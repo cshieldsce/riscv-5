@@ -9,7 +9,7 @@ module ControlUnit (
     output logic [1:0]      ALUSrcA,
     output logic            ALUSrc,
     output logic            MemWrite,
-    output logic [1:0]      MemToReg, // Select write-back data
+    output logic [1:0]      MemToReg,
     output logic            Branch,
     output logic            Jump,
     output logic            Jalr
@@ -26,30 +26,23 @@ module ControlUnit (
         Jump       = 1'b0;
         Jalr       = 1'b0;
 
-        // Since the opcode is shared we check funct3 and funct7 to determine the specific operation
         case (opcode)
 
             // Handle R-type instructions
             OP_R_TYPE: begin 
                 RegWrite = 1'b1;
-                ALUSrc   = 1'b0;    // Use ReadData2
-                MemToReg = 2'b00;   // Write ALUResult to RegFile
+                ALUSrc   = 1'b0;
+                MemToReg = 2'b00;
 
-                case (funct3_alu_t'(funct3))
-                    F3_ADD_SUB: begin
-                        if (funct7 == 7'b0000000) ALUControl = ALU_ADD;
-                        else ALUControl = ALU_SUB;
-                    end
-                    F3_SLL:     ALUControl = ALU_SLL;                                     // shift left logical
-                    F3_SLT:     ALUControl = ALU_SLT;                                     // set less than signed
-                    F3_SLTU:    ALUControl = ALU_SLTU;                                    // set less than unsigned
-                    F3_XOR:     ALUControl = ALU_XOR;                                     // xor
-                    F3_SRL_SRA: begin
-                        if (funct7 == 7'b0000000) ALUControl = ALU_SRL;
-                        else ALUControl = ALU_SRA;
-                    end
-                    F3_OR:      ALUControl = ALU_OR;                                      // or
-                    F3_AND:     ALUControl = ALU_AND;                                     // and
+                case (funct3)
+                    F3_ADD_SUB: ALUControl = alu_op_t'((funct7[5]) ? ALU_SUB : ALU_ADD);
+                    F3_SLL:     ALUControl = ALU_SLL;
+                    F3_SLT:     ALUControl = ALU_SLT;
+                    F3_SLTU:    ALUControl = ALU_SLTU;
+                    F3_XOR:     ALUControl = ALU_XOR;
+                    F3_SRL_SRA: ALUControl = alu_op_t'((funct7[5]) ? ALU_SRA : ALU_SRL);
+                    F3_OR:      ALUControl = ALU_OR;
+                    F3_AND:     ALUControl = ALU_AND;
                     default:    ALUControl = ALU_ADD;
                 endcase
             end
@@ -59,103 +52,89 @@ module ControlUnit (
                 RegWrite = 1'b1;
                 ALUSrc   = 1'b1;
                 MemToReg = 2'b00;
-                ALUControl = ALU_ADD; // Default to addi
 
-                case (funct3_alu_t'(funct3))
-                    F3_ADD_SUB: ALUControl = ALU_ADD; // addi
-                    F3_SLT:     ALUControl = ALU_SLT; // slti
-                    F3_SLTU:    ALUControl = ALU_SLTU; // sltiu
-                    F3_XOR:     ALUControl = ALU_XOR; // xori
-                    F3_OR:      ALUControl = ALU_OR;  // ori
-                    F3_AND:     ALUControl = ALU_AND; // andi
-                    F3_SLL:     ALUControl = ALU_SLL; // slli
-                    F3_SRL_SRA: begin
-                        if (funct7 == 7'b0000000) ALUControl = ALU_SRL;
-                        else ALUControl = ALU_SRA;
-                    end
+                case (funct3)
+                    F3_ADD_SUB: ALUControl = ALU_ADD;
+                    F3_SLL:     ALUControl = ALU_SLL;
+                    F3_SLT:     ALUControl = ALU_SLT;
+                    F3_SLTU:    ALUControl = ALU_SLTU;
+                    F3_XOR:     ALUControl = ALU_XOR;
+                    F3_SRL_SRA: ALUControl = alu_op_t'((funct7[5]) ? ALU_SRA : ALU_SRL);
+                    F3_OR:      ALUControl = ALU_OR;
+                    F3_AND:     ALUControl = ALU_AND;
                     default:    ALUControl = ALU_ADD;
                 endcase
             end
             
             // Handle I-type instructions (Load Word)
             OP_LOAD: begin 
-                RegWrite   = 1'b1;     // 'lw' writes to a register
-                ALUSrc     = 1'b1;     // Use Immediate for address offset
-                MemToReg   = 2'b01;    // Write data from memory to RegFile
-                ALUControl = ALU_ADD;  // ALU calculates rs1 + imm
+                RegWrite   = 1'b1;
+                ALUSrc     = 1'b1;
+                MemToReg   = 2'b01;
+                ALUControl = ALU_ADD;
             end
 
             // Handle S-type instructions
             OP_STORE: begin
-                ALUSrc     = 1'b1;     // Use Immediate for address offset
-                MemWrite   = 1'b1;     // 'sw' writes to memory
-                ALUControl = ALU_ADD;  // ALU calculates rs1 + imm
+                ALUSrc     = 1'b1;
+                MemWrite   = 1'b1;
+                ALUControl = ALU_ADD;
             end
 
             // Handle B-type instructions
             OP_BRANCH: begin
-                Branch   = 1'b1;       // 'beq' instruction
-                ALUSrc   = 1'b0;       // Use ReadData2
-                MemToReg = 2'b00;
-                RegWrite = 1'b0;
-                MemWrite = 1'b0;
-                case (funct3_branch_t'(funct3))
-                    F3_BEQ:  ALUControl = ALU_SUB;  // Check if A - B == 0
-                    F3_BNE:  ALUControl = ALU_SUB;  // Check if A - B != 0
-                    F3_BLT:  ALUControl = ALU_SLT;  // Check if A < B (signed)
-                    F3_BGE:  ALUControl = ALU_SLT;  // Check if !(A < B) aka A >= B
-                    F3_BLTU: ALUControl = ALU_SLTU; // Check if A < B (unsigned)
-                    F3_BGEU: ALUControl = ALU_SLTU; // Check if !(A < B) (unsigned)
-                    default: ALUControl = ALU_SUB;
-                endcase            
+                Branch     = 1'b1;
+                ALUSrc     = 1'b0;       // Use ReadData2 (rs2)
+                MemToReg   = 2'b00;
+                
+                case (funct3)
+                    F3_BEQ, F3_BNE:   ALUControl = ALU_SUB;
+                    F3_BLT, F3_BGE:   ALUControl = ALU_SLT;
+                    F3_BLTU, F3_BGEU: ALUControl = ALU_SLTU;
+                    default:          ALUControl = ALU_SUB;
+                endcase
             end
 
             // Handle J-type instructions
             OP_JAL: begin
-                RegWrite = 1'b1;  // 'jal' writes to a register
-                Jump     = 1'b1;  // Indicate a jump instruction
-                MemToReg = 2'b10; // PC+4 for jal
+                Jump       = 1'b1;
+                RegWrite   = 1'b1;
+                MemToReg   = 2'b10;      // PC+4 for jal
+                ALUControl = ALU_ADD;
             end
 
             OP_JALR: begin
-                RegWrite   = 1'b1;  // 'jalr' writes to a register
-                Jalr       = 1'b1;  // Indicate a jump instruction
-                ALUSrc     = 1'b1;  // Use Immediate for address calculation
-                MemToReg   = 2'b10; // PC+4 for jalr
-                ALUControl = ALU_ADD; // ALU calculates rs1 + imm
+                Jalr       = 1'b1;
+                RegWrite   = 1'b1;
+                ALUSrc     = 1'b1;       // Use immediate
+                MemToReg   = 2'b10;      // PC+4 for jalr
+                ALUControl = ALU_ADD;
             end
 
             // Handle U-type instructions
             OP_LUI: begin
                 RegWrite   = 1'b1;
-                ALUSrcA    = 2'b10; // Input A = Zero
-                ALUSrc     = 1'b1;  // Input B = Immediate
-                MemToReg   = 2'b00; // Write ALUResult to RegFile
-                ALUControl = ALU_ADD; // Result = 0 + imm
+                ALUSrc     = 1'b1;       // Use immediate
+                ALUSrcA    = 2'b10;      // Zero
+                MemToReg   = 2'b00;
+                ALUControl = ALU_ADD;
             end
 
-            OP_AUIPC: begin // Add Upper Immediate to PC
+            OP_AUIPC: begin
                 RegWrite   = 1'b1;
-                ALUSrcA    = 2'b01; // Input A = PC
-                ALUSrc     = 1'b1;  // Input B = Immediate
-                MemToReg   = 2'b00; // Write ALUResult to RegFile
-                ALUControl = ALU_ADD; // Result = PC + imm
+                ALUSrc     = 1'b1;       // Use immediate
+                ALUSrcA    = 2'b01;      // PC
+                MemToReg   = 2'b00;
+                ALUControl = ALU_ADD;
             end
 
             // Handle system instructions
             OP_SYSTEM: begin
-                // ECALL, EBREAK, FENCE - treat as NOP for now
-                // RISCOF doesn't test privileged behavior for RV32I unprivileged
-                RegWrite = 1'b0;
-                MemWrite = 1'b0;
-                Branch   = 1'b0;
-                Jump     = 1'b0;
+                // NOP behavior
             end
 
             OP_FENCE: begin
-                // Treat as NOP - single-core doesn't need memory barriers
-                RegWrite = 1'b0;
-                MemWrite = 1'b0;
+                // NOP behavior
             end
             
             default: begin
