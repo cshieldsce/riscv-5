@@ -20,7 +20,7 @@ module uart_tx #(
 
     state_t state;
     
-    logic [15:0] clk_count;
+    logic [31:0] clk_count; // Changed to 32-bit to support slow baud rates
     logic [2:0]  bit_index;
     logic [7:0]  data_buffer;
     

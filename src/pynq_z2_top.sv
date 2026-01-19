@@ -51,7 +51,7 @@ module pynq_z2_top (
     logic            dmem_we;
     logic [3:0]      dmem_be;
     logic [2:0]      dmem_funct3;
-    logic [3:0]      dmem_leds; 
+    logic [3:0]      dmem_leds; // Missing declaration added here
 
     // CPU Instance
     PipelinedCPU cpu_inst (
@@ -77,8 +77,11 @@ module pynq_z2_top (
         .Instruction(imem_data)
     );
 
+
     // Data Memory
-    DataMemory dmem_inst (
+    DataMemory #(
+        .CLKS_PER_BIT(87) // 10MHz / 115200 = 86.8
+    ) dmem_inst (
         .clk(cpu_clk),
         .rst(cpu_reset),
         .MemWrite(dmem_we),
@@ -94,14 +97,11 @@ module pynq_z2_top (
     // ===================================
     // LED OUTPUT MAPPING
     // ===================================
-    // LED 3: Heartbeat (Should Blink) - Proves Clock is alive
-    // LED 2: Locked (Should be ON)    - Proves PLL is stable
-    // LED 1: CPU Data[1]
-    // LED 0: CPU Data[0]
-    assign led[3] = heartbeat_cnt[23];
-    assign led[2] = clk_locked;
-    assign led[1] = dmem_leds[1];
-    assign led[0] = dmem_leds[0];
+    // Display the lower 4 bits of the CPU's memory-mapped LED register.
+    // This allows visual verification of programs (like Fibonacci).
+    assign led = dmem_leds;
+
+
 
     // ===================================
     // ILA DEBUG

@@ -28,23 +28,29 @@ module ImmGen (
                      instruction[30:25], 
                      instruction[11:8], 1'b0 };
 
-    // J-Type Immediate (JAL) - Corrected bit ordering
-    // Immediate is split and reordered: Imm[20|10:1|11|19:12] << 1
-    // instruction[31] -> Imm[20]
-    // instruction[19:12] -> Imm[19:12]
-    // instruction[20] -> Imm[11]
-    // instruction[30:21] -> Imm[10:1]
-    assign imm_J = { {(XLEN-21){instruction[31]}}, // Sign extension from instruction[31] (Imm[20])
-                     instruction[31],              // Imm[20]
-                     instruction[19:12],           // Imm[19:12]
-                     instruction[20],              // Imm[11]
-                     instruction[30:21],           // Imm[10:1]
-                     1'b0 };                       // LSB is always 0
+            // J-Type Immediate (JAL) - Corrected bit ordering
 
+            // Imm[20|10:1|11|19:12] << 1
 
-    // U-Type Immediate (LUI, AUIPC)
-    // Immediate is bits [31:12] shifted left by 12 bits. Sign extended for RV64.
-    assign imm_U = { {(XLEN-32){instruction[31]}}, instruction[31:12], 12'b0 };
+            assign imm_J = { {(XLEN-21){instruction[31]}}, // Sign extension from instruction[31] (Imm[20])
+
+                             instruction[31],              // Imm[20]
+
+                             instruction[19:12],           // Imm[19:12]
+
+                             instruction[20],              // Imm[11]
+
+                             instruction[30:21],           // Imm[10:1]
+
+                             1'b0 };                       // LSB is always 0
+
+        
+
+            // U-Type Immediate (LUI, AUIPC)
+
+            // Immediate is bits [31:12] shifted left by 12 bits. Sign extended for RV64.
+
+            assign imm_U = { {(XLEN-32){instruction[31]}}, instruction[31:12], 12'b0 };
 
     // Output mux based on opcode
     always_comb begin

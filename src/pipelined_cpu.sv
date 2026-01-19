@@ -174,7 +174,7 @@ module PipelinedCPU (
     end
 
     logic [XLEN-1:0] instruction_in_padded;
-    assign instruction_in_padded = {{ (INSTR_PAD_WIDTH){1'b0} }, imem_data};
+    assign instruction_in_padded = imem_data; // XLEN=32, so direct assignment works.
 
     // --- IF_Stage ---
     IF_Stage if_stage_inst (

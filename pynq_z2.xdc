@@ -13,8 +13,8 @@ set_property -dict {PACKAGE_PIN P14 IOSTANDARD LVCMOS33} [get_ports {led[1]}]
 set_property -dict {PACKAGE_PIN N16 IOSTANDARD LVCMOS33} [get_ports {led[2]}]
 set_property -dict {PACKAGE_PIN M14 IOSTANDARD LVCMOS33} [get_ports {led[3]}]
 
-## UART TX (PMOD JA Pin 1)
-set_property -dict {PACKAGE_PIN Y11 IOSTANDARD LVCMOS33} [get_ports uart_tx]
+## UART TX (PMOD JB Pin 2)
+set_property -dict {PACKAGE_PIN Y14 IOSTANDARD LVCMOS33} [get_ports uart_tx]
 
 ## IGNORE TIMING FOR ASYNC RESET (Keeps timing analysis clean)
 set_false_path -from [get_ports reset_btn]

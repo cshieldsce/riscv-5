@@ -1,6 +1,8 @@
 import riscv_pkg::*;
 
-module DataMemory (
+module DataMemory #(
+    parameter CLKS_PER_BIT = 87
+)(
     input  logic             clk,
     input  logic             rst, 
     input  logic             MemWrite,
@@ -19,7 +21,7 @@ module DataMemory (
     logic       uart_busy;
 
     uart_tx #(
-        .CLKS_PER_BIT(68)
+        .CLKS_PER_BIT(CLKS_PER_BIT)
     ) uart_inst (
         .clk(clk),
         .rst(rst),
@@ -93,40 +95,57 @@ module DataMemory (
         end
     end
 
+    logic [XLEN-1:0] formatted_read_data;
+
     // READ FORMATTING (combinational)
     always_comb begin
         case (funct3_reg)
             F3_BYTE: begin
                 case (byte_offset_reg)
-                    2'b00: ReadData = {{(XLEN-8){mem_read_word_reg[7]}},  mem_read_word_reg[7:0]};
-                    2'b01: ReadData = {{(XLEN-8){mem_read_word_reg[15]}}, mem_read_word_reg[15:8]};
-                    2'b10: ReadData = {{(XLEN-8){mem_read_word_reg[23]}}, mem_read_word_reg[23:16]};
-                    2'b11: ReadData = {{(XLEN-8){mem_read_word_reg[31]}}, mem_read_word_reg[31:24]};
+                    2'b00: formatted_read_data = {{(XLEN-8){mem_read_word_reg[7]}},  mem_read_word_reg[7:0]};
+                    2'b01: formatted_read_data = {{(XLEN-8){mem_read_word_reg[15]}}, mem_read_word_reg[15:8]};
+                    2'b10: formatted_read_data = {{(XLEN-8){mem_read_word_reg[23]}}, mem_read_word_reg[23:16]};
+                    2'b11: formatted_read_data = {{(XLEN-8){mem_read_word_reg[31]}}, mem_read_word_reg[31:24]};
+                    default: formatted_read_data = 32'b0;
                 endcase
             end
             F3_HALF: begin
                 case (byte_offset_reg[1])
-                    1'b0: ReadData = {{(XLEN-16){mem_read_word_reg[15]}}, mem_read_word_reg[15:0]};
-                    1'b1: ReadData = {{(XLEN-16){mem_read_word_reg[31]}}, mem_read_word_reg[31:16]};
+                    1'b0: formatted_read_data = {{(XLEN-16){mem_read_word_reg[15]}}, mem_read_word_reg[15:0]};
+                    1'b1: formatted_read_data = {{(XLEN-16){mem_read_word_reg[31]}}, mem_read_word_reg[31:16]};
+                    default: formatted_read_data = 32'b0;
                 endcase
             end
-            F3_WORD: ReadData = mem_read_word_reg;
+            F3_WORD: formatted_read_data = mem_read_word_reg;
             F3_LBU: begin
                 case (byte_offset_reg)
-                    2'b00: ReadData = {{(XLEN-8){1'b0}}, mem_read_word_reg[7:0]};
-                    2'b01: ReadData = {{(XLEN-8){1'b0}}, mem_read_word_reg[15:8]};
-                    2'b10: ReadData = {{(XLEN-8){1'b0}}, mem_read_word_reg[23:16]};
-                    2'b11: ReadData = {{(XLEN-8){1'b0}}, mem_read_word_reg[31:24]};
+                    2'b00: formatted_read_data = {{(XLEN-8){1'b0}}, mem_read_word_reg[7:0]};
+                    2'b01: formatted_read_data = {{(XLEN-8){1'b0}}, mem_read_word_reg[15:8]};
+                    2'b10: formatted_read_data = {{(XLEN-8){1'b0}}, mem_read_word_reg[23:16]};
+                    2'b11: formatted_read_data = {{(XLEN-8){1'b0}}, mem_read_word_reg[31:24]};
+                    default: formatted_read_data = 32'b0;
                 endcase
             end
             F3_LHU: begin
                 case (byte_offset_reg[1])
-                    1'b0: ReadData = {{(XLEN-16){1'b0}}, mem_read_word_reg[15:0]};
-                    1'b1: ReadData = {{(XLEN-16){1'b0}}, mem_read_word_reg[31:16]};
+                    1'b0: formatted_read_data = {{(XLEN-16){1'b0}}, mem_read_word_reg[15:0]};
+                    1'b1: formatted_read_data = {{(XLEN-16){1'b0}}, mem_read_word_reg[31:16]};
+                    default: formatted_read_data = 32'b0;
                 endcase
             end
-            default: ReadData = mem_read_word_reg;
+            default: formatted_read_data = mem_read_word_reg;
         endcase
+    end
+
+    // MMIO Read Multiplexer
+    always_comb begin
+        if (address_reg == 32'h80000008) begin
+            ReadData = {31'b0, uart_busy}; // UART Status: bit 0 is busy
+        end else if (address_reg == 32'h80000000) begin
+            ReadData = {28'b0, led_reg};   // Optional: Read back LED values
+        end else begin
+            ReadData = formatted_read_data;
+        end
     end
 
 endmodule
