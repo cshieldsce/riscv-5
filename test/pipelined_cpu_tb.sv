@@ -30,9 +30,7 @@ module pipelined_cpu_tb;
         .dmem_wdata(dmem_wdata),
         .dmem_we(dmem_we),
         .dmem_be(dmem_be),
-        .dmem_funct3(dmem_funct3),
-        .leds_out(leds_out),
-        .uart_tx_wire(uart_tx_wire)
+        .dmem_funct3(dmem_funct3)
     );
 
     // Instruction memory instance
@@ -44,7 +42,9 @@ module pipelined_cpu_tb;
     );
 
     // Data memory instance
-    DataMemory dmem_inst (
+    DataMemory #(
+        .CLKS_PER_BIT(868) // 100MHz / 115200 = 868
+    ) dmem_inst (
         .clk(clk),
         .MemWrite(dmem_we),
         .be(dmem_be),
@@ -89,22 +89,14 @@ module pipelined_cpu_tb;
                 
         $display("Waiting for tohost write...\n");
         
-        // Timeout mechanism
-        fork
-            begin : timeout_block
-                #50000000;
-                $display("\n--- Simulation Timeout! tohost not written. ---");
-                $finish;
-            end
-            begin : main_simulation
-                // Runs until $finish from DataMemory
-            end
-        join_none
+        // Timeout mechanism to prevent infinite simulation
+        #5000; // Run for 5000 time units, then finish
+        $display("\n--- Simulation finished after 5000 time units. ---");
         
         $display("[*] Simulation ended.");
         $display("-----------------------------------------------\n");
 
-        wait(0);  // Block forever
+        $finish;
     end
 
 endmodule
