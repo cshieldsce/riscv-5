@@ -60,16 +60,19 @@ module ID_Stage (
         .Jalr(jalr)
     );
 
-    // --- Register File ---
+    // ===================================
+    // REGISTER FILE INSTANTIATION
+    // ===================================
     RegFile reg_file_inst (
         .clk(clk),
-        .RegWrite(reg_write_wb), 
-        .rs1(rs1),
-        .rs2(rs2),
-        .rd(rd_wb),              
-        .WriteData(write_data_wb),   
-        .ReadData1(read_data1),
-        .ReadData2(read_data2)
+        .rst(rst),
+        .RegWrite(reg_write_wb),
+        .rs1(rs1),                   
+        .rs2(rs2),                   
+        .rd(rd_wb),               
+        .write_data(write_data_wb),  
+        .read_data1(read_data1),   
+        .read_data2(read_data2)     
     );
 
     // --- Immediate Generator ---
