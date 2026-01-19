@@ -1,10 +1,13 @@
 # Simulation output files
 *.vcd
 *.out
-*.log                                                                                                                           │
+*.log              
+dfx_runtime.txt                                                                                                             │
 # RISCOF / Compliance artifacts
 riscof_work/
 riscv-arch-test/
 debug_compile/
 __pycache__/
 *.pyc 
+# Vivado
+vivado_project/
