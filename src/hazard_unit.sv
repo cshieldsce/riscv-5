@@ -4,6 +4,7 @@ module HazardUnit (
     // Inputs from ID Stage (Current Instruction)
     input  logic [4:0] id_rs1,
     input  logic [4:0] id_rs2,
+    input  logic       id_branch,
 
     // Inputs from EX Stage (Previous Instruction)
     input  logic [4:0] id_ex_rd,
@@ -22,6 +23,9 @@ module HazardUnit (
     output logic       flush_id         // Flush IF/ID register
 );
 
+    logic id_ex_is_alu_write;
+    assign id_ex_is_alu_write = (id_ex_rd != 0) && !id_ex_mem_read;
+
     always_comb begin : HazardUnit
         // Default values (no hazards)
         stall_if = 0;
@@ -29,61 +33,38 @@ module HazardUnit (
         flush_ex = 0;
         flush_id = 0;
 
+        // Hazard detection is prioritized. The first condition to match takes precedence.
+
         // ========================================================================
-        // 1. LOAD-USE HAZARD DETECTION
+        // PRIORITY 1: LOAD-USE HAZARD
         // ========================================================================
-        // Situation:
-        //   Instruction in EX is a Load (e.g., lw x1, 0(x2)).
-        //   Instruction in ID needs the result (e.g., add x3, x1, x4).
-        //
-        // Action:
-        //   We must stall the pipeline for 1 cycle because the load data
-        //   won't be available until the WB stage (forwarding can't help here).
-        //
-        // Logic:
-        //   If (EX.MemRead) AND (EX.rd matches ID.rs1 OR ID.rs2):
-        //     - Stall PC (stall_if)
-        //     - Stall IF/ID (stall_id)
-        //     - Flush ID/EX (flush_ex) -> Inject NOP into EX stage
-        //
+        // Stalls the pipeline for one cycle if the instruction in ID depends on
+        // a load instruction currently in EX. This is the highest priority stall.
         if (id_ex_mem_read && ((id_ex_rd == id_rs1) || (id_ex_rd == id_rs2))) begin
             stall_if = 1; 
             stall_id = 1;
-            flush_ex = 1;
+            flush_ex = 1; // Insert a bubble
         end
         
         // ========================================================================
-        // 2. CONTROL HAZARD DETECTION
+        // PRIORITY 2: ALU-to-BRANCH HAZARD
         // ========================================================================
-        
-        // --- Case A: Branch/JALR Taken (Resolved in EX Stage) ---
-        // Situation:
-        //   A Branch or JALR instruction in EX stage evaluates to TAKEN.
-        //   The pipeline has already fetched instructions from the fall-through path
-        //   into the ID and IF stages. These are WRONG path instructions.
-        //
-        // Action:
-        //   Flush BOTH the IF/ID and ID/EX registers.
-        //   - flush_id: Kills the instruction currently leaving IF (entering ID).
-        //   - flush_ex: Kills the instruction currently leaving ID (entering EX).
-        //
-        else if (PCSrc) begin
+        // Stalls if a branch in ID depends on an ALU result from EX.
+        else if ((id_ex_rd != 0) && !id_ex_mem_read && id_branch && ((id_ex_rd == id_rs1) || (id_ex_rd == id_rs2))) begin
+             stall_if = 1;
+             stall_id = 1;
+             flush_ex = 1; // Insert a bubble
+        end
+
+        // ========================================================================
+        // PRIORITY 3: CONTROL HAZARDS (Jumps and Taken Branches)
+        // ========================================================================
+        // These hazards flush instructions that were fetched from the wrong path.
+        else if (PCSrc) begin // Branch/JALR is taken (resolved in EX)
             flush_id = 1;
             flush_ex = 1;
         end
-        
-        // --- Case B: JAL (Resolved in ID Stage) ---
-        // Situation:
-        //   A JAL instruction is decoded in the ID stage.
-        //   We know the target address immediately (PC + Imm).
-        //   The pipeline has already fetched the instruction at PC+4 into IF.
-        //
-        // Action:
-        //   Flush ONLY the IF/ID register.
-        //   - flush_id: Kills the instruction at PC+4 (wrong path).
-        //   - The JAL instruction itself proceeds to EX validly.
-        //
-        else if (jump_id_stage) begin
+        else if (jump_id_stage) begin // JAL is in ID stage
             flush_id = 1;
         end
     end
