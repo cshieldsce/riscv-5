@@ -16,10 +16,7 @@ module PipelinedCPU (
     output logic [XLEN-1:0]  dmem_wdata,
     output logic             dmem_we,
     output logic [3:0]       dmem_be,
-    output logic [2:0]       dmem_funct3,
-    
-    output logic [3:0]       leds_out,
-    output logic             uart_tx_wire
+    output logic [2:0]       dmem_funct3
 );
 
     // ========================================================================
@@ -36,11 +33,11 @@ module PipelinedCPU (
     localparam ID_EX_WIDTH = (5 * XLEN) + 18 + 14;
 
     // EX/MEM:
-    // Data: ALUResult(X), WriteData(X), rd(5), PC+4(X), funct3(3)
+    // Data: ALUResult(X), WriteData(X), rd(5), PC+4(X), funct3(3), rs2(5)  // ADD rs2
     // Control: RegWrite(1), MemWrite(1), MemToReg(2)
-    // Total Data: 3*XLEN + 8
+    // Total Data: 3*XLEN + 8 + 5 = 3*XLEN + 13
     // Total Control: 4
-    localparam EX_MEM_WIDTH = (3 * XLEN) + 8 + 4;
+    localparam EX_MEM_WIDTH = (3 * XLEN) + 13 + 4;  // CHANGED: Added 5 bits for rs2
 
     // MEM/WB:
     // Data: ReadData(X), ALUResult(X), rd(5), PC+4(X)
@@ -62,7 +59,8 @@ module PipelinedCPU (
 
     // IF/ID PIPELINE REGISTER
     logic [XLEN-1:0] if_id_pc, if_id_pc_plus_4;
-    logic [31:0]     if_id_valid_vector; // Used to store validity flag
+    logic [31:0]     if_id_instruction;  // ADD THIS
+    logic [31:0]     if_id_valid_vector;
     logic            if_id_valid;
 
     // --- ID: INSTRUCTION DECODE ---
@@ -97,10 +95,12 @@ module PipelinedCPU (
     logic [XLEN-1:0] ex_alu_result, ex_alu_b_input; 
     logic            ex_zero;
     logic [XLEN-1:0] ex_branch_target;
+    logic            branch_taken;
 
     // EX/MEM PIPELINE REGISTER
     logic [XLEN-1:0] ex_mem_alu_result, ex_mem_write_data; 
     logic [4:0]      ex_mem_rd;
+    logic [4:0]      ex_mem_rs2;        
     logic [XLEN-1:0] ex_mem_pc_plus_4;
 
     // EX/MEM Control Signals
@@ -199,20 +199,18 @@ module PipelinedCPU (
         .rst(rst),
         .en(~stall_id),
         .clear(flush_id),
-        .in({if_pc, 32'd1, if_pc_plus_4}), 
-        .out({if_id_pc, if_id_valid_vector, if_id_pc_plus_4}) 
+        .in({if_pc, if_instruction, if_pc_plus_4}),  // Store actual instruction
+        .out({if_id_pc, if_id_instruction, if_id_pc_plus_4})  // Output instruction
     );
     
-    assign if_id_valid = if_id_valid_vector[0];
+    assign if_id_valid = (if_id_instruction != 32'h00000013); // Check if not NOP
 
     // ========================================================================
     // ID: INSTRUCTION DECODE
     // ========================================================================
 
     logic [31:0] id_instruction_muxed;
-    // BRAM Adaptation: If the IF/ID register is valid (not flushed), use memory data.
-    // Otherwise (flushed/reset), use NOP.
-    assign id_instruction_muxed = (if_id_valid) ? imem_data : 32'h00000013;
+    assign id_instruction_muxed = if_id_instruction;  // Use stored instruction
 
     ID_Stage id_stage_inst (
         .clk(clk),
@@ -246,6 +244,7 @@ module PipelinedCPU (
     HazardUnit hazard_unit_inst (
         .id_rs1(id_rs1),
         .id_rs2(id_rs2),
+        .id_branch(id_branch),
         .id_ex_rd(id_ex_rd),
         .id_ex_mem_read(id_ex_mem_to_reg[0]), 
         .PCSrc(pcsrc),
@@ -334,12 +333,14 @@ module PipelinedCPU (
             id_ex_rd,           
             id_ex_pc_plus_4,    
             id_ex_funct3,
+            id_ex_rs2,          // Track rs2 for store forwarding
             // Control Payload
             id_ex_reg_write, id_ex_mem_write, id_ex_mem_to_reg
         }),
         .out({
             // Data Payload
             ex_mem_alu_result, ex_mem_write_data, ex_mem_rd, ex_mem_pc_plus_4, ex_mem_funct3,
+            ex_mem_rs2,         
             // Control Payload
             ex_mem_reg_write, ex_mem_mem_write, ex_mem_mem_to_reg
         })
@@ -349,22 +350,59 @@ module PipelinedCPU (
     // MEM: Memory
     // ========================================================================
 
+    // MEM-stage forwarding for store data
+    logic [XLEN-1:0] mem_store_data;
+    
+    // Forwarding logic for store data in MEM stage
+    always_comb begin
+        // Forward from WB if:
+        // 1. WB is writing to a register
+        // 2. That register matches the source of our store data
+        // 3. The register is not x0
+        if (mem_wb_reg_write && (mem_wb_rd != 0) && (mem_wb_rd == ex_mem_rs2)) begin
+            mem_store_data = wb_write_data;
+        end else begin
+            mem_store_data = ex_mem_write_data;
+        end
+    end
+
     assign dmem_addr = ex_mem_alu_result;
-    assign dmem_wdata = ex_mem_write_data;
+    assign dmem_wdata = mem_store_data;  // Use forwarded data
     assign dmem_we = ex_mem_mem_write;
     assign dmem_funct3 = ex_mem_funct3;
+
+    // MEM_Stage mem_stage_inst (
+    //     .clk(clk),
+    //     .rst(rst),
+    //     .alu_result(ex_mem_alu_result),
+    //     .write_data(ex_mem_write_data),
+    //     .mem_write_en(ex_mem_mem_write),
+    //     .funct3(ex_mem_funct3),
+    //     .dmem_be(dmem_be),
+    //     .leds_out(leds_out),
+    //     .uart_tx_wire(uart_tx_wire)
+    // );
     
-    MEM_Stage mem_stage_inst (
-        .clk(clk),
-        .rst(rst),
-        .alu_result(ex_mem_alu_result),
-        .write_data(ex_mem_write_data),
-        .mem_write_en(ex_mem_mem_write),
-        .funct3(ex_mem_funct3),
-        .dmem_be(dmem_be),
-        .leds_out(leds_out),
-        .uart_tx_wire(uart_tx_wire)
-    );
+    // Generate byte enables directly here:
+    always_comb begin
+        case (ex_mem_funct3)
+            F3_BYTE: begin
+                case (ex_mem_alu_result[1:0])
+                    2'b00: dmem_be = 4'b0001;
+                    2'b01: dmem_be = 4'b0010;
+                    2'b10: dmem_be = 4'b0100;
+                    2'b11: dmem_be = 4'b1000;
+                endcase
+            end
+            F3_HALF: begin
+                case (ex_mem_alu_result[1])
+                    1'b0: dmem_be = 4'b0011;
+                    1'b1: dmem_be = 4'b1100;
+                endcase
+            end
+            default: dmem_be = 4'b1111; // Word
+        endcase
+    end
     
     assign mem_read_data = dmem_rdata;
     
