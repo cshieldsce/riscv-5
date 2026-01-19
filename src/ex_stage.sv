@@ -25,79 +25,73 @@ module EX_Stage (
     output logic            alu_zero,
     output logic            branch_taken,
     output logic [XLEN-1:0] branch_target,
-    output logic [XLEN-1:0] rs2_data_forwarded // Value to be stored in memory
+    output logic [XLEN-1:0] rs2_data_forwarded
 );
 
     logic [XLEN-1:0] alu_in_a_forwarded;
     logic [XLEN-1:0] alu_in_a;
     logic [XLEN-1:0] alu_in_b;
-    logic [XLEN-1:0] alu_b_final;
 
-    // --- 1. ALU Input A MUX (Forwarding) ---
+    // --- 1. Forwarding MUX for rs1 ---
     always_comb begin
         case (forward_a)
             2'b00:   alu_in_a_forwarded = rs1_data;
-            2'b10:   alu_in_a_forwarded = ex_mem_alu_result;
             2'b01:   alu_in_a_forwarded = wb_write_data;
+            2'b10:   alu_in_a_forwarded = ex_mem_alu_result;
             default: alu_in_a_forwarded = rs1_data;
         endcase
     end
 
-    // --- 2. Handle LUI/AUIPC MUX ---
+    // --- 2. Forwarding MUX for rs2 (MUST be before alu_in_b assignment) ---
+    always_comb begin
+        case (forward_b)
+            2'b00:   rs2_data_forwarded = rs2_data;
+            2'b01:   rs2_data_forwarded = wb_write_data;
+            2'b10:   rs2_data_forwarded = ex_mem_alu_result;
+            default: rs2_data_forwarded = rs2_data;
+        endcase
+    end
+
+    // --- 3. Handle LUI/AUIPC MUX ---
     always_comb begin
         case (alu_src_a)
-            2'b00:   alu_in_a = alu_in_a_forwarded;
-            2'b01:   alu_in_a = pc;
-            2'b10:   alu_in_a = {XLEN{1'b0}};
+            2'b00:   alu_in_a = alu_in_a_forwarded; // Register
+            2'b01:   alu_in_a = pc;                  // PC
+            2'b10:   alu_in_a = {XLEN{1'b0}};        // Zero
             default: alu_in_a = alu_in_a_forwarded;
         endcase
     end
 
-    // --- 3. ALU Input B MUX (Forwarding) ---
-    always_comb begin
-        case (forward_b)
-            2'b00:   alu_in_b = rs2_data;
-            2'b10:   alu_in_b = ex_mem_alu_result;
-            2'b01:   alu_in_b = wb_write_data;
-            default: alu_in_b = rs2_data;
-        endcase
-    end
-    
-    // rs2_data_forwarded is needed for the Memory stage (Store data)
-    assign rs2_data_forwarded = alu_in_b;
-
-    // --- 4. ALU Source MUX (Immediate vs Register) ---
-    assign alu_b_final = (alu_src == 1'b0) ? alu_in_b : imm;
+    // --- 4. ALU Input B MUX (Register or Immediate) ---
+    assign alu_in_b = alu_src ? imm : rs2_data_forwarded;
 
     // --- 5. ALU Instantiation ---
     ALU alu_inst (
         .A(alu_in_a),
-        .B(alu_b_final),
+        .B(alu_in_b),
         .ALUControl(alu_control),
         .Result(alu_result),
-        .Zero(alu_zero)
+        .Zero(alu_zero)  // Now correctly drives the output port
     );
 
-    // --- 6. Branch Comparison Logic ---
-    logic alu_lsb;
-    assign alu_lsb = alu_result[0];
-
+    // --- 6. Branch Logic ---
     always_comb begin
-        branch_taken = 1'b0;
         if (branch_en) begin
             case (funct3)
-                F3_BEQ:  branch_taken = alu_zero;
-                F3_BNE:  branch_taken = ~alu_zero;
-                F3_BLT:  branch_taken = alu_lsb;
-                F3_BGE:  branch_taken = ~alu_lsb;
-                F3_BLTU: branch_taken = alu_lsb;
-                F3_BGEU: branch_taken = ~alu_lsb;
+                F3_BEQ:  branch_taken = alu_zero;          // A == B
+                F3_BNE:  branch_taken = ~alu_zero;         // A != B
+                F3_BLT:  branch_taken = alu_result[0];     // A < B (signed)
+                F3_BGE:  branch_taken = ~alu_result[0];    // A >= B (signed)
+                F3_BLTU: branch_taken = alu_result[0];     // A < B (unsigned)
+                F3_BGEU: branch_taken = ~alu_result[0];    // A >= B (unsigned)
                 default: branch_taken = 1'b0;
             endcase
+        end else begin
+            branch_taken = 1'b0;
         end
     end
 
-    // --- 7. Branch Target Adder ---
+    // --- 7. Branch Target Calculation ---
     assign branch_target = pc + imm;
 
 endmodule
