@@ -19,14 +19,14 @@ This plan outlines the steps to restructure and enhance the project's documentat
 - [x] Task: Conductor - User Manual Verification 'Phase 2: The "Hook"' (Protocol in workflow.md)
 
 ## Phase 3: The "Theory Audit" (Architecture Manual)
-- [ ] Task: Map RTL to Patterson & Hennessy (Chapter 4)
+- [x] Task: Map RTL to Patterson & Hennessy (Chapter 4) (92267d5)
     - [ ] Create `docs/architecture/datapath.md` with side-by-side logic/textbook mappings
     - [ ] Document the 5-stage pipeline registers and control signals with textbook citations
-- [ ] Task: Visualizing the Pipeline with Draw.io XML
+- [x] Task: Visualizing the Pipeline with Draw.io XML (5259648)
     - [ ] Generate **Draw.io XML source files** for the 5-stage datapath
     - [ ] Implement specific subgraph boundaries for IF, ID, EX, MEM, and WB stages
     - [ ] Verify that signal connections in XML match `pipelined_cpu.sv`
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: The "Theory Audit"' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: The "Theory Audit"' (Protocol in workflow.md)
 
 ## Phase 4: The "Proof" (Verification Report)
 - [ ] Task: Document Compliance and RISCOF Results
