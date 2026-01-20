@@ -8,7 +8,11 @@ module InstructionMemory (
     output logic [31:0]     Instruction
 );
 
-    logic [31:0] rom_memory [0:4095];
+`ifndef SYNTHESIS
+    logic [31:0] rom_memory [0:1048575]; // 4MB for Simulation
+`else
+    logic [31:0] rom_memory [0:4095];    // 16KB for FPGA
+`endif
 
     initial begin
         $readmemh("fib_test.mem", rom_memory);
@@ -19,6 +23,10 @@ module InstructionMemory (
     
     // --- COMBINATIONAL READ (Asynchronous) ---
     // This ensures Instruction is ready in the SAME cycle as Address
+`ifndef SYNTHESIS
+    assign Instruction = (word_addr < 1048576) ? rom_memory[word_addr] : 32'h00000013;
+`else
     assign Instruction = (word_addr < 4096) ? rom_memory[word_addr] : 32'h00000013;
+`endif
 
 endmodule

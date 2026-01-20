@@ -32,7 +32,12 @@ module DataMemory #(
         .tx_done()
     );
 
-    logic [31:0] ram_memory [0:4095];
+`ifndef SYNTHESIS
+    logic [31:0] ram_memory [0:1048575]; // 4MB for Simulation
+`else
+    logic [31:0] ram_memory [0:4095];    // 16KB for FPGA
+`endif
+
     logic [3:0]  led_reg;
     
     logic [ALEN-1:0] word_addr;
@@ -55,7 +60,11 @@ module DataMemory #(
             mem_read_word_reg <= 32'b0;
         end else begin
             // READ: Always read (synchronous BRAM behavior)
+`ifndef SYNTHESIS
+            if (word_addr < 1048576) 
+`else
             if (word_addr < 4096) 
+`endif
                 mem_read_word_reg <= ram_memory[word_addr];
             else
                 mem_read_word_reg <= 32'b0;
@@ -78,9 +87,23 @@ module DataMemory #(
                         uart_start <= 1'b1;
                     end
                 end
+
+`ifndef SYNTHESIS
+                // 3. ToHost (0x80001000) - Compliance Trigger
+                else if (Address == 32'h80001000) begin
+                    if (WriteData[0] == 1'b1) begin
+                        dump_signature();
+                        $finish;
+                    end
+                end
+`endif
                 
-                // 3. RAM Write (Byte Enabled)
+                // 4. RAM Write (Byte Enabled)
+`ifndef SYNTHESIS
+                else if (word_addr < 1048576) begin
+`else
                 else if (word_addr < 4096) begin
+`endif
                     logic [31:0] wdata_shifted;
                     wdata_shifted = WriteData << (byte_offset * 8);
 
@@ -94,6 +117,23 @@ module DataMemory #(
             end
         end
     end
+
+`ifndef SYNTHESIS
+    task dump_signature;
+        integer f;
+        integer i;
+        begin
+            f = $fopen("signature.txt", "w");
+            // Dump the data section starting at 0x200000 (Word index 524288)
+            // Dump 4KB worth of data (1024 words) which should cover the signature
+            for (i = 524288; i < 524288 + 2048; i = i + 1) begin
+                $fwrite(f, "%h\n", ram_memory[i]);
+            end
+            $fclose(f);
+            $display("Signature dumped to signature.txt");
+        end
+    endtask
+`endif
 
     logic [XLEN-1:0] formatted_read_data;
 

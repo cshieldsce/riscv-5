@@ -90,8 +90,8 @@ module pipelined_cpu_tb;
         $display("Waiting for tohost write...\n");
         
         // Timeout mechanism to prevent infinite simulation
-        #5000; // Run for 5000 time units, then finish
-        $display("\n--- Simulation finished after 5000 time units. ---");
+        #500000; // Run for 500000 time units, then finish
+        $display("\n--- Simulation finished after 500000 time units. ---");
         
         $display("[*] Simulation ended.");
         $display("-----------------------------------------------\n");
