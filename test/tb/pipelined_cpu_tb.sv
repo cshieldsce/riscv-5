@@ -96,7 +96,7 @@ module pipelined_cpu_tb;
         $display("[*] Simulation Checkpoint (Time: %0t)", $time);
         
         // --- SELF-CHECKING LOGIC FOR CI ---
-        if (test_file == "mem/complex_branch_test.mem") begin
+        if (test_file == "test/mem/complex_branch_test.mem") begin
             // Markers: x3=1, x4=2, x5=3, x6=4 if all branches taken correctly.
             if (cpu_inst.id_stage_inst.reg_file_inst.register_memory[3] == 1 &&
                 cpu_inst.id_stage_inst.reg_file_inst.register_memory[4] == 2 &&
@@ -108,7 +108,7 @@ module pipelined_cpu_tb;
             end
         end
 
-        else if (test_file == "mem/lui_test.mem") begin
+        else if (test_file == "test/mem/lui_test.mem") begin
             // x2 should be 0x12345001
             if (cpu_inst.id_stage_inst.reg_file_inst.register_memory[2] == 32'h12345001) begin
                 $display("INTEGRATION TEST: LUI + Forwarding check correct. STATUS: PASS");

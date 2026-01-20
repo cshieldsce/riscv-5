@@ -34,6 +34,7 @@ The core has been validated against the **RISC-V Architectural Test Suite** and 
     - `tb/`: SystemVerilog testbenches for individual modules and core integration.
     - `verification/`: RISCOF compliance suite setup, Golden reference model (Spike), and plugins.
     - `scripts/`: Automated regression, linting, and compilation scripts.
+    - `mem/`: Memory-initialization files (`.mem`) for various tests.
 - `fpga/`: Vivado project creation scripts and physical constraint files (`.xdc`) for PYNQ-Z2.
 - `docs/`: Extensive documentation including Theory of Operation and Waveform analysis.
 
@@ -44,7 +45,7 @@ To run a quick execution test using the Fibonacci sequence:
 ```bash
 ./test/scripts/regression_check.sh
 ```
-This script verifies that the RTL compiles for both Simulation and FPGA, and then runs a subset of tests.
+(Note: You can also run individual tests using `vvp sim.out +TEST=test/mem/fib_test.mem`)
 
 ### 2. Full Compliance Suite
 To run the full **RISC-V Architectural Test Suite** (requires `riscof`, `spike`, and `riscv64-unknown-elf-gcc`):
