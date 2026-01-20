@@ -1,5 +1,26 @@
 import riscv_pkg::*;
 
+/*
+ * Module: RegFile
+ * 
+ * Description:
+ *  32x32-bit Register File (x0-x31).
+ *  - Reads are asynchronous.
+ *  - Writes are synchronous on posedge clk.
+ *  - x0 is hardwired to 0.
+ *  - Supports write-through forwarding to resolve WB-to-ID hazards.
+ *
+ * Inputs:
+ *  - clk, rst: System clock and reset
+ *  - RegWrite: Write enable signal
+ *  - rs1, rs2: Read addresses (5-bit)
+ *  - rd: Write address (5-bit)
+ *  - write_data: Data to write (32-bit)
+ *
+ * Outputs:
+ *  - read_data1: Data from rs1
+ *  - read_data2: Data from rs2
+ */
 module RegFile (
     input  logic             clk,
     input  logic             rst,
