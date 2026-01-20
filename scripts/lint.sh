@@ -2,7 +2,7 @@
 # Simple linter script for SystemVerilog
 
 echo "Checking for snake_case filenames in src/..."
-bad_files=$(find src -name "*.sv" | grep -vE '^[a-z0-9_]+\.sv$')
+bad_files=$(find src -name "*.sv" | grep -vE '^src/[a-z0-9_]+\.sv$')
 if [ -n "$bad_files" ]; then
     echo "ERROR: The following files do not follow snake_case naming:"
     echo "$bad_files"
