@@ -36,18 +36,10 @@ jobs:
       run: |
         iverilog -g2012 -o sim.out test/scripts/stubs.sv src/riscv_pkg.sv $(ls src/*.sv | grep -vE "riscv_pkg.sv|datapath.sv") test/tb/pipelined_cpu_tb.sv
 
-        - name: Run Basic Integration Tests
-
-          run: |
-
-            echo "Running complex_branch_test.mem..."
-
-            vvp sim.out +TEST=test/mem/complex_branch_test.mem | grep "STATUS: PASS"
-
-            echo "Running lui_test.mem..."
-
-            vvp sim.out +TEST=test/mem/lui_test.mem | grep "STATUS: PASS"
-
-            echo "Basic tests verified successfully."
-
-    
+    - name: Run Basic Integration Tests
+      run: |
+        echo "Running complex_branch_test.mem..."
+        vvp sim.out +TEST=test/mem/complex_branch_test.mem | grep "STATUS: PASS"
+        echo "Running lui_test.mem..."
+        vvp sim.out +TEST=test/mem/lui_test.mem | grep "STATUS: PASS"
+        echo "Basic tests verified successfully."
