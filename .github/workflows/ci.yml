@@ -39,9 +39,9 @@ jobs:
     - name: Run Basic Integration Tests
       run: |
         echo "Running complex_branch_test.mem..."
-        vvp sim.out +TEST=mem/complex_branch_test.mem
+        vvp sim.out +TEST=mem/complex_branch_test.mem | grep "STATUS: PASS"
         echo "Running lui_test.mem..."
-        vvp sim.out +TEST=mem/lui_test.mem
+        vvp sim.out +TEST=mem/lui_test.mem | grep "STATUS: PASS"
         echo "Running fib_test.mem..."
-        vvp sim.out +TEST=mem/fib_test.mem
-        echo "Basic tests execution confirmed (see verification/ for full compliance results)."
+        vvp sim.out +TEST=mem/fib_test.mem | grep "STATUS: PASS"
+        echo "Basic tests verified successfully."

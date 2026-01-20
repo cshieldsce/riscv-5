@@ -87,12 +87,46 @@ module pipelined_cpu_tb;
         repeat(2) @(posedge clk); 
         rst = 0;
                 
-        $display("Waiting for tohost write...\n");
+        $display("Execution started. Waiting for completion or timeout...\n");
         
         // Timeout mechanism to prevent infinite simulation
-        #500000; // Run for 500000 time units, then finish
-        $display("\n--- Simulation finished after 500000 time units. ---");
+        #100000; 
         
+        $display("\n-----------------------------------------------");
+        $display("[*] Simulation Checkpoint (Time: %0t)", $time);
+        
+        // --- SELF-CHECKING LOGIC FOR CI ---
+        if (test_file == "mem/fib_test.mem") begin
+            // Fibonacci(10) should eventually reach 55. 
+            // In your fib_test.mem, x2 holds the current value.
+            if (cpu_inst.id_stage_inst.reg_file_inst.register_memory[2] == 55 || dmem_inst.led_reg == 55) begin
+                $display("INTEGRATION TEST: Fibonacci Result 55 detected. STATUS: PASS");
+            end else begin
+                $display("INTEGRATION TEST: Fibonacci Result incorrect (Got %d, Expected 55). STATUS: FAIL", cpu_inst.id_stage_inst.reg_file_inst.register_memory[2]);
+            end
+        end 
+        
+        else if (test_file == "mem/complex_branch_test.mem") begin
+            // Markers: x3=1, x4=2, x5=3, x6=4 if all branches taken correctly.
+            if (cpu_inst.id_stage_inst.reg_file_inst.register_memory[3] == 1 &&
+                cpu_inst.id_stage_inst.reg_file_inst.register_memory[4] == 2 &&
+                cpu_inst.id_stage_inst.reg_file_inst.register_memory[5] == 3 &&
+                cpu_inst.id_stage_inst.reg_file_inst.register_memory[6] == 4) begin
+                $display("INTEGRATION TEST: All 4 Complex Branches passed markers. STATUS: PASS");
+            end else begin
+                $display("INTEGRATION TEST: Branch markers incomplete. STATUS: FAIL");
+            end
+        end
+
+        else if (test_file == "mem/lui_test.mem") begin
+            // x2 should be 0x12345001
+            if (cpu_inst.id_stage_inst.reg_file_inst.register_memory[2] == 32'h12345001) begin
+                $display("INTEGRATION TEST: LUI + Forwarding check correct. STATUS: PASS");
+            end else begin
+                $display("INTEGRATION TEST: LUI Result incorrect (Got %h). STATUS: FAIL", cpu_inst.id_stage_inst.reg_file_inst.register_memory[2]);
+            end
+        end
+
         $display("[*] Simulation ended.");
         $display("-----------------------------------------------\n");
 
