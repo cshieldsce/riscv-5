@@ -2,7 +2,11 @@
 
 Welcome to the technical thesis and user manual for the `riscv-5` processor. This documentation is engineered to serve three distinct personas: Recruiters, Professors, and Peer Engineers.
 
-## 🧭 Navigation Quadrants
+## 🧭 The Rationale for Documentation as Code
+
+In the contemporary landscape of digital logic design, the artifact of code—whether SystemVerilog or VHDL—serves merely as the foundation. The true differentiator that distinguishes a competent student from a deployable engineer is high-fidelity, theoretically grounded, and visually distinct documentation. This repository adopts a "Documentation as Code" philosophy, ensuring that architectural intent and verification proof are as rigorous as the RTL itself.
+
+## 🏛️ Navigation Quadrants
 
 ### 1. The Architecture Manual (Theory)
 A deep dive into the microarchitecture that links RTL modules to textbook concepts.

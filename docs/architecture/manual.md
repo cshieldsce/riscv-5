@@ -2,6 +2,10 @@
 
 To prove engineering competence, this document anchors every design decision in the `riscv-5` core to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
 
+## 🏛️ Rationale: Why Mapping Matters
+
+A common pitfall in digital design is "hacking" an architecture until it passes a testbench without understanding the underlying principles. By explicitly mapping RTL modules to established textbook equations, we demonstrate that this design is not ad-hoc, but a faithful instantiation of proven architectural principles. This mapping provides the "Theoretical Audit" required by academic evaluators and senior design engineers.
+
 ## 1. Mapping the Textbook to the RTL
 
 The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of Patterson & Hennessy.

@@ -2,6 +2,10 @@
 
 This guide provides the technical instructions for building, simulating, and extending the `riscv-5` core. For this audience, clarity of instruction and reproducibility of results are paramount.
 
+## 🏛️ Rationale: Engineering Reproducibility
+
+A core that only runs on the original designer's machine is not a professional product. The "Developer Guide" quadrant ensures that the design is portable, the toolchain dependencies are clear, and the simulation results are reproducible. By providing copy-pasteable onboarding instructions, we prove that the project is built with collaboration and "Open Source" scalability in mind.
+
 ## 1. Toolchain Dependencies
 
 The project relies on standard open-source EDA tools and the RISC-V GNU toolchain.

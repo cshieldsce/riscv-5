@@ -2,6 +2,10 @@
 
 In hardware engineering, "it works" is a meaningless statement without the qualifier "verified against." This report details the objective proof of correctness through the RISCOF compliance framework and the subjective narrative of architectural debugging.
 
+## 🏛️ Rationale: The Narrative of Proof
+
+Verification is the cornerstone of silicon success. While compliance matrices provide the "what," the debugging retrospectives (War Stories) provide the "how." By documenting the specific failures encountered and the systematic approach taken to resolve them, we provide concrete evidence of engineering resilience and microarchitectural depth. This quadrant serves as the ultimate proof for recruiters that the candidate can handle the "real-world" challenges of RTL design.
+
 ## 1. RISCOF: The Gold Standard of Compliance
 
 To ensure the `riscv-5` core adheres strictly to the official RISC-V specification, we utilize the **RISCOF Architectural Test Framework**. Every instruction is validated against the golden architectural reference model (**Spike**).
