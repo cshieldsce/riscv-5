@@ -15,7 +15,8 @@ module InstructionMemory (
 `endif
 
     initial begin
-        $readmemh("fib_test.mem", rom_memory);
+        // Initialize memory to 0
+        for (int i = 0; i < 1048576; i++) rom_memory[i] = 0;
     end
 
     logic [ALEN-1:0] word_addr;

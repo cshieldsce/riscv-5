@@ -92,6 +92,7 @@ module DataMemory #(
                 // 3. ToHost (0x80001000) - Compliance Trigger
                 else if (Address == 32'h80001000) begin
                     if (WriteData[0] == 1'b1) begin
+                        $display("Simulation hit tohost finish. Status: PASS");
                         dump_signature();
                         $finish;
                     end
