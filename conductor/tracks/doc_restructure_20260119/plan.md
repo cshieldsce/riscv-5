@@ -37,10 +37,10 @@ This plan outlines the steps to restructure and enhance the project's documentat
 - [x] Task: Conductor - User Manual Verification 'Phase 4: The "Proof"' (Protocol in workflow.md)
 
 ## Phase 5: The "How-To" (Developer Guide)
-- [ ] Task: Technical Onboarding Guide
+- [x] Task: Technical Onboarding Guide (d972af3)
     - [ ] Create `docs/developer/setup.md` with copy-pasteable toolchain setup snippets
     - [ ] Document the build and simulation workflow (Verilator/Icarus)
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: The "How-To"' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 5: The "How-To"' (Protocol in workflow.md)
 
 ## Phase 6: Final Integration & Aesthetic Polish
 - [ ] Task: Final Visual Audit and Linking
