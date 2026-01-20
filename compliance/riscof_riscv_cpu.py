@@ -50,10 +50,11 @@ class riscv_cpu(pluginTemplate):
         
         # Get all SV files in src/
         # Exclude FPGA top-level file and legacy datapath from simulation build
+        # Also exclude riscv_pkg.sv here to add it explicitly at the start
         src_files = [os.path.join(self.src_dir, f) for f in os.listdir(self.src_dir) 
-                     if f.endswith('.sv') and f not in ['pynq_z2_top.sv', 'datapath.sv']]
+                     if f.endswith('.sv') and f not in ['pynq_z2_top.sv', 'datapath.sv', 'riscv_pkg.sv']]
         tb_file = os.path.join(self.test_dir, 'pipelined_cpu_tb.sv')
-        pkg_file = os.path.join(os.path.dirname(self.src_dir), 'riscv_pkg.sv')
+        pkg_file = os.path.join(self.src_dir, 'riscv_pkg.sv')
         
         self.sim_compile_cmd = ['iverilog', '-g2012', '-o', self.dut_exe] + [pkg_file] + src_files + [tb_file]
         

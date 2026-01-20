@@ -1,0 +1,71 @@
+package riscv_pkg;
+
+    // --- ARCHITECTURAL PARAMETERS ---
+    parameter XLEN = 32;
+    parameter ALEN = 32;
+    parameter LED_WIDTH  = 4;
+    
+    // --- MEMORY MAP ---
+    parameter logic [ALEN-1:0] MMIO_LED_ADDR = 32'hFFFF_FFF0;
+
+    // --- OPCODES (RV32I) ---
+    typedef enum logic [6:0] {
+        OP_R_TYPE   = 7'b0110011, // add, sub, sll...
+        OP_I_TYPE   = 7'b0010011, // addi, slti...
+        OP_LOAD     = 7'b0000011, // lb, lh, lw...
+        OP_STORE    = 7'b0100011, // sb, sh, sw...
+        OP_BRANCH   = 7'b1100011, // beq, bne...
+        OP_JAL      = 7'b1101111, // jal
+        OP_JALR     = 7'b1100111, // jalr
+        OP_LUI      = 7'b0110111, // lui (Load Upper Immediate)
+        OP_AUIPC    = 7'b0010111, // auipc (Add Upper Immediate to PC)
+        OP_SYSTEM   = 7'b1110011, // ecall, csrrw...
+        OP_FENCE    = 7'b0001111  // fence
+    } opcode_t;
+
+    // --- ALU OPERATIONS ---
+    typedef enum logic [3:0] {
+        ALU_ADD  = 4'b0010,
+        ALU_SUB  = 4'b0110,
+        ALU_AND  = 4'b0000,
+        ALU_OR   = 4'b0001,
+        ALU_XOR  = 4'b1001,
+        ALU_SLL  = 4'b1010,
+        ALU_SRL  = 4'b1011,
+        ALU_SRA  = 4'b1100,
+        ALU_SLT  = 4'b0111,
+        ALU_SLTU = 4'b1000
+    } alu_op_t;
+
+    // --- FUNCT3 CODES (ALU / R-Type / I-Type) ---
+    typedef enum logic [2:0] {
+        F3_ADD_SUB = 3'b000, // add, sub, addi
+        F3_SLL     = 3'b001, // sll, slli
+        F3_SLT     = 3'b010, // slt, slti
+        F3_SLTU    = 3'b011, // sltu, sltiu
+        F3_XOR     = 3'b100, // xor, xori
+        F3_SRL_SRA = 3'b101, // srl, sra, srli, srai
+        F3_OR      = 3'b110, // or, ori
+        F3_AND     = 3'b111  // and, andi
+    } funct3_alu_t;
+
+    // --- FUNCT3 CODES (Memory) ---
+    typedef enum logic [2:0] {
+        F3_BYTE  = 3'b000, // lb, sb
+        F3_HALF  = 3'b001, // lh, sh
+        F3_WORD  = 3'b010, // lw, sw
+        F3_LBU   = 3'b100, // lbu
+        F3_LHU   = 3'b101  // lhu
+    } funct3_mem_t;
+
+    // --- FUNCT3 CODES (Branch) ---
+    typedef enum logic [2:0] {
+        F3_BEQ  = 3'b000,
+        F3_BNE  = 3'b001,
+        F3_BLT  = 3'b100,
+        F3_BGE  = 3'b101,
+        F3_BLTU = 3'b110,
+        F3_BGEU = 3'b111
+    } funct3_branch_t;
+
+endpackage

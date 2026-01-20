@@ -6,7 +6,8 @@ echo "Starting Regression Check..."
 echo "Checking Synthesis Compatibility..."
 # We try to compile the top level with SYNTHESIS defined.
 # We expect errors about missing IP (clk_wiz, ila), but NOT syntax errors in our code.
-iverilog -g2012 -D SYNTHESIS -o synth_check.out riscv_pkg.sv src/*.sv > synth_check.log 2>&1
+# Ensure riscv_pkg.sv is compiled first
+iverilog -g2012 -D SYNTHESIS -o synth_check.out src/riscv_pkg.sv $(ls src/*.sv | grep -v src/riscv_pkg.sv) > synth_check.log 2>&1
 
 # Check if the log contains syntax errors other than missing modules
 if grep -q "syntax error" synth_check.log; then
