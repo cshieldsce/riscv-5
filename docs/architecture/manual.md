@@ -10,6 +10,7 @@ A common pitfall in digital design is "hacking" an architecture until it passes 
 
 The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of Patterson & Hennessy.
 
+<!-- ELABORATION POINT: Provide a link to your Draw.io source file. Recruiters value seeing that the diagram is version-controlled and not just a static image. -->
 [INSERT DRAW.IO DIAGRAM: The 5-Stage Datapath Topology (LR Flow, Subgraph Boundaries, Signal Labels for rs1_data, imm_val, etc.)]
 
 ### 1.1 The Pipelined Datapath (Section 4.6)
@@ -30,10 +31,12 @@ Inter-stage registers are the structural necessity of the pipeline. In the RTL, 
 - **Primary Objective:** Anchor the PC to the next instruction address.
 - **RTL implementation:** `if_stage.sv`.
 - **Key Logic:** The PC logic resolves `PC+4` by default, or the `branch_target` if `PCSrc` is asserted in the EX stage.
+<!-- ELABORATION POINT: Discuss why you chose to resolve branches in EX vs ID. Refer to the "2-cycle penalty" tradeoff mentioned in the textbook. -->
 
 ### 2.2 Instruction Decode (ID)
 - **Primary Objective:** Translate the opcode into control signals and retrieve operands.
 - **ISA Compliance (Vol I, Ch 2):** Supports Integer Computational, Control Transfer, and Load/Store instructions.
+<!-- ELABORATION POINT: Mention the specific handling of JAL in this stage. Why resolve it here? What is the impact on the branch penalty? -->
 - **ImmGen Logic:** Maps directly to the signed immediate layouts for I, S, B, U, and J formats.
 
 ### 2.3 Execute (EX)
@@ -47,10 +50,12 @@ Inter-stage registers are the structural necessity of the pipeline. In the RTL, 
       forward_a = 2'b10;
   end
   ```
+<!-- ELABORATION POINT: Add a side-by-side comparison for the MEM-to-EX forwarding condition. This proves you translated the mathematical logic accurately into hardware. -->
 
 ### 2.4 Memory Access (MEM)
 - **Primary Objective:** Data memory interaction.
 - **RTL implementation:** `mem_stage.sv`.
+<!-- ELABORATION POINT: Explain the byte-alignment and sign-extension logic for LB, LH, and LBU instructions as per RISC-V Spec Section 2.6. -->
 - **MMIO Support:** Integrated UART transmitter and LED controller at specific memory-mapped addresses.
 
 ### 2.5 Writeback (WB)
@@ -59,9 +64,9 @@ Inter-stage registers are the structural necessity of the pipeline. In the RTL, 
 
 ---
 
-## 3. Control Hazard Management (Section 4.8)
+## 3. Legislative Compliance: The RISC-V ISA Spec
 
-Branch instructions resolution is performed in the **EX stage**. Mispredicted branches result in a 2-cycle flush of the `IF` and `ID` stages, turning fetched instructions into bubbles (NOPs).
+<!-- ELABORATION POINT: Insert a section here detailing your implementation of the Zicsr extension or the behavior of SLT (Set Less Than) for signed vs unsigned comparisons. Refer specifically to Chapter 2 of the Unprivileged ISA manual. -->
 
 ---
 *Reference: Patterson, D. A., & Hennessy, J. L. (2017). Computer Organization and Design RISC-V Edition.*

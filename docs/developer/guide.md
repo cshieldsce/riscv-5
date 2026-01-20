@@ -44,6 +44,8 @@ iverilog -g2012 -o sim.out -I src/ src/pipelined_cpu.sv test/tb/pipelined_cpu_tb
 vvp sim.out +TEST=test/mem/fib_test.mem
 ```
 
+<!-- ELABORATION POINT: Insert a section on "How to interpret the VCD waveforms". List the key signals (e.g., pc, instr, reg_write) that a developer should watch to debug an execution error. -->
+
 ---
 
 ## 3. Compliance Verification Workflow
@@ -54,6 +56,8 @@ To run the full **RISC-V Architectural Test Suite** and generate a formal compli
 ./test/verification/run_compliance.sh
 ```
 *The resulting HTML report will be located in `test/verification/riscof_work/report.html`.*
+
+<!-- ELABORATION POINT: Explain the role of the `elf2hex.py` script in your verification flow. Why is it necessary to convert the ELF output from GCC into a hex format for the RTL simulator? -->
 
 ---
 
@@ -70,6 +74,7 @@ vivado -mode batch -source create_project.tcl
 
 ### 4.2 UART Communication
 Monitor core output via UART at **115200 baud**.
+<!-- ELABORATION POINT: Provide a brief troubleshooting section for FPGA deployment (e.g., what to do if the UART output is garbled or the LEDs don't blink as expected). -->
 
 ---
 *Built for the Silicon Industry. Verified for the Future.*

@@ -18,6 +18,8 @@ To ensure the `riscv-5` core adheres strictly to the official RISC-V specificati
 | **Zicsr** | `riscv-arch-test` | 120 | 100% | `spike` |
 | **Privileged** | `custom-suite` | 50 | 98% | `spike` |
 
+<!-- ELABORATION POINT: Insert a technical description of your RISCOF DUT plugin (riscof_riscv_cpu.py). Explain how you map the memory signature to the expected format. -->
+
 ### 1.2 Automated Verification & Badges
 To signal professional workflow practices, we utilize Continuous Integration (CI).
 - **Workflow Status:** [![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml)
@@ -29,6 +31,7 @@ To signal professional workflow practices, we utilize Continuous Integration (CI
 
 One of the most complex interactions in the 5-stage pipeline is the Load-Use hazard. As defined in **Patterson & Hennessy Section 4.7**, a stall is required because data from memory is not available until the end of the `MEM` stage.
 
+<!-- ELABORATION POINT: Elaborate on the WaveDrom diagram below. Explain specifically what is happening to the PC and the IF/ID register during the stall. Why does the ADD instruction persist in ID for two cycles? -->
 [INSERT WAVEDROM JSON: Load-Use Hazard Timing Diagram (LW followed by ADD, PC stall for 1 cycle, bubble insertion in EX)]
 
 ---
@@ -41,6 +44,7 @@ Recruiters value the ability to learn from failure. These narratives detail diff
 - **🌟 Situation:** During early execution of `fib_test.mem`, the processor deadlocked indefinitely.
 - **🎯 Task:** Identify the root cause of the stall signal assertion.
 - **🛠️ Action:** Traced waveforms in GTKWave. Analysis showed the `HazardUnit` was asserting `stall_if` on all register matches (`rd == rs1`), regardless of whether the instruction in EX was a Load.
+<!-- ELABORATION POINT: Include a code snippet of the "Buggy" vs "Fixed" Verilog code here. Visual evidence of the fix is high-impact. -->
 - **✅ Result:** Added the `id_ex_mem_read` check to the stall logic. The core successfully passed the test.
 
 ### 3.2 Archetype: The Bouncing Branch (Signed Mismatch)
