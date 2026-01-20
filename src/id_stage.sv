@@ -49,15 +49,15 @@ module ID_Stage (
         .opcode(opcode),
         .funct3(funct3),
         .funct7(funct7),
-        .RegWrite(reg_write),
-        .ALUControl(alu_control),
-        .ALUSrcA(alu_src_a),
-        .ALUSrc(alu_src),
-        .MemWrite(mem_write),
-        .MemToReg(mem_to_reg),
-        .Branch(branch),
-        .Jump(jump),
-        .Jalr(jalr)
+        .reg_write(reg_write),
+        .alu_control(alu_control),
+        .alu_src_a(alu_src_a),
+        .alu_src(alu_src),
+        .mem_write(mem_write),
+        .mem_to_reg(mem_to_reg),
+        .branch(branch),
+        .jump(jump),
+        .jalr(jalr)
     );
 
     // ===================================
