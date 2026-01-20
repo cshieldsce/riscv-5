@@ -1,3 +1,6 @@
+layout: post
+title: Developer Guide
+
 # Developer Guide: Technical Onboarding
 
 This guide provides the technical instructions for building, simulating, and extending the `riscv-5` core. For this audience, clarity of instruction and reproducibility of results are paramount.
