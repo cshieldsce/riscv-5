@@ -80,4 +80,7 @@ assign flush_ex = branch_taken;
 ```
 
 ---
+**[Explore Detailed Hazard Handling & War Stories](../verification/hazards.md)**
+
+---
 *Reference: Patterson, D. A., & Hennessy, J. L. (2017). Computer Organization and Design RISC-V Edition: The Hardware/Software Interface.*

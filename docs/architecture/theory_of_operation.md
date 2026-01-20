@@ -29,8 +29,17 @@ The `riscv-5` core is a classic 5-stage pipelined processor implementing the **R
     *   Accesses Data Memory for Load and Store instructions.
     *   Handles MMIO (Memory Mapped I/O) writes.
 
-5.  **WB (Writeback):**
+5. **WB (Writeback):**
+
     *   Writes the result (ALU result, Memory data, or PC+4) back to the Register File.
+
+
+
+---
+
+**[See Detailed Datapath Analysis for Stage-by-Stage Breakdown](./datapath.md)**
+
+
 
 ## 2. Split-Jump Mechanism
 
