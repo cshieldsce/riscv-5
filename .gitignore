@@ -6,6 +6,8 @@ dfx_runtime.txt                                                                 
 # RISCOF / Compliance artifacts
 riscof_work/
 riscv-arch-test/
+verification/riscof_work/
+verification/riscv-arch-test/
 debug_compile/
 __pycache__/
 *.pyc 
