@@ -66,9 +66,16 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$(pwd)/verification/compliance:$(pwd)/verification/compliance/spike_sim
         ./verification/run_compliance.sh
 
-    - name: Upload Compliance Report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: riscof-report
-        path: verification/riscof_work/report.html
+        - name: Upload Compliance Report
+
+          uses: actions/upload-artifact@v4
+
+          if: always()
+
+          with:
+
+            name: riscof-report
+
+            path: verification/riscof_work/
+
+    

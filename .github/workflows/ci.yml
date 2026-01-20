@@ -18,7 +18,7 @@ jobs:
 
     - name: Compile CPU
       run: |
-        iverilog -g2012 -o sim.out riscv_pkg.sv src/*.sv test/pipelined_cpu_tb.sv
+        iverilog -g2012 -o sim.out src/riscv_pkg.sv src/*.sv test/tb/pipelined_cpu_tb.sv
 
     - name: Run Complex Branch Test
       run: |
