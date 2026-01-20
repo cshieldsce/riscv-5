@@ -30,10 +30,10 @@ The core has been validated against the **RISC-V Architectural Test Suite** and 
 ## Project Structure
 
 - `src/`: Core RTL (SystemVerilog) including the package and 5-stage pipeline registers.
-- `verification/`: RISCOF compliance suite setup, Golden reference model (Spike), and plugins.
 - `test/`:
     - `tb/`: SystemVerilog testbenches for individual modules and core integration.
-    - `scripts/`: Automated regression and compilation scripts.
+    - `verification/`: RISCOF compliance suite setup, Golden reference model (Spike), and plugins.
+    - `scripts/`: Automated regression, linting, and compilation scripts.
 - `fpga/`: Vivado project creation scripts and physical constraint files (`.xdc`) for PYNQ-Z2.
 - `docs/`: Extensive documentation including Theory of Operation and Waveform analysis.
 
@@ -49,9 +49,9 @@ This script verifies that the RTL compiles for both Simulation and FPGA, and the
 ### 2. Full Compliance Suite
 To run the full **RISC-V Architectural Test Suite** (requires `riscof`, `spike`, and `riscv64-unknown-elf-gcc`):
 ```bash
-./verification/run_compliance.sh
+./test/verification/run_compliance.sh
 ```
-The resulting `report.html` will be generated in `verification/riscof_work/`.
+The resulting `report.html` will be generated in `test/verification/riscof_work/`.
 
 ## FPGA Implementation (PYNQ-Z2)
 

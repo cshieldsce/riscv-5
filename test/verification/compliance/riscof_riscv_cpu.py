@@ -28,7 +28,7 @@ class riscv_cpu(pluginTemplate):
         
         # Determine the root of the project to locate src/ and test/
         plugin_path = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.abspath(os.path.join(plugin_path, '..', '..'))
+        project_root = os.path.abspath(os.path.join(plugin_path, '..', '..', '..'))
         
         self.src_dir = os.path.join(project_root, 'src')
         self.test_dir = os.path.join(project_root, 'test', 'tb')

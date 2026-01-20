@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Ensure we are in the script directory
+cd "$(dirname "$0")"
+
 echo "Starting Regression Check..."
 
 # 1. Mock Synthesis Check
@@ -20,7 +23,7 @@ fi
 
 # 2. Compliance Check
 echo "Running Compliance Tests..."
-if ../../verification/run_compliance.sh; then
+if ../verification/run_compliance.sh; then
      echo "PASSED: Compliance tests executed successfully."
 else
      echo "FAILED: Compliance tests failed."
