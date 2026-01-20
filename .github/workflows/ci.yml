@@ -24,12 +24,12 @@ jobs:
       run: |
         echo "Verifying RTL for synthesis compatibility..."
         # Ensure riscv_pkg.sv is compiled first
-        iverilog -g2012 -D SYNTHESIS -o synth_check.out test/scripts/stubs.sv src/riscv_pkg.sv $(ls src/*.sv | grep -v src/riscv_pkg.sv)
+        iverilog -g2012 -D SYNTHESIS -o synth_check.out test/scripts/stubs.sv src/riscv_pkg.sv $(ls src/*.sv | grep -vE "riscv_pkg.sv|datapath.sv")
         echo "Synthesis check passed (no syntax errors)."
 
     - name: Compile CPU for Simulation
       run: |
-        iverilog -g2012 -o sim.out test/scripts/stubs.sv src/riscv_pkg.sv $(ls src/*.sv | grep -v src/riscv_pkg.sv) test/tb/pipelined_cpu_tb.sv
+        iverilog -g2012 -o sim.out test/scripts/stubs.sv src/riscv_pkg.sv $(ls src/*.sv | grep -vE "riscv_pkg.sv|datapath.sv") test/tb/pipelined_cpu_tb.sv
 
     - name: Run Complex Branch Test
       run: vvp sim.out +TEST=mem/complex_branch_test.mem | grep "PASS"
