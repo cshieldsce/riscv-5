@@ -16,9 +16,13 @@ module RegFile (
 
     logic [XLEN-1:0] register_memory [0:31];
 
-    // ASYNC READ (With x0 Protection)
-    assign read_data1 = (rs1 == 5'b0) ? 32'b0 : register_memory[rs1];
-    assign read_data2 = (rs2 == 5'b0) ? 32'b0 : register_memory[rs2];
+    // ASYNC READ (With x0 Protection and Write-Through Forwarding)
+    // If reading from the register currently being written, bypass the memory and use write_data.
+    assign read_data1 = (rs1 == 5'b0) ? 32'b0 : 
+                        ((rs1 == rd) && RegWrite) ? write_data : register_memory[rs1];
+                        
+    assign read_data2 = (rs2 == 5'b0) ? 32'b0 : 
+                        ((rs2 == rd) && RegWrite) ? write_data : register_memory[rs2];
 
     // SYNCHRONOUS WRITE
     always_ff @(posedge clk) begin
