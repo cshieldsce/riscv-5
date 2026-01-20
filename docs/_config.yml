@@ -7,9 +7,9 @@ minima:
 
 header_pages:
   - index.md
-  - architecture/datapath.md
-  - verification/compliance.md
-  - developer/setup.md
+  - architecture/manual.md
+  - verification/report.md
+  - developer/guide.md
 
 plugins:
   - jekyll-remote-theme
