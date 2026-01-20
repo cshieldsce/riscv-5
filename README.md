@@ -1,6 +1,6 @@
 # riscv-5: Verified Pipelined Core
 
-![CI Status](https://github.com/cshieldsce/riscv-cpu/actions/workflows/ci.yml/badge.svg) ![Compliance Status](https://github.com/cshieldsce/riscv-cpu/actions/workflows/compliance.yml/badge.svg)
+![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg) ![Compliance Status](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml/badge.svg)
 
 > A fully verified, 5-stage pipelined RISC-V processor (RV32I) implemented in SystemVerilog.
 
