@@ -27,59 +27,54 @@ The core has been validated against the **RISC-V Architectural Test Suite** and 
 - **Control Flow:** `beq`, `bne`, `blt`, `bge`, `bltu`, `bgeu`, `jal`, `jalr`
 - **Large Constants:** `lui`, `auipc`
 
-## Compliance Testing
+## Project Structure
 
-This project utilizes [RISCOF](https://github.com/riscv-software-src/riscof) (RISC-V Architectural Test Framework) to ensure strict adherence to the RISC-V Unprivileged Specification.
+- `src/`: Core RTL (SystemVerilog) including the package and 5-stage pipeline registers.
+- `verification/`: RISCOF compliance suite setup, Golden reference model (Spike), and plugins.
+- `test/`:
+    - `tb/`: SystemVerilog testbenches for individual modules and core integration.
+    - `scripts/`: Automated regression and compilation scripts.
+- `fpga/`: Vivado project creation scripts and physical constraint files (`.xdc`) for PYNQ-Z2.
+- `docs/`: Extensive documentation including Theory of Operation and Waveform analysis.
 
-### Test Structure
-- **DUT Plugin:** Python plugin located in `compliance/` that compiles the RTL using Icarus Verilog and executes tests.
-- **Reference Model:** Uses [Spike](https://github.com/riscv-software-src/riscv-isa-sim) for golden-model comparison.
-- **Verification:** Signatures are automatically extracted from the DUT's memory and compared against Spike's output.
+## Quick Start: Simulation & Verification
 
-### Running Compliance Tests Locally
-To run the full suite (requires `riscof`, `spike`, and `riscv64-unknown-elf-gcc`):
-
+### 1. Simple Integration Test
+To run a quick execution test using the Fibonacci sequence:
 ```bash
-./run_compliance.sh
+./test/scripts/regression_check.sh
 ```
+This script verifies that the RTL compiles for both Simulation and FPGA, and then runs a subset of tests.
 
-## GitHub Actions CI/CD
-
-The repository includes automated workflows to maintain code quality:
-1.  **Basic CI (`ci.yml`)**: Runs to verify basic core functionality with custom assembly tests.
-2.  **Compliance Suite (`compliance.yml`)**: A comprehensive workflow that builds Spike and runs the official RISC-V Architecture Test suite. 
-    *   *Note: These are both configured with `workflow_dispatch` to be run manually or on PRs affecting core logic to optimize resource usage.*
+### 2. Full Compliance Suite
+To run the full **RISC-V Architectural Test Suite** (requires `riscof`, `spike`, and `riscv64-unknown-elf-gcc`):
+```bash
+./verification/run_compliance.sh
+```
+The resulting `report.html` will be generated in `verification/riscof_work/`.
 
 ## FPGA Implementation (PYNQ-Z2)
 
-This core is optimized for FPGA implementation using **Synchronous BRAM** and memory-mapped peripherals.
+This core is silicon-ready and optimized for Xilinx Zynq-7000 series FPGAs. It uses Synchronous BRAM and includes a UART MMIO peripheral.
 
-### Quick Start (Vivado)
-1. Generate the Vivado project:
+### Vivado Project Creation
+1. Generate the project:
    ```bash
-   vivado -mode batch -source create_project.tcl
+   cd fpga && vivado -mode batch -source create_project.tcl
    ```
-2. Open `vivado_project/riscv_cpu.xpr` in Vivado.
-3. Click **Generate Bitstream**.
-4. Program your PYNQ-Z2 and monitor UART at **115200 baud**.
+2. Open the generated project in the Vivado GUI.
+3. Generate Bitstream and Program the PYNQ-Z2 board.
+4. Monitor output via Serial at **115200 baud**.
 
 ---
 
 ## Tools & Requirements
 
 - **Simulator:** [Icarus Verilog](https://steveicarus.github.io/iverilog/) (`iverilog`) v12.0+
-- **Toolchain:** `riscv64-unknown-elf-gcc` (for test compilation)
-- **Framework:** `riscof` (for architectural compliance)
+- **Verification:** [RISCOF](https://github.com/riscv-software-src/riscof) (RISC-V Architectural Test Framework)
+- **Reference Model:** [Spike](https://github.com/riscv-software-src/riscv-isa-sim)
+- **Toolchain:** `riscv64-unknown-elf-gcc`
 - **Language:** SystemVerilog (IEEE 1800-2012)
-
-## Running the project
-
-For simple verification (using the Fibonacci sequence test):
-
-```bash
-iverilog -g2012 -o sim.out riscv_pkg.sv src/*.sv test/pipelined_cpu_tb.sv
-vvp sim.out +TEST=mem/fib_test.mem
-```
 
 ## Roadmap
 
