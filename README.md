@@ -1,12 +1,30 @@
-# riscv-5: Verified Pipelined Core
+# RISC-V Pipelined Processor (RV32I)
 
-![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg) ![Compliance Status](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml/badge.svg)
+[![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml)
+[![Compliance Status](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-gray.svg)](https://opensource.org/licenses/MIT)
 
-> A fully verified, 5-stage pipelined RISC-V processor (RV32I) implemented in SystemVerilog.
+This repository contains a synthesizable 5-stage pipelined RISC-V core (RV32I) implemented in SystemVerilog. The project emphasizes hardware-software co-design, formal verification via the RISCOF framework, and physical implementation on FPGA.
+
+---
+
+## Design Vision
+
+The goal of this project is to implement a cycle-accurate RISC-V implementation that strictly adheres to the unprivileged ISA specification. By following the architectural patterns established in Patterson & Hennessy, the design provides a clear mapping between microarchitectural theory and RTL implementation.
+
+## Technical Features
+
+- **5-Stage Pipeline:** Decoupled Instruction Fetch (IF), Decode (ID), Execute (EX), Memory (MEM), and Writeback (WB) stages.
+- **Hazard Handling:** Integrated forwarding unit and load-use stall logic to mitigate data hazards.
+- **ISA Compliance:** Verified against the RISC-V Architectural Test Suite (RISCOF) with a 100% pass rate.
+- **Synthesizable RTL:** Optimized for Xilinx Zynq-7000 series FPGAs, specifically tested on the PYNQ-Z2.
+- **Automated Verification:** Continuous integration using Spike as a golden reference model.
+
+---
 
 ## Architecture Overview
 
-This project is a Harvard-architecture RISC-V core designed to be cycle-accurate and strictly compliant to the ISA specification. Verification is prioritized by using the official RISC-V test suite (RISCOF) to validate every instruction against the standard golden model. 
+The core follows the classic RISC-V pipeline structure.
 
 ```mermaid
 graph LR
@@ -31,101 +49,40 @@ graph LR
     end
 ```
 
-### Documentation Portal (GitHub Pages)
-Explore the deep technical details of the implementation:
-- 🎓 **[Architecture Manual](./docs/index.md):** Theoretical mapping to textbooks.
-- 💼 **[Verification Report](./docs/verification/compliance.md):** Compliance Matrix and "War Stories".
-- 🛠️ **[Developer Guide](./docs/developer/setup.md):** Toolchain and simulation workflow.
-
-![alt text](docs/pipeline.png)
-
-### Features
-- 5-Stage Pipeline: `IF`, `ID`, `EX`, `MEM`, `WB` stages with pipeline registers.
-- Hazard Management: Resolves data, load-use, and control hazards to manage pipeline stalls and control flow.
-- Verified Compliance: Passing the official RISC-V rv32i_m/I architectural test suite.
-- Automated CI/CD: GitHub Actions workflows that re-verify the core against the ISA spec.
-
-### Supported Instructions (RV32I)
-
-The core has been validated against the **RISC-V Architectural Test Suite** and supports the following instruction types:
-
-- **Arithmetic:** `add`, `sub`, `addi`, `slt`, `sltu`, `slti`, `sltiu`
-- **Logic:** `and`, `or`, `xor`, `andi`, `ori`, `xori`
-- **Shifts:** `sll`, `srl`, `sra`, `slli`, `srli`, `srai`
-- **Memory:** `lw`, `sw`, `lb`, `lbu`, `lh`, `lhu`, `sb`, `sh`
-- **Control Flow:** `beq`, `bne`, `blt`, `bge`, `bltu`, `bgeu`, `jal`, `jalr`
-- **Large Constants:** `lui`, `auipc`
-
-## Project Structure
-
-- `src/`: Core RTL (SystemVerilog) including the package and 5-stage pipeline registers.
-- `test/`:
-    - `tb/`: SystemVerilog testbenches for individual modules and core integration.
-    - `verification/`: RISCOF compliance suite setup, Golden reference model (Spike), and plugins.
-    - `scripts/`: Automated regression, linting, and compilation scripts.
-    - `mem/`: Memory-initialization files (`.mem`) for various tests.
-- `fpga/`: Vivado project creation scripts and physical constraint files (`.xdc`) for PYNQ-Z2.
-- `docs/`: Extensive documentation including Theory of Operation and Waveform analysis.
-
-## Quick Start: Simulation & Verification
-
-### 1. Simple Integration Test
-To run a quick execution test using the Fibonacci sequence:
-```bash
-./test/scripts/regression_check.sh
-```
-(Note: You can also run individual tests using `vvp sim.out +TEST=test/mem/fib_test.mem`)
-
-### 2. Full Compliance Suite
-To run the full **RISC-V Architectural Test Suite** (requires `riscof`, `spike`, and `riscv64-unknown-elf-gcc`):
-```bash
-./test/verification/run_compliance.sh
-```
-The resulting `report.html` will be generated in `test/verification/riscof_work/`.
-
-## FPGA Implementation (PYNQ-Z2)
-
-This core is silicon-ready and optimized for Xilinx Zynq-7000 series FPGAs. It uses Synchronous BRAM and includes a UART MMIO peripheral.
-
-### Vivado Project Creation
-1. Generate the project:
-   ```bash
-   cd fpga && vivado -mode batch -source create_project.tcl
-   ```
-2. Open the generated project in the Vivado GUI.
-3. Generate Bitstream and Program the PYNQ-Z2 board.
-4. Monitor output via Serial at **115200 baud**.
+### Documentation
+Detailed technical documentation is available in the `docs/` directory:
+- **[Architecture Manual](./docs/index.md):** Theoretical mapping and stage-by-stage analysis.
+- **[Verification Report](./docs/verification/compliance.md):** Compliance Matrix and debugging retrospectives.
+- **[Developer Guide](./docs/developer/setup.md):** Environment configuration and simulation workflow.
 
 ---
 
-## Tools & Requirements
+## Getting Started
 
-- **Simulator:** [Icarus Verilog](https://steveicarus.github.io/iverilog/) (`iverilog`) v12.0+
-- **Verification:** [RISCOF](https://github.com/riscv-software-src/riscof) (RISC-V Architectural Test Framework)
-- **Reference Model:** [Spike](https://github.com/riscv-software-src/riscv-isa-sim)
-- **Toolchain:** `riscv64-unknown-elf-gcc`
-- **Language:** SystemVerilog (IEEE 1800-2012)
+### Functional Verification
+Execute the regression suite to verify core integration:
+```bash
+./test/scripts/regression_check.sh
+```
 
-## Roadmap
+### ISA Compliance
+Run the full RISCOF suite (requires riscof, spike, and riscv64-unknown-elf-gcc):
+```bash
+./test/verification/run_compliance.sh
+```
 
-Phase 1: Single-Cycle Core (Completed)
-Phase 2: 5-Stage Pipelining (Completed)
-Phase 3: ISA Completeness (Completed)
+---
 
-Phase 4: C-Readiness & Hardening (Completed)
+## Project Structure
 
-- [x] **Complex Branching:** Implement BNE, BLT, BGE, etc., to support standard C control flow.
-- [x] **Compliance:** Integrated RISCOF and passed the official RV32I test suite.
-- [x] **Memory Expansion:** Increased I-Mem and D-Mem to 4MB each to support large binaries.
-- [x] **MMIO Hardening:** Standardized `tohost` (0x80001000) for test termination.
-
-Phase 5: FPGA & Peripherals (Future)
-
-- [ ] UART: Implement Serial Transmit (MMIO) for printf support.
-- [ ] Physical Constraints: Map pins to the specific FPGA board.
+```text
+├── src/           # SystemVerilog RTL
+├── test/          # RISCOF configuration and testbenches
+├── fpga/          # Vivado TCL scripts and XDC constraints
+└── docs/          # Technical documentation and diagrams
+```
 
 ## References
 
-- [Computer Organization and Design | The Hardware/Software Interface | RISC-V Edition by David A. Patterson & John L. Hennessy | Chapter 4 - The Processor](https://www.cs.sfu.ca/~ashriram/Courses/CS295/assets/books/HandP_RISCV.pdf)
-
-- [The RISC-V Instruction Set Manual Volume I | Unprivileged Architecture](https://docs.riscv.org/reference/isa/_attachments/riscv-unprivileged.pdf)
+- *Computer Organization and Design (RISC-V Edition)* - Patterson & Hennessy.
+- *RISC-V Instruction Set Manual Volume I: Unprivileged ISA*.

@@ -1,29 +1,28 @@
-# RISC-V Pipelined Processor Portfolio
+# RISC-V Pipelined Processor Documentation
 
-Welcome to the comprehensive documentation for my RV32I 5-stage pipelined processor. This project demonstrates a deep dive into computer architecture, from RTL implementation in SystemVerilog to verification with RISCOF and FPGA deployment.
+This documentation provides a technical deep-dive into the implementation, verification, and deployment of the RV32I 5-stage pipelined processor.
 
-## 🚀 Strategic Roadmap
+## Strategic Organization
 
-This documentation is structured to provide value to three primary audiences:
+The documentation is organized by technical domain to facilitate efficient review:
 
-### 💼 For Recruiters (30-Second Scan)
-*See the "Hook" and evidence of engineering maturity.*
-- **[High-Level Overview](../README.md):** Vision, features, and status badges.
-- **[Verification Compliance Matrix](./verification/compliance.md):** Proof of correctness.
-- **[War Stories](./verification/hazards.md):** Narrative retrospectives on solving complex microarchitectural bugs.
+### Microarchitecture
+*Focus on theoretical mapping and RTL implementation.*
+- **[Architecture Overview](./architecture/theory_of_operation.md):** Theoretical anchoring to textbooks.
+- **[Pipelined Datapath](./architecture/datapath.md):** Detailed analysis of stage transitions and timing.
+- **[Hazard Handling](./architecture/pipeline_notes.md):** Forwarding and stall logic implementation.
 
-### 🎓 For Professors (Theory Audit)
-*Verify the implementation against established architectural principles.*
-- **[Architecture Manual](./architecture/theory_of_operation.md):** Mapping SystemVerilog to Patterson & Hennessy.
-- **[Pipelined Datapath](./architecture/datapath.md):** Detailed stage-by-stage analysis.
-- **[Hazard Handling](./architecture/pipeline_notes.md):** Theoretical anchoring of forwarding and stalls.
+### Verification and Compliance
+*Focus on proof of correctness and debugging.*
+- **[Compliance Matrix](./verification/compliance.md):** Formal RISCOF results and methodology.
+- **[Hazard Analysis and Retrospectives](./verification/hazards.md):** Timing diagrams and debugging case studies.
 
-### 🛠️ For Peers (How-To)
-*Technical details for building, simulating, and extending the core.*
-- **[Developer Setup](./developer/setup.md):** Toolchain and environment configuration.
-- **[FPGA Integration](./developer/fpga.md):** Deployment on PYNQ-Z2.
-- **[SoC Peripherals](./developer/soc_peripherals.md):** Memory-mapped I/O and UART.
+### Development and Integration
+*Focus on tools and hardware deployment.*
+- **[Environment Setup](./developer/setup.md):** Toolchain and simulation prerequisites.
+- **[FPGA Deployment](./developer/fpga.md):** Synthesis and implementation on PYNQ-Z2.
+- **[Peripherals](./developer/soc_peripherals.md):** UART and MMIO definitions.
 
 ---
 
-*Built with passion for digital logic and RISC-V. Optimized for GitHub Pages.*
+*Verified RTL. Rigorous Documentation. Silicon-Ready Design.*

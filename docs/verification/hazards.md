@@ -1,13 +1,13 @@
-# Hazard Handling & War Stories
+# Hazard Handling and Debugging Retrospectives
 
-This document explores the complex interactions of the 5-stage pipeline, focusing on how data and control hazards are resolved through logic and architectural ingenuity.
+This document analyzes the resolution of data and control hazards within the 5-stage pipeline.
 
-## 1. Temporal Proof: The Load-Use Stall
+## 1. Load-Use Hazard Analysis
 
-One of the most complex interactions in a 5-stage pipeline is the **Load-Use Hazard**. When an instruction depends on the result of a `LW` instruction, it must stall for one cycle because the memory data is only available at the end of the `MEM` stage.
+In a 5-stage pipeline, a load-use hazard occurs when an instruction depends on the result of a preceding `LW` instruction. Because memory data is only available at the end of the `MEM` stage, a 1-cycle stall is required.
 
-### WaveDrom: Load-Use Stall Visualization
-The following timing diagram illustrates a `LW` instruction followed by an `ADD` that uses the loaded value. Note the 1-cycle "bubble" inserted into the EX stage.
+### Temporal Visualization
+The following timing diagram illustrates the insertion of a pipeline bubble.
 
 ```json
 { "signal": [
@@ -24,18 +24,15 @@ The following timing diagram illustrates a `LW` instruction followed by an `ADD`
 
 ---
 
-## 2. Forwarding: The "Time Travel" Solution
+## 2. Forwarding Logic
 
-Forwarding allows the result of an instruction to be used by a following instruction before it has been written back to the register file. This is crucial for maintaining high IPC.
-
-### WaveDrom: Forwarding from EX/MEM to ALU
-In this scenario, `x1` is calculated by an `ADD` and immediately used by a `SUB`.
+Forwarding bypasses the register file to provide results from the `MEM` or `WB` stages directly to the ALU inputs.
 
 ```json
 { "signal": [
   { "name": "CLK",    "wave": "p....." },
-  { "name": "ADD (x1=x2+x3)", "wave": "34567.", "data": ["IF", "ID", "EX", "MEM", "WB"] },
-  { "name": "SUB (x4=x1-x5)", "wave": ".34567", "data": ["IF", "ID", "EX", "MEM", "WB"] },
+  { "name": "ADD (x1)", "wave": "34567.", "data": ["IF", "ID", "EX", "MEM", "WB"] },
+  { "name": "SUB (x1)", "wave": ".34567", "data": ["IF", "ID", "EX", "MEM", "WB"] },
   { "name": "rs1_data", "wave": "..==..", "data": ["Old x1", "Fwd x1"] }
 ],
   "edge": ["ADD.EX -> SUB.EX Forwarding Path"]
@@ -44,55 +41,34 @@ In this scenario, `x1` is calculated by an `ADD` and immediately used by a `SUB`
 
 ---
 
-## 3. War Story: The Frozen Pipeline
+## 3. Retrospective: The Frozen Pipeline
 
-### 🌟 Situation
-During early integration testing with the `fib_test.mem`, the processor would consistently deadlock on the first loop iteration. The PC would stop incrementing, and the `IF/ID` register would hold the same branch instruction indefinitely.
+**Situation:** During initial integration, the processor deadlocked on loop iterations. The PC stopped incrementing, and the instruction registers stalled indefinitely.
 
-### 🎯 Task
-Identify why the pipeline was freezing instead of progressing through the Fibonacci calculation.
+**Task:** Debug the stall logic within the `HazardUnit`.
 
-### 🛠️ Action
-Using GTKWave, I traced the `stall_if` signal from the `HazardUnit`. I discovered that the stall logic for Load-Use hazards was incorrectly triggering on **all** instructions where `rd == rs1`, regardless of whether the instruction in EX was actually a `Load`.
+**Action:** Traced the `stall_if` signal in GTKWave. Analysis revealed that the load-use stall was triggering on all register matches, regardless of whether the instruction in EX was a load.
 
-**The Buggy Logic:**
+**Result:** Implemented an explicit `id_ex_mem_read` check.
 ```systemverilog
-// Triggered on ANY rd match, not just Loads
-if ((id_ex_rd == id_rs1) || (id_ex_rd == id_rs2)) begin
-    stall_if = 1;
-end
-```
-
-### ✅ Result
-I added the `id_ex_mem_read` check to ensure the stall only occurs when the previous instruction is a memory load.
-```systemverilog
-// Fixed Logic
 if (id_ex_mem_read && ((id_ex_rd == id_rs1) || (id_ex_rd == id_rs2))) begin
     stall_if = 1;
+    stall_id = 1;
+    flush_ex = 1;
 end
 ```
-The deadlock was resolved, and the core successfully calculated the 10th Fibonacci number.
 
 ---
 
-## 3. War Story: The Bouncing Branch
+## 4. Retrospective: Signed Branch Comparison
 
-### 🌟 Situation
-The core passed all arithmetic compliance tests but failed on `BEQ` (Branch if Equal) when comparing negative numbers (e.g., `-1` vs `-1`). The branch would consistently evaluate as "Not Taken".
+**Situation:** The core failed `BEQ` compliance tests for negative number comparisons.
 
-### 🎯 Task
-Debug the signed comparison logic in the Branch comparator.
+**Task:** Audit the branch comparator logic in the `EX_Stage`.
 
-### 🛠️ Action
-I isolated the comparison logic in the `EX_Stage`. I realized that while `XLEN` was 32 bits, the operands were being treated as `unsigned` by default in the SystemVerilog equality check, causing sign-extension issues.
+**Action:** Isolated the comparison and identified that SystemVerilog was performing unsigned comparisons by default, leading to incorrect evaluations for sign-extended values.
 
-### ✅ Result
-I explicitly cast the operands to `signed` for the comparison logic, aligning the behavior with the RISC-V Spec Section 2.5.
+**Result:** Applied explicit `$signed()` casting to the comparator inputs.
 ```systemverilog
-// Explicit signed casting for branch comparison
 assign rs1_eq_rs2 = ($signed(alu_in_a_forwarded) == $signed(rs2_data_forwarded));
 ```
-This fix allowed the core to pass the full `rv32i_m/I` compliance suite.
-
----
-*War stories represent the real-world engineering resilience required for silicon success.*

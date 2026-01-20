@@ -1,77 +1,68 @@
-# Developer Setup & Workflow
+# Developer Setup and Workflow
 
-This guide provides a step-by-step technical onboarding for building, simulating, and verifying the `riscv-5` core.
+Technical onboarding for building, simulating, and verifying the `riscv-5` core.
 
-## 1. Toolchain Installation
+## 1. Environment Configuration
 
-The core is developed and verified using open-source tools. Follow these steps to set up your environment on a Linux-based system (Ubuntu/Debian recommended).
+The development environment requires open-source EDA tools.
 
-### Required Packages
+### Prerequisites
 ```bash
 sudo apt-get update
 sudo apt-get install -y iverilog gtkwave python3 python3-pip git
 ```
 
-### RISC-V GNU Toolchain
-To compile assembly and C code for the core, you need the RISC-V GCC cross-compiler.
+### RISC-V Cross-Compiler
 ```bash
-# We recommend using pre-built binaries or your distribution's package
 sudo apt-get install gcc-riscv64-unknown-elf
 ```
 
-### RISCOF (Compliance Framework)
+### RISCOF Installation
 ```bash
 pip3 install riscof
 ```
 
 ---
 
-## 2. Simulation Workflow
+## 2. Simulation Procedures
 
-We use **Icarus Verilog** for simulation. The project includes a regression script to quickly verify core integration.
-
-### Run Functional Regression
+### Functional Regression
+Run the standard regression suite:
 ```bash
 ./test/scripts/regression_check.sh
 ```
 
-### Manual Simulation
-To simulate a specific memory file (`.mem`):
+### Manual Test Execution
+To simulate a specific memory image:
 ```bash
-# Compile
+# Compile core and testbench
 iverilog -g2012 -o sim.out -I src/ src/pipelined_cpu.sv test/tb/pipelined_cpu_tb.sv
-# Run
+# Execute with memory file
 vvp sim.out +TEST=test/mem/fib_test.mem
 ```
 
 ---
 
-## 3. Verification Workflow (RISCOF)
+## 3. Compliance Testing
 
-To ensure the core remains compliant with the ISA specification, run the full RISCOF suite.
-
+To verify ISA compliance:
 ```bash
-# Execute the compliance runner
 ./test/verification/run_compliance.sh
 ```
-*The results will be generated in `test/verification/riscof_work/report.html`.*
+Results are accessible via the generated HTML report in `test/verification/riscof_work/`.
 
 ---
 
-## 4. FPGA Deployment (Vivado)
+## 4. FPGA Implementation
 
-### Project Generation
-The project includes a TCL script to automatically generate the Vivado project for the PYNQ-Z2.
+### Vivado Project Generation
 ```bash
 cd fpga
 vivado -mode batch -source create_project.tcl
 ```
 
-### UART Communication
-When running on the hardware, the core communicates via UART at **115200 baud**. Use `screen` or `minicom` to view output:
+### Hardware Monitoring
+Monitor board output via UART at 115200 baud:
 ```bash
 screen /dev/ttyUSB0 115200
 ```
-
----
-*Contributions are welcome. Please ensure all code passes the `lint.sh` and `regression_check.sh` before submitting a PR.*

@@ -1,32 +1,31 @@
-# RISC-V ISA Compliance Report
+# ISA Compliance and Verification
 
-This document details the formal verification of the `riscv-5` core against the RISC-V Instruction Set Architecture (ISA) specifications using the **RISCOF** framework.
+Formal verification of the `riscv-5` core is conducted against the RISC-V Instruction Set Architecture (ISA) specifications using the RISCOF framework.
 
 ## 1. Compliance Matrix
 
-The following table summarizes the test results for each supported ISA extension. Verification is performed by comparing the core's architectural state transitions against the **Spike** golden reference model.
+The following table summarizes the pass rates for the supported ISA extensions. Verification compares the Device Under Test (DUT) state transitions against the Spike golden reference model.
 
-| ISA Extension | Test Suite | Tests Run | Pass Rate | Golden Model |
+| ISA Extension | Test Suite | Tests Run | Pass Rate | Reference Model |
 | :--- | :--- | :--- | :--- | :--- |
-| **RV32I** | `riscv-arch-test` | 482 | 100% | `sail-riscv` / `spike` |
+| **RV32I** | `riscv-arch-test` | 482 | 100% | `spike` |
 | **Zicsr** | `riscv-arch-test` | 120 | 100% | `spike` |
 | **Privileged** | `custom-suite` | 50 | 98% | `spike` |
 
 ---
 
-## 2. Verification Methodology
+## 2. Methodology
 
 ### RISCOF Framework
-We utilize [RISCOF](https://github.com/riscv-software-src/riscof), the industry-standard RISC-V Architectural Test Framework. 
+We utilize the industry-standard [RISCOF](https://github.com/riscv-software-src/riscof) framework for architectural testing.
 
-**Workflow:**
-1. **Test Generation:** RISCOF selects relevant assembly tests from the `riscv-arch-test` repository.
-2. **Compilation:** Tests are compiled using `riscv64-unknown-elf-gcc`.
-3. **Execution (DUT):** The `riscv-5` core executes the tests in the Icarus Verilog simulator, producing a signature file.
-4. **Execution (REF):** The Spike reference model executes the same tests to produce a golden signature.
-5. **Comparison:** RISCOF compares the two signatures. Any mismatch indicates a bug in the DUT.
+**Verification Lifecycle:**
+1. **Test Selection:** Relevant assembly tests are pulled from the `riscv-arch-test` repository.
+2. **Compilation:** Tests are compiled via the `riscv64-unknown-elf-gcc` cross-compiler.
+3. **Execution:** The RTL core executes the tests in the Icarus Verilog environment, generating a signature file.
+4. **Validation:** Signature files are compared against those produced by the Spike golden model.
 
-### Configuration (`riscv_cpu_isa.yaml`)
+### ISA Configuration
 ```yaml
 hart0:
   ISA: RV32I
@@ -37,11 +36,8 @@ hart0:
 
 ---
 
-## 3. Automated Regression
-To ensure no regressions are introduced during development, the compliance suite is integrated into our GitHub Actions CI pipeline.
+## 3. Continuous Integration
+Verification is automated via GitHub Actions to ensure regression-free development.
 
-- **CI Status:** [![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml)
+- **Build Status:** [![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml)
 - **Compliance Status:** [![Compliance Status](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml)
-
----
-*Verification provides the proof of correctness required for silicon deployment.*
