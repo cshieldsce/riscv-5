@@ -29,16 +29,12 @@ This plan outlines the steps to restructure and enhance the project's documentat
 - [x] Task: Conductor - User Manual Verification 'Phase 3: The "Theory Audit"' (Protocol in workflow.md)
 
 ## Phase 4: The "Proof" (Verification Report)
-- [ ] Task: Document Compliance and RISCOF Results
+- [x] Task: Document Compliance and RISCOF Results (4b57211)
     - [ ] Create `docs/verification/compliance.md` with the Verification Compliance Matrix
     - [ ] Detail the test environment (Spike vs. RTL) and coverage metrics
-- [ ] Task: Narrative Debugging (War Stories)
-    - [ ] Draft at least two "War Stories" using the STAR method (e.g., "The Frozen Pipeline", "The Bouncing Branch")
-    - [ ] Include "Before/After" code snippets for each story
-- [ ] Task: Temporal Proof with WaveDrom
-    - [ ] Create `docs/verification/hazards.md`
-    - [ ] Implement **WaveDrom JSON** timing diagrams for load-use stalls and forwarding paths
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: The "Proof"' (Protocol in workflow.md)
+- [x] Task: Narrative Debugging (War Stories) (e75d511)
+- [x] Task: Temporal Proof with WaveDrom (e75d511)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: The "Proof"' (Protocol in workflow.md)
 
 ## Phase 5: The "How-To" (Developer Guide)
 - [ ] Task: Technical Onboarding Guide
