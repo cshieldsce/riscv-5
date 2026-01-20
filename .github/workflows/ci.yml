@@ -20,6 +20,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y iverilog
 
+    - name: Run Linter
+      run: |
+        chmod +x scripts/lint.sh
+        ./scripts/lint.sh
+
     - name: Mock Synthesis Check (FPGA Compatibility)
       run: |
         echo "Verifying RTL for synthesis compatibility..."
@@ -39,4 +44,4 @@ jobs:
         vvp sim.out +TEST=mem/lui_test.mem
         echo "Running fib_test.mem..."
         vvp sim.out +TEST=mem/fib_test.mem
-        echo "Basic tests completed successfully."
+        echo "Basic tests execution confirmed (see verification/ for full compliance results)."
