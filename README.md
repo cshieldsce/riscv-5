@@ -8,6 +8,35 @@
 
 This project is a Harvard-architecture RISC-V core designed to be cycle-accurate and strictly compliant to the ISA specification. Verification is prioritized by using the official RISC-V test suite (RISCOF) to validate every instruction against the standard golden model. 
 
+```mermaid
+graph LR
+    subgraph IF [Fetch]
+        PC[PC] --> IMem[I-Mem]
+    end
+    subgraph ID [Decode]
+        IMem --> RF[RegFile]
+        IMem --> CU[Control]
+    end
+    subgraph EX [Execute]
+        RF --> ALU[ALU]
+        CU --> ALU
+    end
+    subgraph MEM [Memory]
+        ALU --> DMem[D-Mem]
+    end
+    subgraph WB [Writeback]
+        DMem --> WB_Mux[MUX]
+        ALU --> WB_Mux
+        WB_Mux --> RF
+    end
+```
+
+### Documentation Portal (GitHub Pages)
+Explore the deep technical details of the implementation:
+- 🎓 **[Architecture Manual](./docs/index.md):** Theoretical mapping to textbooks.
+- 💼 **[Verification Report](./docs/verification/compliance.md):** Compliance Matrix and "War Stories".
+- 🛠️ **[Developer Guide](./docs/developer/setup.md):** Toolchain and simulation workflow.
+
 ![alt text](docs/pipeline.png)
 
 ### Features

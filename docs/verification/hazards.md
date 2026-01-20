@@ -24,7 +24,27 @@ The following timing diagram illustrates a `LW` instruction followed by an `ADD`
 
 ---
 
-## 2. War Story: The Frozen Pipeline
+## 2. Forwarding: The "Time Travel" Solution
+
+Forwarding allows the result of an instruction to be used by a following instruction before it has been written back to the register file. This is crucial for maintaining high IPC.
+
+### WaveDrom: Forwarding from EX/MEM to ALU
+In this scenario, `x1` is calculated by an `ADD` and immediately used by a `SUB`.
+
+```json
+{ "signal": [
+  { "name": "CLK",    "wave": "p....." },
+  { "name": "ADD (x1=x2+x3)", "wave": "34567.", "data": ["IF", "ID", "EX", "MEM", "WB"] },
+  { "name": "SUB (x4=x1-x5)", "wave": ".34567", "data": ["IF", "ID", "EX", "MEM", "WB"] },
+  { "name": "rs1_data", "wave": "..==..", "data": ["Old x1", "Fwd x1"] }
+],
+  "edge": ["ADD.EX -> SUB.EX Forwarding Path"]
+}
+```
+
+---
+
+## 3. War Story: The Frozen Pipeline
 
 ### 🌟 Situation
 During early integration testing with the `fib_test.mem`, the processor would consistently deadlock on the first loop iteration. The PC would stop incrementing, and the `IF/ID` register would hold the same branch instruction indefinitely.

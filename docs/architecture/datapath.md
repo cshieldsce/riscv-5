@@ -18,7 +18,23 @@ The processor implements the classic "Store-and-Forward" pipeline architecture. 
 
 ---
 
-## 2. Pipeline Registers (The State-Between-Stages)
+## 2. Temporal Pipeline Flow (WaveDrom)
+
+The following diagram illustrates how a sequence of independent instructions flows through the pipeline stages (`IF` -> `ID` -> `EX` -> `MEM` -> `WB`).
+
+```json
+{ "signal": [
+  { "name": "CLK", "wave": "p......." },
+  { "name": "Instr 1 (ADD)", "wave": "34567...", "data": ["IF", "ID", "EX", "MEM", "WB"] },
+  { "name": "Instr 2 (SUB)", "wave": ".34567..", "data": ["IF", "ID", "EX", "MEM", "WB"] },
+  { "name": "Instr 3 (OR)",  "wave": "..34567.", "data": ["IF", "ID", "EX", "MEM", "WB"] },
+  { "name": "Instr 4 (AND)", "wave": "...34567", "data": ["IF", "ID", "EX", "MEM", "WB"] }
+]}
+```
+
+---
+
+## 3. Pipeline Registers (The State-Between-Stages)
 
 As defined in **Section 4.6 (Figure 4.35)**, pipeline registers are mandatory to preserve the values produced in one clock cycle for use in the next. In `riscv-5`, these are implemented as a generic `pipeline_reg` module.
 
