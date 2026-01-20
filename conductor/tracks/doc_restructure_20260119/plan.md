@@ -12,11 +12,11 @@ This plan outlines the steps to restructure and enhance the project's documentat
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Infrastructure' (Protocol in workflow.md)
 
 ## Phase 2: The "Hook" (Landing Page)
-- [ ] Task: Update root `README.md` for the 30-second scan
+- [x] Task: Update root `README.md` for the 30-second scan (61f3c4d)
     - [ ] Add dynamic CI/CD and compliance badges
     - [ ] Insert a high-level architectural block diagram viewport (Exported from Draw.io)
     - [ ] Craft a compelling "Vision" and "Key Features" section
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: The "Hook"' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: The "Hook"' (Protocol in workflow.md)
 
 ## Phase 3: The "Theory Audit" (Architecture Manual)
 - [ ] Task: Map RTL to Patterson & Hennessy (Chapter 4)
