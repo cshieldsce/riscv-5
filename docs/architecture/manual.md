@@ -1,21 +1,45 @@
 # Architecture Manual: The Theoretical Anchor
 
-To prove engineering competence, this document anchors every design decision in the `riscv-5` core to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
+This document proves to anchor every design decision in the `riscv-5` core to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
 
-## 🏛️ Rationale: Why Mapping Matters
+## Introduction
 
-A common pitfall in digital design is "hacking" an architecture until it passes a testbench without understanding the underlying principles. By explicitly mapping RTL modules to established textbook equations, we demonstrate that this design is not ad-hoc, but a faithful instantiation of proven architectural principles. This mapping provides the "Theoretical Audit" required by academic evaluators and senior design engineers.
+To understand why we build pipelined processors, we first have to look at the limitations of a **Single Cycle CPU**. In a single-cycle implementation, the entire execution of an instruction—fetching from memory, decoding, calculating in the ALU, accessing data memory, and finally writing back to registers must happen in exactly one clock tick. 
+
+> **FPGA Tip: The "Long Wire" Problem**
+> If you have used Xilinx Vivado to synthesize a core, you likely encountered **Total Negative Slack (TNS)**. In a Single Cycle CPU, the "Critical Path" (the longest path between two registers) is effectively the entire length of the CPU. Vivado will report timing violations because the signal physically cannot travel to the logic gates fast enough.
+
+You can think of a Single Cycle CPU as one giant combinational circuit, and the critical path as "one long wire" spanning from the Fetch $\to$ Writeback. If the signal has to travel through 50 gates to get from the Instruction Memory to the Register Writeback, your clock cycle must be long enough for the electricity to traverse all 50 gates at once. While this design is simple to understand, it is practically inefficient.
+
+### The Solution: Pipelining
+
+Pipelining solves this by breaking that "one long wire" into smaller, independent segments separated by Pipeline Registers. Instead of one cycle needing to cover the Fetch $\to$ Writeback distance, the clock cycle only needs to be long enough for the longest individual stage (e.g., just the Execute stage).
+
+This architecture shift dramatically increases **Throughput**. While the time to execute one individual instruction (Latency) stays roughly the same, the rate at which we finish instructions skyrockets.
+
+| Metric | Single Cycle CPU | Pipelined CPU |
+| :--- | :--- | :--- |
+| **Clock Speed** | Low (~10 MHz) | High (**50-100 MHz+**) |
+| **Instructions Per Cycle** | 1 | 1 (Ideal) |
+| **Logic Depth** | 50+ Gates (Deep) | ~10 Gates (Shallow) |
+| **Vivado Timing** | Negative Slack 🔴 | Positive Slack 🟢 |
+
+## Building the Core
+
+Motivations:
+systemverilog and function programming
+
+found the hennesey book, everybody said it was the best, started reading in conjuction with the isa spec, went from there.
 
 ## 1. Mapping the Textbook to the RTL
 
 The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of Patterson & Hennessy.
 
-<!-- ELABORATION POINT: Provide a link to your Draw.io source file. Recruiters value seeing that the diagram is version-controlled and not just a static image. -->
-[INSERT DRAW.IO DIAGRAM: The 5-Stage Datapath Topology (LR Flow, Subgraph Boundaries, Signal Labels for rs1_data, imm_val, etc.)]
+![Simplified pipelined datapath](../images/pipeline_basic.svg "Figure 4.31 - Patterson & Hennesey")
 
 ### 1.1 The Pipelined Datapath (Section 4.6)
 
-Inter-stage registers are the structural necessity of the pipeline. In the RTL, these registers carry data and control signals forward, ensuring that signals are synchronized with the instruction they control.
+Pipeline stage registers are the backbone of the pipeline, they allow us to transfer data freely between stages with blocking the flow of instructions. In the RTL, these registers carry data and control signals forward, ensuring that signals are synchronized with the instruction they control. This allows us to effectively synchronized the data and control signals required for instruction.
 
 | Textbook Reference | SystemVerilog Module | Architectural State Preserved |
 | :--- | :--- | :--- |

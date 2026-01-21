@@ -1,15 +1,15 @@
 # Strategic Documentation Engineering: RISC-V Portfolio
 
-Welcome to the technical thesis and user manual for the `riscv-5` processor. This documentation is engineered to serve three distinct personas: Recruiters, Professors, and Peer Engineers.
+Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation was created to give you background on this project from both a high and low level.
 
-## 🧭 The Rationale for Documentation as Code
+## Project Development
 
-In the contemporary landscape of digital logic design, the artifact of code—whether SystemVerilog or VHDL—serves merely as the foundation. The true differentiator that distinguishes a competent student from a deployable engineer is high-fidelity, theoretically grounded, and visually distinct documentation. This repository adopts a "Documentation as Code" philosophy, ensuring that architectural intent and verification proof are as rigorous as the RTL itself.
+I first learned about RISC-V when studying ARM assembly during a course I was taking at the Universiy of Glasgow while abroad. Upon learning of it's open source and free use nature I finally found the answer to a lifelong pursuit of mine. I can make my own CPU? I began my journey learning the riscv isa and starting off by building a single cycle cpu. Once done with that I moved on to the 5 stage, and then the FPGA. After running the fib test on the FPGA i finally said this project is complete.  
 
-## 🏛️ Navigation Quadrants
+## Articles
 
 ### 1. The Architecture Manual (Theory)
-A deep dive into the microarchitecture that links RTL modules to textbook concepts.
+A deep dive into the microarchitecture of the core.
 - **[Theory of Operation](./architecture/manual.md):** Theoretical anchoring to Patterson & Hennessy.
 - **[Stage Analysis](./architecture/manual.md#pipeline-stages):** Detailed breakdown of IF, ID, EX, MEM, and WB transitions.
 
