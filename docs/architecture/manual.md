@@ -77,13 +77,13 @@ Pipeline stage registers are the backbone of the pipeline, they allow us to tran
 ## References
 
 1. **Patterson, D. A., & Hennessy, J. L.** (2017). *Computer Organization and Design: The Hardware/Software Interface (RISC-V Edition).* Morgan Kaufmann.
-   - Chapter 4: The Processor — 5-stage pipeline architecture
+   - Chapter 4: The Processor: 5 stage pipeline architecture
    - Section 4.6: Pipelined datapath and control
 
 2. **RISC-V Foundation.** *The RISC-V Instruction Set Manual Volume I: Unprivileged ISA (v20191213).*
-   - Section 2: RV32I Base Integer ISA
+   - Section 2: RV32I Base Integer Instruction Set
+   - Section 2.5: Control Transfer Instructions
    - Section 2.6: Load and Store Instructions
-   - Section 12: Instruction Formats and Encoding
 
 3. **RISC-V Software Tools Documentation.** *riscv64-unknown-elf-gcc* and *spike* simulator.
 
