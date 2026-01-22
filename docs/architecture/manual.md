@@ -12,7 +12,7 @@ To understand why we build pipelined processors, we first have to look at the li
 
 You can think of a Single Cycle CPU as one giant combinational circuit, and the critical path as "one long wire" spanning from the Fetch to Writeback. If the signal has to travel through 50 gates to get from the Instruction Memory to the Register Writeback, your clock cycle must be long enough for the electricity to traverse all 50 gates at once. While this design is simple to understand, it is practically inefficient.
 
-> **FPGA Tip:**  
+> 💡 **FPGA Tip:**  
 > If you have used Xilinx Vivado to synthesize a core, you likely encountered **Total Negative Slack (TNS)**. In a Single Cycle CPU, the "Critical Path" (the longest path between two registers) is effectively the entire length of the CPU. Vivado will report timing violations because the signal physically cannot travel to the logic gates fast enough.
 
 ### The Solution: Pipelining
@@ -28,7 +28,7 @@ This architecture shift dramatically increases **Throughput**. While the time to
 | **Logic Depth** | 50+ Gates (Deep) | ~10 Gates (Shallow) |
 | **Vivado Timing** | Negative Slack (-) | Positive Slack (+) |
 
-> **Latency vs. Throughput:**  
+> ⚠️ **Latency vs. Throughput:**  
 > It is a common misconception that pipelining reduces the execution time of a single instruction; in fact, individual latency often increases slightly due to register overhead. The true performance gain comes from throughput, as the processor completes one instruction every clock cycle rather than waiting for the entire datapath to finish. We accept this minor latency cost to achieve a massive increase in overall system frequency and processing rate.
 
 ---
@@ -116,6 +116,9 @@ end
 
 By detecting `JAL` early in the ID stage (since the target is just `PC + Immediate`), we reduce the control hazard penalty from 2 cycles to 1 cycle. However, `JALR` and conditional branches still incur a 2-cycle penalty because they require ALU computation. See **Case 5** below.
 
+> 🎯 **Design Decision:**  
+> JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect—the target depends on register content—so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.
+
 ---
 
 ### 2.2 Instruction Decode (ID)
@@ -139,6 +142,9 @@ assign funct7 = instruction[31:25];
 #### ISA Compliance
 
 This stage implements the decoding logic for all RV32I base instructions (Sections 2.2-2.5 of the RISC-V Unprivileged ISA Specification). The `ImmGen` module correctly handles the sign-extension requirements for I-type, S-type, B-type, U-type, and J-type immediate formats.
+
+> 📋 **ISA Reference:**  
+> See *RISC-V Unprivileged ISA Specification v20191213*, Section 2: "RV32I Base Integer ISA". All instruction formats and encoding are defined there.
 
 ---
 
@@ -181,8 +187,8 @@ end
 assign alu_in_b = alu_src ? imm : rs2_data_forwarded;
 ```
 
-> **LUI Trick:**  
-> LUI loads a 20-bit immediate into the upper 20 bits of a register. The RISC-V ISA defines this as: rd = imm << 12. By setting A = 0 and B = (imm << 12), we can use the ALU's addition operation: 0 + (imm << 12) = imm << 12.
+> 💡 **LUI Trick:**  
+> LUI (Load Upper Immediate) loads a 20-bit immediate into bits [31:12]. The RISC-V ISA defines this as: `rd = imm << 12`. By setting A = 0 and B = (imm << 12), we can reuse the ALU's addition operation: `0 + (imm << 12) = imm << 12`. This is an elegant hardware reuse pattern.
 
 #### 3. Branch Resolution Logic
 
@@ -205,6 +211,9 @@ end
 
 assign branch_target = pc + imm;
 ```
+
+> ℹ️ **Implementation Detail:**  
+> The ALU computes both signed and unsigned comparison results. BLT/BGE use the signed result (bit 0 of SLT operation), while BLTU/BGEU use the unsigned equivalent. The branch resolution logic simply selects the appropriate comparison output.
 
 ---
 
@@ -242,8 +251,8 @@ always_comb begin
 end
 ```
 
-> **ISA Requirement:**  
-> The RISC-V ISA (Section 2.6) requires that LB/SB access a single byte, and LH/SH access two aligned bytes. This logic ensures compliance by using the lower address bits to select the correct byte lane.
+> 📖 **ISA Requirement:**  
+> The RISC-V ISA (Section 2.6, "Load and Store Instructions") mandates byte-granular memory access control. Addresses must be naturally aligned for their size (byte at any address, halfword at even addresses, word at 4-byte aligned addresses). This logic ensures compliance.
 
 ---
 
@@ -272,8 +281,8 @@ end
 - `mem_to_reg = 01`: Load instructions that read from memory
 - `mem_to_reg = 10`: Jump-and-link instructions that save the return address (PC+4) into rd
 
-> **Why PC+4 for JAL/JALR?**  
-> The RISC-V ISA specifies that JAL and JALR store the address of the next instruction (the instruction immediately after the jump) into the destination register. This enables function calls by allowing the callee to `JALR x0, 0(ra)` (jump to the return address stored in ra).
+> 💡 **Why PC+4 for JAL/JALR?**  
+> The RISC-V ISA specifies that JAL and JALR store the address of the next instruction (the instruction immediately after the jump) into the destination register. This enables function calls: the callee saves `ra` somewhere, does work, then executes `JALR x0, 0(ra)` to jump back. The `0(ra)` addressing mode loads the return address from register `ra`.
 
 ### 2.6 Pipeline Register Summary
 
@@ -286,8 +295,8 @@ Each pipeline register preserves the architectural state needed by downstream st
 | **EX/MEM** | `alu_result`, `rs2_data`, `rd`, `pc+4`, `funct3`, `rs2` | `reg_write`, `mem_write`, `mem_to_reg` | Interface with memory and preserve results |
 | **MEM/WB** | `mem_read_data`, `alu_result`, `rd`, `pc+4` | `reg_write`, `mem_to_reg` | Select data for register writeback |
 
-> **Design Note:**  
-> We include rs2 in the EX/MEM register to enable store data forwarding (as described in Section 2.4). This is a subtle optimization not always shown in textbook diagrams but critical for correctness.
+> 🔧 **Design Note:**  
+> We include `rs2` in the EX/MEM register to enable store data forwarding (described in Section 3, Case 4). Without it, store instructions couldn't forward dependent values to memory writes. This is a subtle optimization not always shown in textbook diagrams but critical for correctness.
 
 ---
 
@@ -299,8 +308,8 @@ In a standard Single-Cycle processor, the concept of a "Data Hazard" does not ex
 
 However, in our Pipelined design we violate this assumption. We now have up to five instructions executing simultaneously.
 
-> **The Dependency Paradox:**  
-> If Instruction B relies on a value calculated by Instruction A, Instruction B might try to read that value from the Register File *before* Instruction A has actually written the value to the register.
+> ⚠️ **The Dependency Paradox:**  
+> If Instruction B relies on a value calculated by Instruction A, Instruction B might try to read that value from the Register File *before* Instruction A has actually written the value to the register. Without intervention, the CPU would process stale data, leading to incorrect results.
 
 Without intervention, the CPU would process stale data leading to calculation errors. To maintain the illusion of sequential execution while enjoying the speed of parallel processing, we implemented a sophisticated Hazard Resolution system using **Forwarding** (bypassing storage) and **Stalling** (injecting wait states).
 
@@ -308,18 +317,19 @@ Without intervention, the CPU would process stale data leading to calculation er
 
 When a Data Hazard occurs, the hardware must choose between an aggressive optimization (Forwarding) or a defensive pause (Stalling).
 
-> **Forwarding**  
-> Bypassing relies on the fact that the calculated data already exists inside the pipeline registers somewhere even though it hasn't been written back to the Register File. The Forwarding Unit detects and routes the data directly to the ALU inputs via multiplexers. This allows the pipeline to maintain full speed, executing dependent instructions with zero latency penalty.
+> 🚀 **Forwarding Strategy:**  
+> Forwarding relies on the fact that the calculated data already exists inside the pipeline registers, even though it hasn't been written back to the Register File yet. The Forwarding Unit detects data dependencies and routes the data directly to the ALU inputs via multiplexers. This allows the pipeline to maintain full speed with zero latency penalty for most hazards.
 
-> **Stalling**  
-> Stalling is the fallback used when forwarding is physically impossible. The Hazard Unit must freeze the Program Counter and flush the `ID/EX` register. This injects a "bubble" (or NOP) into the pipeline, forcing the instruction to wait exactly one clock cycle so that the memory access can complete.
+> ⏸️ **Stalling Strategy:**  
+> Stalling is the fallback when forwarding is physically impossible (e.g., data is still in RAM). The Hazard Unit freezes the Program Counter and flushes the `ID/EX` register, injecting a "bubble" (NOP) into the pipeline. This forces dependent instructions to wait exactly one cycle, allowing memory data to arrive.
 
 We handle hazards using two dedicated hardware units:
 
 1. **The Forwarding Unit (`src/forwarding_unit.sv`):** A combinational logic block that controls MUXes at the ALU inputs. It "short-circuits" data from later pipeline stages directly to the Execute stage, skipping the Register File entirely.
 2. **The Hazard Unit (`src/hazard_unit.sv`):** The "traffic cop" of the CPU. If forwarding is impossible (e.g., waiting for RAM), it freezes the PC and inserts "bubbles" (NOPs) to pause execution.
 
-**[INSERT DATAPATH DIAGRAM HERE — Show Hazard and Forwarding Units with annotations]**
+> 📊 **[INSERT DATAPATH DIAGRAM HERE]**  
+> Show the full datapath with Hazard and Forwarding Units annotated. Include MUX select signals and the priority logic that determines which forwarding path wins.
 
 ---
 
@@ -354,7 +364,7 @@ sub x5, x1, x4   # In ID/EX stage (Needs x1)
 
 | The Problem | The Fix | Penalty (Cycles) |
 |-------------|---------|-----------------|
-| The result is in the `MEM/WB` register, we don't have access to it. | The Forwarding Unit detects `rs1_ex == rd_wb`. It switches the ALU MUX to grab data from the `MEM/WB register.` | 0 |
+| The result is in the `MEM/WB` register, not yet in the register file. | The Forwarding Unit detects `rs1_ex == rd_wb`. It switches the ALU MUX to grab data from the `MEM/WB` register. | 0 |
 
 ---
 
@@ -370,7 +380,7 @@ add  x5, x1, x6    # Instruction C (In ID/EX)  - Needs x1
 
 | The Problem | The Fix | Penalty (Cycles) |
 |-------------|---------|-----------------|
-| Both the `EX/MEM` and `MEM/WB` stages contain a value for `x1`. Which one do we use? | The Forwarding Unit checks the `EX/MEM` hazard first. Since *Instruction B* is more recent, its value overrides *Instruction A*. | 0 |
+| Both the `EX/MEM` and `MEM/WB` stages contain a value for `x1`. Which one is correct? | The Forwarding Unit checks the `EX/MEM` hazard first. Since *Instruction B* is more recent, its value (20) overrides *Instruction A*'s value (10). | 0 |
 
 Snippet (`src/forwarding_unit.sv`):
 
@@ -381,6 +391,9 @@ end else if (forward_mem_condition) begin
     // Forward from MEM/WB (Older)
 end
 ```
+
+> 🔧 **Priority Resolution:**  
+> This is a subtle but critical detail. The forwarding logic must prioritize the most recently computed value. If we forwarded from MEM/WB when EX/MEM had the newer result, we'd compute with stale data. The priority always favors EX/MEM over MEM/WB.
 
 ---
 
@@ -396,6 +409,17 @@ add x3, x1, x4   # In ID stage (Needs x1 immediately)
 | The Problem | The Fix | Penalty (Cycles) |
 |-------------|---------|-----------------|
 | The `lw` instruction is currently calculating the address. The data is still inside the memory chip. We cannot forward data we haven't fetched yet. | The Hazard Unit:<br>**1. Stall:** PC_Write and IF/ID_Write are disabled. The `lw` and `add` stay put for 1 cycle.<br>**2. Bubble:** The `ID/EX` register is flushed (control signals set to 0), sending a `NOP` down the pipeline. | 1 |
+
+> ⚠️ **Unavoidable Stall:**  
+> This is the only data hazard that cannot be resolved by forwarding. Memory latency is physical—the RAM access takes time. We must stall and wait. This is why modern CPUs use caches and prefetching to minimize load-use hazard penalties.
+
+**Timing Diagram:**
+
+```
+Cycle 1:  lw  (EX)  │ add (ID)
+Cycle 2:  lw  (MEM) │ BUBBLE (stalled, flushed)
+Cycle 3:  lw  (WB)  │ add (EX) ← x1 available via forwarding
+```
 
 ---
 
@@ -413,12 +437,31 @@ sub  x6, x0, 2     # (In IF Stage - Wrong path!)
 |-------------|---------|-----------------|
 | By the time `beq` decides to take the branch, we have already fetched two instructions we shouldn't have. | The Hazard Unit detects `PCSrc` (Branch Taken) is high. It asserts `Flush_ID` and `Flush_EX`, wiping those two instructions from existence. | 2 |
 
-> **Branch Penalty Trade-off:**  
-> You might notice that our **2-Cycle Branch Penalty** (flushing IF and ID) seems high. A common optimization in RISC-V architectures is to move the branch comparison logic earlier, from the **Execute (EX)** stage to the **Decode (ID)** stage. If we resolved branches in the ID stage, we would only need to flush the IF stage, reducing the misprediction penalty to just **1 Cycle**.
+> ⚠️ **Branch Penalty Trade-off:**  
+> Our **2-Cycle Branch Penalty** seems high compared to some architectures. A common optimization is to move branch comparison from the **Execute (EX)** stage to the **Decode (ID)** stage. This would reduce the penalty to just **1 Cycle** (flushing only IF).
 >
-> **So, why did we keep it in the EX stage?**  
-> If we wanted to move the branch logic we would have to introduce significant hardware costs (e.g., comparator, adder) into the **Decode (ID)** stage which is already congested. This would cause our *Critical Path* to grow, forcing us to slow down the entire CPU clock.
+> **Why didn't we do this?**  
+> If we moved branch logic to ID, we'd need to add significant hardware (comparator, adder for target calculation) into the already-congested ID stage. This would increase the Critical Path of the ID stage, forcing us to slow down our entire clock frequency. We chose to accept the 2-cycle penalty to keep the clock fast. Trades are always about picking which metric matters most.
+
+> 📊 **[INSERT CONTROL HAZARD TIMING DIAGRAM HERE]**  
+> Show cycles 1-4 with the branch being resolved, wrong instructions flushed, and correct path resuming.
 
 ---
 
-**Reference:** Patterson, D. A., & Hennessy, J. L. (2017). *Computer Organization and Design: RISC-V Edition*.
+## References
+
+1. **Patterson, D. A., & Hennessy, J. L.** (2017). *Computer Organization and Design: The Hardware/Software Interface (RISC-V Edition).* Morgan Kaufmann.
+   - Chapter 4: The Processor — 5-stage pipeline architecture
+   - Section 4.6: Pipelined datapath and control
+
+2. **RISC-V Foundation.** *The RISC-V Instruction Set Manual Volume I: Unprivileged ISA (v20191213).*
+   - Section 2: RV32I Base Integer ISA
+   - Section 2.6: Load and Store Instructions
+   - Section 12: Instruction Formats and Encoding
+
+3. **RISC-V Software Tools Documentation.** *riscv64-unknown-elf-gcc* and *spike* simulator.
+
+---
+
+**Last Updated:** January 2026  
+**Author:** Charles Shields
