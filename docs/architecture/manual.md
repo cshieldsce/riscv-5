@@ -22,7 +22,7 @@ This architecture shift dramatically increases **Throughput**. While the time to
 | **Clock Speed** | Low (~10 MHz) | High (**50-100 MHz+**) |
 | **Instructions Per Cycle** | 1 | 1 (Ideal) |
 | **Logic Depth** | 50+ Gates (Deep) | ~10 Gates (Shallow) |
-| **Vivado Timing** | Negative Slack 🔴 | Positive Slack 🟢 |
+| **Vivado Timing** | Negative Slack (-) | Positive Slack (+) |
 
 ## Building the Core
 
@@ -32,10 +32,12 @@ systemverilog and function programming
 found the hennesey book, everybody said it was the best, started reading in conjuction with the isa spec, went from there.
 
 ## 1. Mapping the Textbook to the RTL
+The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
 
-The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of Patterson & Hennessy.
+![Simplified pipelined datapath](../images/pipeline_basic.svg "Figure 4.31 - Patterson & Hennessy")
 
-![Simplified pipelined datapath](../images/pipeline_basic.svg "Figure 4.31 - Patterson & Hennesey")
+**Figure 1** illustrates the theoretical 5-stage RISC-V datapath as described in *Patterson & Hennessy*. Ideally, one instruction completes every cycle.
+
 
 ### 1.1 The Pipelined Datapath (Section 4.6)
 
@@ -88,9 +90,126 @@ Pipeline stage registers are the backbone of the pipeline, they allow us to tran
 
 ---
 
-## 3. Legislative Compliance: The RISC-V ISA Spec
+## 3.0 Hazard Resolution:
 
-<!-- ELABORATION POINT: Insert a section here detailing your implementation of the Zicsr extension or the behavior of SLT (Set Less Than) for signed vs unsigned comparisons. Refer specifically to Chapter 2 of the Unprivileged ISA manual. -->
+### The Problem: The Pipeline Illusion
+In a standard Single-Cycle processor, the concept of a "Data Hazard" does not exist. The entire instruction completes fetching, calculating, and writing back to the register file before the next instruction even begins. The software written for a single cycle processor assumes: "Instruction A finishes completely before Instruction B starts."
+
+However, in our Pipelined design we violate this assumption. We now have up to five instructions executing simultaneously.
+
+> **The Dependency Paradox**: If Instruction B relies on a value calculated by Instruction A, Instruction B might try to read that value from the Register File *before* Instruction A has actually written the value to the register.
+
+Without intervention, the CPU would process stale data leading to calculation errors. To maintain the illusion of sequential execution while enjoying the speed of parallel processing, we implemented a sophisticated Hazard Resolution system using **Forwarding** (bypassing storage) and **Stalling** (injecting wait states).
+
+---
+
+### 2.1 The Solution Architecture
+
+We handle hazards using two dedicated hardware units. You can see their interactions in the datapath diagram below.
+
+![Insert your Draw.io Diagram Here](path/to/your/pipeline_diagram.png)
+*(Figure 2.1: The Pipelined Datapath featuring Hazard and Forwarding Units)*
+
+1.  **The Forwarding Unit (`src/forwarding_unit.sv`):** A combinational logic block that controls MUXes at the ALU inputs. It "short-circuits" data from later pipeline stages directly to the Execute stage, skipping the Register File entirely. 
+2.  **The Hazard Unit (`src/hazard_unit.sv`):** The "traffic cop" of the CPU. If forwarding is impossible (e.g., waiting for RAM), it freezes the PC and inserts "bubbles" (NOPs) to pause execution.
+
+---
+
+### 2.2 Detailed Case Analysis
+
+Below is an analysis of every hazard scenario our architecture handles, including the specific assembly code that triggers it and the hardware's response.
+
+#### Case 1: EX-to-EX Forwarding (Immediate Dependency)
+This is the most common hazard. An instruction needs the result of the *immediately preceding* operation.
+
+**The Code:**
+```assembly
+add x1, x2, x3   # In EX/MEM stage (Result calculated, not written)
+sub x5, x1, x4   # In ID/EX stage  (Needs x1 NOW)
+```
+
+| The Problem | The Fix | Penalty (Cycles) |
+| :--- | :--- | :--- |
+| The result of the add is in the `EX/MEM` pipeline register.<br> The `sub` instruction is about to enter the ALU. | The Forwarding Unit detects `rs1_ex == rd_mem`.<br> It switches the ALU MUX to grab data directly from the `EX/MEM` register. | 0 |
+
+### Case 2: MEM-to-EX Forwarding (Delayed Dependency)
+The dependency is one instruction removed.
+
+Code snippet
+```assembly
+add x1, x2, x3   # In MEM/WB stage (Waiting to be written)
+nop              # (Or any unrelated instruction)
+sub x5, x1, x4   # In ID/EX stage (Needs x1)
+```
+
+| The Problem | The Fix | Penalty (Cycles) |
+| :--- | :--- | :--- |
+| The result is in the `MEM/WB` register, we don't have access to it. | The Forwarding Unit detects `rs1_ex == rd_wb`. <br>It switches the ALU MUX to grab data from the `MEM/WB register.` | 0 |
+
+
+### Case 3: The "Double Hazard" (Priority Logic)
+This is an edge case that tests the robustness of the forwarding logic. What if both previous instructions write to the same register?
+
+The Code:
+Code snippet
+```assembly
+addi x1, x0, 10    # Instruction A (In MEM/WB) - Writes 10 to x1
+addi x1, x0, 20    # Instruction B (In EX/MEM) - Writes 20 to x1
+add  x5, x1, x6    # Instruction C (In ID/EX)  - Needs x1
+```
+
+| The Problem | The Fix | Penalty (Cycles) |
+| :--- | :--- | :--- |
+| Both the `EX/MEM` and `MEM/WB` stages contain a value for `x1`.<br> Which one do we use? | The Forwarding Unit checks the `EX/MEM` hazard first.<br>Since *Instruction B* is more recent, its value overrides *Instruction A*. | 0 |
+
+Snippet (forwarding_unit.sv):
+```sv
+if (forward_ex_condition) begin
+    // Forward from EX/MEM (Most Recent)
+end else if (forward_mem_condition) begin
+    // Forward from MEM/WB (Older)
+end
+```
+
+#### Case 4: The Load-Use Hazard (The Physical Limit)
+This is the only case where forwarding is physically impossible.
+
+Code snippet
+```assembly
+lw  x1, 0(x2)    # In EX stage (Calculating address, data is still in RAM)
+add x3, x1, x4   # In ID stage (Needs x1 immediately)
+```
+
+| The Problem | The Fix | Penalty (Cycles) |
+| :--- | :--- | :--- |
+| The `lw` instruction is currently calculating the address.<br> The data is still inside the memory chip.<br>We cannot forward data we haven't fetched yet. | The Hazard Unit : <br>**1. Stall:** PC_Write and IF/ID_Write are disabled. <br>The `lw` and `add` stay put for 1 cycle.<br> **2. Bubble:** The `ID/EX` register is flushed (control signals set to 0),<br> sending a `NOP` down the pipeline. | 1 |
+
+
+
+explain stalls and bubbles
+
+### Case 5: Control Hazards (Branch Misprediction)
+Because we resolve branches in the **Execute (EX)** stage, we don't know if we need to jump until the instruction is halfway through the pipeline.
+
+The Code:
+
+Code snippet
+```asm
+beq x1, x2, LABEL  # Taken! (In EX Stage)
+addi x5, x0, 1     # (In ID Stage - Wrong path!)
+sub  x6, x0, 2     # (In IF Stage - Wrong path!)
+```
+
+Penalty: 2 Cycles.
+
+| The Problem | The Fix | Penalty (Cycles) |
+| :--- | :--- | :--- |
+| By the time `beq` decides to take the branch,<br> we have already fetched two instructions we shouldn't have. | The Hazard Unit detects `PCSrc` (Branch Taken) is high. It asserts `Flush_ID` and `Flush_EX`, wiping those two instructions from existence. | 2 |
+
+
+> You might notice that our **2-Cycle Branch Penalty** (flushing IF and ID) seems high. A common optimization in RISC-V architectures is to move the branch comparison logic earlier, from the **Execute (EX)** stage to the **Decode (ID)** stage. If we resolved branches in the ID stage, we would only need to flush the IF stage, reducing the misprediction penalty to just **1 Cycle**.<br><br>**So, why did we keep it in the EX stage?**<br>If we wanted to move the branch logic we would have to introduce significant hardware costs (e.g., comparator, adder) into the **Decode (ID)** stage which is already congested. This would cause our *Critical Path* to grow, forcing us to slow down the entire CPU clock.
 
 ---
 *Reference: Patterson, D. A., & Hennessy, J. L. (2017). Computer Organization and Design RISC-V Edition.*
+
+
