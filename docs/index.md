@@ -1,3 +1,13 @@
+<link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<div class="site-nav">
+  <a href="./index.html">Home</a>
+  <a href="./architecture/manual.html">Architecture Overview</a>
+  <a href="./architecture/stages.html">Pipeline Stages</a>
+  <a href="./architecture/hazards.html">Hazard Resolution</a>
+  <a href="./verification/report.html">Verification</a>
+  <a href="./developer/guide.html">Developer Guide</a>
+</div>
+
 # Strategic Documentation Engineering: RISC-V Portfolio
 
 Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation was created to give you background on this project from both a high and low level.
@@ -10,19 +20,20 @@ I first learned about RISC-V when studying ARM assembly during a course I was ta
 
 ### 1. The Architecture Manual (Theory)
 A deep dive into the microarchitecture of the core.
-- **[Theory of Operation](./architecture/manual.md):** Theoretical anchoring to Patterson & Hennessy.
-- **[Stage Analysis](./architecture/manual.md#pipeline-stages):** Detailed breakdown of IF, ID, EX, MEM, and WB transitions.
+- **[Theory of Operation](./architecture/manual.html):** Theoretical anchoring to Patterson & Hennessy.
+- **[Stage Analysis](./architecture/stages.html):** Detailed breakdown of IF, ID, EX, MEM, and WB transitions.
+- **[Hazard Resolution](./architecture/hazards.html):** Forwarding, stalling, and control hazards.
 
 ### 2. The Verification Report (Proof)
 Objective evidence of correctness and a narrative account of debugging resilience.
-- **[Compliance Matrix](./verification/report.md):** Formal RISCOF results for RV32I.
-- **[Hazard Handling](./verification/report.md#load-use-hazard-stall):** Timing diagrams (WaveDrom) of temporal interactions.
-- **[War Stories](./verification/report.md#war-stories):** Retrospectives on solving "The Frozen Pipeline" and "The Bouncing Branch".
+- **[Compliance Matrix](./verification/report.html):** Formal RISCOF results for RV32I.
+- **[Hazard Handling](./verification/report.html#load-use-hazard-stall):** Timing diagrams (WaveDrom) of temporal interactions.
+- **[War Stories](./verification/report.html#war-stories):** Retrospectives on solving "The Frozen Pipeline" and "The Bouncing Branch".
 
 ### 3. The Developer Guide (How-To)
 Practical instructions for instantiating the core and running simulations.
-- **[Technical Onboarding](./developer/guide.md):** Toolchain setup and simulation workflow.
-- **[FPGA Integration](./developer/guide.md#fpga-deployment):** Deployment on the Xilinx PYNQ-Z2.
+- **[Technical Onboarding](./developer/guide.html):** Toolchain setup and simulation workflow.
+- **[FPGA Integration](./developer/guide.html#fpga-deployment):** Deployment on the Xilinx PYNQ-Z2.
 
 ---
 
