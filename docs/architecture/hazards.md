@@ -39,10 +39,15 @@ We handle hazards using two dedicated hardware units:
 1. **The Forwarding Unit (`src/forwarding_unit.sv`):** A combinational logic block that controls MUXes at the ALU inputs. It "short-circuits" data from later pipeline stages directly to the Execute stage, skipping the Register File entirely.
 2. **The Hazard Unit (`src/hazard_unit.sv`):** The "traffic cop" of the CPU. If forwarding is impossible (e.g., waiting for RAM), it freezes the PC and inserts "bubbles" (NOPs) to pause execution.
 
-<div class="callout note"><span class="title">Diagram Placeholder</span>
-<strong>[INSERT DATAPATH DIAGRAM HERE]</strong><br/>
-Show the full datapath with Hazard and Forwarding Units annotated. Include MUX select signals and the priority logic that determines which forwarding path wins.
-</div>
+### Forwarding Architecture
+
+![Forwarding Paths](../images/forwarding_datapath.svg)
+*Figure 7: Data forwarding paths from EX/MEM and MEM/WB stages back to ALU inputs. Red lines show the bypass routes.*
+
+The diagram above highlights the three forwarding scenarios:
+1. **EX Hazard (Red):** Forward from `EX/MEM` register
+2. **MEM Hazard (Orange):** Forward from `MEM/WB` register  
+3. **Priority Logic (Yellow):** EX/MEM takes precedence over MEM/WB
 
 ---
 
@@ -51,6 +56,9 @@ Show the full datapath with Hazard and Forwarding Units annotated. Include MUX s
 Below is an analysis of every hazard scenario our architecture handles, including the specific assembly code that triggers it and the hardware's response.
 
 ### Case 1: EX-to-EX Forwarding (Immediate Dependency)
+
+![EX-to-EX Timing](../images/timing_ex_hazard.svg)
+*Figure 8: Cycle-by-cycle view of `add` followed by `sub`. Data forwards from EX/MEM to ALU input in cycle 3.*
 
 This is the most common hazard. An instruction needs the result of the *immediately preceding* operation.
 
@@ -113,6 +121,9 @@ This is a subtle but critical detail. The forwarding logic must prioritize the m
 
 ### Case 4: The Load-Use Hazard (The Physical Limit)
 
+![Load-Use Stall](../images/timing_load_use.svg)
+*Figure 9: Load-use hazard showing PC stall, bubble insertion, and forwarding after memory access completes.*
+
 This is the only case where forwarding is physically impossible.
 
 ```asm
@@ -139,6 +150,9 @@ Cycle 3:  lw  (WB)  │ add (EX) ← x1 available via forwarding
 ---
 
 ### Case 5: Control Hazards (Branch Misprediction)
+
+![Branch Flush](../images/timing_branch_flush.svg)
+*Figure 10: Branch misprediction showing IF and ID stages flushed when branch resolves in EX.*
 
 Because we resolve branches in the **Execute (EX)** stage, we don't know if we need to jump until the instruction is halfway through the pipeline.
 

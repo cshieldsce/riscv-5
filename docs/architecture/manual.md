@@ -28,6 +28,11 @@ If you have used Xilinx Vivado to synthesize a core, you likely encountered <str
 
 ### The Solution: Pipelining
 
+The diagram below shows the clean separation of stages that pipelining enables:
+![5-Stage Pipeline Overview](../images/pipeline_stages_clean.svg)
+*Figure 1: The 5-stage RISC-V pipeline. Each stage operates independently on different instructions.*
+
+
 Pipelining solves this by breaking that "one long wire" into smaller, independent segments separated by Pipeline Registers. Instead of one cycle needing to cover the Fetch to Writeback distance, the clock cycle only needs to be long enough for the longest individual stage (e.g., just the Execute stage).
 
 This architecture shift dramatically increases **Throughput**. While the time to execute one individual instruction (Latency) stays roughly the same, the rate at which we finish instructions skyrockets.

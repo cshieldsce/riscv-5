@@ -12,7 +12,19 @@
 
 This section maps the theoretical pipeline stages from *Patterson & Hennessy* to our SystemVerilog implementation, proving that each stage faithfully implements the RISC-V ISA specification.
 
+## Complete Datapath
+Before diving into individual stages, here's the full pipeline with all major signals labeled:
+
+![Complete Pipelined Datapath](../images/pipeline_complete.svg)
+*Figure 3: Complete datapath showing pipeline registers, forwarding paths, and hazard detection units. Based on Patterson & Hennessy Figure 4.51.*
+
+This diagram maps directly to our SystemVerilog implementation in [`src/pipelined_cpu.sv`](../../src/pipelined_cpu.sv).
+
+
 ## 2.1 Instruction Fetch (IF)
+
+![IF Stage Detail](../images/stage_if.svg)
+*Figure 4: IF stage showing PC selection multiplexer and instruction memory interface.*
 
 **Implementation:** `if_stage.sv`  
 **Objective:** Fetch the next instruction from memory and calculate `PC+4`.
@@ -75,6 +87,9 @@ JAL is a direct jump, so the target address is known immediately from the instru
 
 ## 2.2 Instruction Decode (ID)
 
+![ID Stage Detail](../images/stage_id.svg)
+*Figure 5: ID stage with control unit, register file, and immediate generator.*
+
 **Implementation:** `id_stage.sv`  
 **Objective:** Decode the instruction, generate control signals, read registers, and produce the immediate value.
 
@@ -102,6 +117,9 @@ See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I 
 ---
 
 ## 2.3 Execute (EX)
+
+![EX Stage Detail](../images/stage_ex.svg)
+*Figure 6: EX stage showing forwarding multiplexers and branch resolution logic.*
 
 **Implementation:** `ex_stage.sv`  
 

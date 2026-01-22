@@ -1,0 +1,491 @@
+<mxfile host="65bd71144e" scale="1" border="20">
+    <diagram id="QGwhOLrmGj8w8fDFc04c" name="Page-1">
+        <mxGraphModel dx="1137" dy="287" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#1C1C1C" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="28" value="32" style="edgeStyle=none;html=1;labelBorderColor=none;spacingLeft=-2;spacingTop=-6;fontSize=8;labelBackgroundColor=none;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontColor=#E8E8E8;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" parent="1" source="10" target="18" edge="1">
+                    <mxGeometry x="0.1902" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="244" y="450"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="157" style="edgeStyle=none;html=1;entryX=0.693;entryY=0.029;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1" target="184">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="585.0880000000004" y="466.21500000000003" as="targetPoint"/>
+                        <mxPoint x="456" y="466" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="161" style="edgeStyle=none;html=1;entryX=0.876;entryY=1.003;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="454.25" y="340" as="sourcePoint"/>
+                        <mxPoint x="584.4328600000001" y="339.22400000000005" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="2" value="ID/EX&lt;br&gt;256 Bits" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;strokeWidth=3;fontColor=#FFCC00;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fillStyle=hatch;textShadow=1;shadow=0;" parent="1" vertex="1">
+                    <mxGeometry x="414" y="268" width="40" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="118" style="edgeStyle=none;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;entryX=0.05;entryY=0.222;entryDx=0;entryDy=0;entryPerimeter=0;rounded=0;curved=0;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="967" y="500" as="sourcePoint"/>
+                        <mxPoint x="1197" y="359.8211799999999" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="967" y="360"/>
+                            <mxPoint x="1077" y="360"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="3" value="EX/MEM&lt;br&gt;193 Bits" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;fontColor=#FFCC00;fontStyle=1;strokeWidth=3;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fillStyle=hatch;shadow=0;" parent="1" vertex="1">
+                    <mxGeometry x="907" y="273" width="40" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="MEM/WB&lt;br&gt;128 Bits" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;strokeWidth=3;fontColor=#FFCC00;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fillStyle=hatch;shadow=0;" parent="1" vertex="1">
+                    <mxGeometry x="1198" y="273.31" width="40" height="389.69" as="geometry"/>
+                </mxCell>
+                <mxCell id="207" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="170" y="550" as="sourcePoint"/>
+                        <mxPoint x="259" y="636.845" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="170" y="637"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="6" value="IF/ID&lt;br&gt;96 Bits" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;fontColor=#FFCC00;fontStyle=1;strokeWidth=3;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fillStyle=hatch;shadow=0;gradientColor=none;textShadow=1;" parent="1" vertex="1">
+                    <mxGeometry x="119" y="268" width="40" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="PC" style="rounded=0;whiteSpace=wrap;html=1;fontColor=#F0E7D5;fillColor=#353535;strokeColor=#F0E7D5;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=0;" parent="1" vertex="1">
+                    <mxGeometry x="-143" y="424.35" width="30" height="65.37" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="Registers" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#F0E7D5;fillColor=#353535;fontColor=#F0E7D5;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=0;" parent="1" vertex="1">
+                    <mxGeometry x="209" y="440" width="159" height="159" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="ALU" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rotation=-90;flipV=1;flipH=0;textDirection=vertical-lr;spacingLeft=0;spacingBottom=50;fontColor=#F0E7D5;strokeWidth=2;strokeColor=#F0E7D5;fillColor=#353535;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;shadow=0;" parent="1" vertex="1">
+                    <mxGeometry x="751" y="455.5" width="120" height="128" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="Instruction Memory" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#353535;gradientColor=none;strokeColor=#F0E7D5;fontColor=#F0E7D5;strokeWidth=2;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=0;" parent="1" vertex="1">
+                    <mxGeometry x="-67" y="438.94" width="161.25" height="161.25" as="geometry"/>
+                </mxCell>
+                <mxCell id="97" value="64" style="edgeStyle=none;html=1;fontSize=8;labelBorderColor=none;align=center;spacingLeft=-22;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;labelPosition=center;verticalLabelPosition=top;verticalAlign=bottom;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;" parent="1" source="18" edge="1">
+                    <mxGeometry x="0.1178" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="384" y="385"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                        <mxPoint x="411" y="385" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="18" value="ImmGen" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=0;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="360.62" width="48.38" height="48.38" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="Data Memory" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#353535;strokeColor=#F0E7D5;strokeWidth=2;fontColor=#F0E7D5;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" vertex="1">
+                    <mxGeometry x="988" y="398" width="160.62" height="160.62" as="geometry"/>
+                </mxCell>
+                <mxCell id="177" value="Write data" style="edgeStyle=none;html=1;entryX=-0.001;entryY=0.894;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#FFCC00;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontSize=8;spacingLeft=-3;spacingTop=3;rounded=0;curved=0;shadow=0;jumpStyle=none;exitX=0.53;exitY=1.011;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" target="10" edge="1" source="23">
+                    <mxGeometry x="1" y="32" relative="1" as="geometry">
+                        <mxPoint x="228.18179598721593" y="650" as="targetPoint"/>
+                        <mxPoint x="1112" y="497" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="1370" y="500"/>
+                            <mxPoint x="1370" y="680"/>
+                            <mxPoint x="654" y="680"/>
+                            <mxPoint x="180" y="680"/>
+                            <mxPoint x="180" y="582"/>
+                        </Array>
+                        <mxPoint x="31" y="30" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="23" value="x&lt;br&gt;u&lt;br&gt;M" style="ellipse;whiteSpace=wrap;html=1;rotation=-90;textDirection=vertical-lr;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontStyle=1;spacingLeft=0;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="1274.73" y="485.47" width="86" height="34.19" as="geometry"/>
+                </mxCell>
+                <mxCell id="108" value="Read&lt;br&gt;register 2" style="edgeStyle=none;html=1;entryX=-0.001;entryY=0.321;entryDx=0;entryDy=0;entryPerimeter=0;labelBorderColor=none;fontSize=8;spacing=0;spacingLeft=6;align=left;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;rounded=0;curved=0;" parent="1" edge="1" target="10">
+                    <mxGeometry x="1" relative="1" as="geometry">
+                        <mxPoint x="170" y="460" as="sourcePoint"/>
+                        <mxPoint x="194" y="489.9889999999999" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="170" y="491"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="112" value="Write &lt;br&gt;register" style="edgeStyle=none;html=1;labelBorderColor=none;fontSize=8;spacingLeft=5;align=left;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;rounded=0;curved=0;entryX=-0.002;entryY=0.692;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" edge="1" target="10">
+                    <mxGeometry x="1" relative="1" as="geometry">
+                        <mxPoint x="170" y="481" as="sourcePoint"/>
+                        <mxPoint x="190" y="550" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="170" y="550"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="116" style="edgeStyle=none;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="950" y="500" as="sourcePoint"/>
+                        <mxPoint x="988" y="500" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="119" value="1" style="edgeStyle=none;html=1;entryX=1;entryY=0;entryDx=0;entryDy=0;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontColor=#E8E8E8;labelBackgroundColor=none;textShadow=1;fontSize=8;spacingLeft=4;rounded=0;curved=0;" parent="1" target="23" edge="1">
+                    <mxGeometry x="1" y="5" relative="1" as="geometry">
+                        <mxPoint x="1239" y="365" as="sourcePoint"/>
+                        <mxPoint x="1302.7211172733446" y="471.96171821271696" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="1258" y="365"/>
+                            <mxPoint x="1258" y="472"/>
+                        </Array>
+                        <mxPoint x="5" y="5" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="86" value="Read&lt;br&gt;data 1" style="edgeStyle=none;html=1;labelBorderColor=none;fontSize=8;spacingLeft=-2;align=left;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;" parent="1" edge="1">
+                    <mxGeometry x="-1" y="31" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="381" y="466"/>
+                        </Array>
+                        <mxPoint x="-29" y="25" as="offset"/>
+                        <mxPoint x="368" y="466" as="sourcePoint"/>
+                        <mxPoint x="413" y="465.38461538461536" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="101" value="Read&lt;br&gt;data 2" style="edgeStyle=none;html=1;labelBorderColor=none;fontSize=8;spacing=0;spacingLeft=-1;align=left;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;exitX=1;exitY=0.817;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="10" edge="1">
+                    <mxGeometry x="-1" y="30" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="384" y="570"/>
+                        </Array>
+                        <mxPoint x="-29" y="29" as="offset"/>
+                        <mxPoint x="370" y="570" as="sourcePoint"/>
+                        <mxPoint x="412" y="570" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="113" value="ALU&lt;br&gt;result" style="edgeStyle=none;html=1;exitX=0.668;exitY=-0.005;exitDx=0;exitDy=0;exitPerimeter=0;labelBorderColor=none;fontSize=8;align=left;spacingLeft=-10;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;" parent="1" edge="1" source="16">
+                    <mxGeometry x="-1" y="23" relative="1" as="geometry">
+                        <mxPoint x="876.4080000000001" y="501.8199999999998" as="sourcePoint"/>
+                        <mxPoint x="906" y="499.0000000000001" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="906" y="499"/>
+                        </Array>
+                        <mxPoint x="-22" y="19" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="114" value="Zero" style="edgeStyle=none;html=1;exitX=0.494;exitY=-0.001;exitDx=0;exitDy=0;exitPerimeter=0;fontSize=8;labelBorderColor=none;spacingLeft=-10;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;spacingTop=4;" parent="1" edge="1" source="16">
+                    <mxGeometry x="-1" y="10" relative="1" as="geometry">
+                        <mxPoint x="876.3499999999999" y="520.105" as="sourcePoint"/>
+                        <mxPoint x="906" y="520.4" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="906" y="520.4"/>
+                        </Array>
+                        <mxPoint x="-9" y="7" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="115" value="Address" style="edgeStyle=none;html=1;entryX=-0.008;entryY=0.758;entryDx=0;entryDy=0;entryPerimeter=0;labelBorderColor=none;fontSize=8;strokeColor=#E8E8E8;fontColor=#E8E8E8;labelBackgroundColor=none;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;" parent="1" edge="1">
+                    <mxGeometry x="1" y="35" relative="1" as="geometry">
+                        <mxPoint x="948" y="520" as="sourcePoint"/>
+                        <mxPoint x="986.71504" y="519.74996" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="948" y="520"/>
+                        </Array>
+                        <mxPoint x="21" y="6" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="127" value="Write&lt;br&gt;data" style="edgeStyle=none;html=1;labelBorderColor=none;fontSize=8;align=left;spacingTop=-11;spacingLeft=-11;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;rounded=0;curved=0;" parent="1" edge="1">
+                    <mxGeometry x="1" y="11" relative="1" as="geometry">
+                        <mxPoint x="949" y="620" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="1070" y="620"/>
+                        </Array>
+                        <mxPoint x="11" y="-10" as="offset"/>
+                        <mxPoint x="1070" y="560" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="117" value="Read&lt;br&gt;data" style="edgeStyle=none;html=1;fontSize=8;labelBorderColor=none;align=left;spacingLeft=12;spacingTop=10;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;textShadow=1;" parent="1" edge="1">
+                    <mxGeometry x="-0.9523" y="41" relative="1" as="geometry">
+                        <mxPoint x="1149.62" y="535.6085807504078" as="sourcePoint"/>
+                        <mxPoint x="1197" y="536" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="1149" y="536"/>
+                        </Array>
+                        <mxPoint x="-40" y="30" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="137" value="Read&lt;br&gt;register 1" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.002;entryY=0.127;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#E8E8E8;align=left;textShadow=1;labelBackgroundColor=none;fontColor=#E8E8E8;fontSize=8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" parent="1" target="10" edge="1">
+                    <mxGeometry x="1" y="4" width="80" relative="1" as="geometry">
+                        <mxPoint x="161" y="460" as="sourcePoint"/>
+                        <mxPoint x="244" y="460.27" as="targetPoint"/>
+                        <Array as="points"/>
+                        <mxPoint x="4" y="3" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="96" value="Instruction" style="edgeStyle=none;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;labelBackgroundColor=none;textShadow=1;fontColor=#E8E8E8;spacingLeft=9;fontSize=8;spacingTop=0;" parent="1" edge="1">
+                    <mxGeometry x="-0.9195" y="36" relative="1" as="geometry">
+                        <mxPoint x="95" y="460" as="sourcePoint"/>
+                        <mxPoint x="121" y="460" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="121" y="460"/>
+                        </Array>
+                        <mxPoint x="-36" y="35" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="139" value="Add" style="shape=trapezoid;perimeter=trapezoidPerimeter;html=1;fixedSize=1;rotation=-90;flipV=1;flipH=0;textDirection=vertical-lr;spacingLeft=0;spacingBottom=0;fontColor=#F0E7D5;strokeWidth=2;strokeColor=#F0E7D5;fillColor=#353535;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;shadow=0;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="-45" y="321.11" width="83" height="42.38" as="geometry"/>
+                </mxCell>
+                <mxCell id="176" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" source="144" target="11" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="144" value="pc_src&lt;br&gt;Mux PC" style="ellipse;whiteSpace=wrap;html=1;rotation=-90;textDirection=vertical-lr;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontStyle=1;spacingLeft=0;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="-242.97" y="428.97" width="86" height="56.13" as="geometry"/>
+                </mxCell>
+                <mxCell id="148" value="alu_src&lt;br&gt;Mux Src" style="ellipse;whiteSpace=wrap;html=1;rotation=-90;textDirection=vertical-lr;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontStyle=1;spacingLeft=0;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="502.51" y="518.17" width="55.66" height="74.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="160" style="edgeStyle=none;html=1;fontColor=#E8E8E8;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="585" y="386" as="targetPoint"/>
+                        <mxPoint x="545.6000000000001" y="385.745" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="149" value="left 1&lt;br&gt;Shift" style="ellipse;whiteSpace=wrap;html=1;rotation=-90;textDirection=vertical-lr;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontStyle=1;spacingLeft=0;spacingTop=2;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="497" y="363.49" width="66.69" height="44.51" as="geometry"/>
+                </mxCell>
+                <mxCell id="150" value="Add" style="shape=trapezoid;perimeter=trapezoidPerimeter;html=1;fixedSize=1;rotation=-90;flipV=1;flipH=0;textDirection=vertical-lr;spacingLeft=0;spacingBottom=0;fontColor=#F0E7D5;strokeWidth=2;strokeColor=#F0E7D5;fillColor=#353535;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;shadow=0;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="562.34" y="342" width="88.5" height="42.38" as="geometry"/>
+                </mxCell>
+                <mxCell id="152" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;fontColor=#E8E8E8;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="455" y="386" as="sourcePoint"/>
+                        <mxPoint x="508" y="386" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="153" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E8E8E8;entryX=0.249;entryY=0.058;entryDx=0;entryDy=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;labelBackgroundColor=none;fontColor=#E8E8E8;fontSize=8;spacingTop=2;spacingLeft=3;entryPerimeter=0;" parent="1" edge="1">
+                    <mxGeometry x="1" y="6" width="80" relative="1" as="geometry">
+                        <mxPoint x="455" y="568" as="sourcePoint"/>
+                        <mxPoint x="496.4110000000003" y="568.3906599999998" as="targetPoint"/>
+                        <Array as="points"/>
+                        <mxPoint x="6" y="4" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="154" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E8E8E8;rounded=0;curved=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="474" y="568" as="sourcePoint"/>
+                        <mxPoint x="900" y="620" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="474" y="620"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="156" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.651;entryY=0.012;entryDx=0;entryDy=0;strokeColor=#E8E8E8;labelBackgroundColor=none;fontColor=#E8E8E8;textShadow=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;spacingTop=-3;fontSize=8;spacingLeft=-3;jumpStyle=line;rounded=0;curved=0;entryPerimeter=0;" parent="1" target="148" edge="1">
+                    <mxGeometry x="1" y="-9" width="80" relative="1" as="geometry">
+                        <mxPoint x="474" y="386" as="sourcePoint"/>
+                        <mxPoint x="507.2515197422598" y="507.6906405638655" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="474" y="547"/>
+                        </Array>
+                        <mxPoint x="9" y="-8" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="164" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E8E8E8;endArrow=none;endFill=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="160" y="340" as="sourcePoint"/>
+                        <mxPoint x="412" y="339" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="165" value="Address" style="edgeStyle=none;html=1;entryX=-0.004;entryY=0.083;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#E8E8E8;exitX=0.995;exitY=0.525;exitDx=0;exitDy=0;exitPerimeter=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;labelBackgroundColor=none;fontColor=#E8E8E8;fontSize=8;spacingLeft=87;textShadow=1;" parent="1" source="11" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-107" y="458.1146844816484" as="sourcePoint"/>
+                        <mxPoint x="-67.64499999999975" y="458.32375" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="166" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E8E8E8;rounded=0;curved=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="-93" y="458" as="sourcePoint"/>
+                        <mxPoint x="-26" y="320" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="-93" y="320"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="168" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.537;exitY=0.025;exitDx=0;exitDy=0;exitPerimeter=0;strokeColor=#E8E8E8;rounded=0;curved=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" source="150" edge="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="626.7800000000002" y="362.91550000000007" as="sourcePoint"/>
+                        <mxPoint x="904" y="320" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="674" y="360"/>
+                            <mxPoint x="674" y="320"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="170" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;strokeColor=#E8E8E8;rounded=0;curved=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" parent="1" edge="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="-93" y="410" as="sourcePoint"/>
+                        <mxPoint x="121" y="340" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="84" y="410"/>
+                            <mxPoint x="84" y="340"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="171" value="4" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E8E8E8;fontColor=#E8E8E8;labelBackgroundColor=none;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;spacingLeft=14;spacingTop=0;spacingBottom=0;spacingRight=17;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontSize=10;textShadow=1;" parent="1" edge="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="-56" y="360" as="sourcePoint"/>
+                        <mxPoint x="-26" y="360" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="172" value="" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;labelBackgroundColor=none;fontColor=#E8E8E8;fontSize=8;spacingTop=-7;textShadow=1;rounded=0;curved=0;entryX=0.697;entryY=0.038;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="139" target="144" edge="1">
+                    <mxGeometry x="1" y="-10" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="64" y="342"/>
+                            <mxPoint x="64" y="280"/>
+                            <mxPoint x="-252" y="280"/>
+                            <mxPoint x="-251" y="440"/>
+                        </Array>
+                        <mxPoint x="9" y="-7" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="175" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FFCC00;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;labelBackgroundColor=none;fontColor=#E8E8E8;fontSize=8;spacingTop=-1;textShadow=1;rounded=0;curved=0;jumpStyle=line;" parent="1" target="144" edge="1">
+                    <mxGeometry x="1" y="-9" width="80" relative="1" as="geometry">
+                        <mxPoint x="949" y="320" as="sourcePoint"/>
+                        <mxPoint x="804" y="321.11" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="990" y="320"/>
+                            <mxPoint x="990" y="210"/>
+                            <mxPoint x="-200" y="210"/>
+                            <mxPoint x="-200" y="370"/>
+                        </Array>
+                        <mxPoint x="9" y="-9" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="178" value="0" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;fontColor=#E8E8E8;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontSize=8;textShadow=1;labelBackgroundColor=none;spacingLeft=-6;" parent="1" edge="1">
+                    <mxGeometry x="1" y="10" width="80" relative="1" as="geometry">
+                        <mxPoint x="1239" y="536" as="sourcePoint"/>
+                        <mxPoint x="1307" y="536" as="targetPoint"/>
+                        <Array as="points"/>
+                        <mxPoint x="10" y="9" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="190" style="edgeStyle=none;html=1;strokeColor=#FFCC00;dashed=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" edge="1" parent="1" source="180">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="411" y="638" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="191" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FFCC00;dashed=1;jumpStyle=gap;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" edge="1" parent="1" source="180" target="148">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="300" y="700"/>
+                            <mxPoint x="530" y="700"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="180" value="Control Unit" style="whiteSpace=wrap;html=1;strokeColor=#F0E7D5;strokeWidth=2;fillColor=#434343;fontColor=#F0E7D5;textShadow=0;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" vertex="1" parent="1">
+                    <mxGeometry x="259" y="617.69" width="80" height="40.31" as="geometry"/>
+                </mxCell>
+                <mxCell id="188" value="Flush" style="edgeStyle=none;html=1;strokeColor=#FFCC00;dashed=1;fontColor=#E8E8E8;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;jumpStyle=gap;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" edge="1" parent="1">
+                    <mxGeometry x="-0.3159" relative="1" as="geometry">
+                        <mxPoint x="435" y="230" as="targetPoint"/>
+                        <mxPoint x="313.5" y="159.74824324324322" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="435" y="160"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="189" style="edgeStyle=none;html=1;entryX=0.236;entryY=0.064;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#FFCC00;dashed=1;entryPerimeter=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" edge="1" parent="1" source="181" target="144">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="190" y="160"/>
+                            <mxPoint x="-279" y="160"/>
+                            <mxPoint x="-279" y="480"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="206" value="Stall" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#1C1C1C;fontColor=#E8E8E8;labelBorderColor=#FFCC00;fontSize=11;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" vertex="1" connectable="0" parent="189">
+                    <mxGeometry x="0.4829" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="181" value="Hazard Unit" style="whiteSpace=wrap;html=1;strokeColor=#F0E7D5;strokeWidth=2;fillColor=#434343;fontColor=#F0E7D5;textShadow=0;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" vertex="1" parent="1">
+                    <mxGeometry x="228.5" y="137" width="90" height="45.31" as="geometry"/>
+                </mxCell>
+                <mxCell id="195" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FFCC00;dashed=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" edge="1" parent="1" source="182" target="184">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="645" y="390"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="182" value="Forwarding Unit" style="whiteSpace=wrap;html=1;strokeColor=#F0E7D5;strokeWidth=2;fillColor=#434343;fontColor=#F0E7D5;textShadow=0;fontStyle=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" vertex="1" parent="1">
+                    <mxGeometry x="713.9" y="368" width="110" height="45.31" as="geometry"/>
+                </mxCell>
+                <mxCell id="193" style="edgeStyle=none;html=1;entryX=0.861;entryY=1.009;entryDx=0;entryDy=0;strokeColor=#E8E8E8;entryPerimeter=0;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" edge="1" parent="1" source="184" target="16">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="184" value="forward_a&lt;br&gt;Mux A" style="ellipse;whiteSpace=wrap;html=1;rotation=-90;textDirection=vertical-lr;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontStyle=1;spacingLeft=0;spacingTop=2;" vertex="1" parent="1">
+                    <mxGeometry x="619.3" y="438.94" width="51.54" height="74.06" as="geometry"/>
+                </mxCell>
+                <mxCell id="194" style="edgeStyle=none;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" edge="1" parent="1" source="185" target="16">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="730" y="568"/>
+                            <mxPoint x="730" y="550"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="185" value="forward_b&lt;br&gt;Mux B" style="ellipse;whiteSpace=wrap;html=1;rotation=-90;textDirection=vertical-lr;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;fontStyle=1;spacingLeft=0;spacingTop=2;" vertex="1" parent="1">
+                    <mxGeometry x="652.77" y="533.5" width="61.13" height="69.19" as="geometry"/>
+                </mxCell>
+                <mxCell id="197" style="edgeStyle=none;html=1;entryX=0.702;entryY=0.038;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" edge="1" parent="1" source="148" target="185">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="186" value="ALUResult" style="edgeStyle=none;html=1;strokeColor=#FFCC00;jumpStyle=line;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="607" y="476" as="targetPoint"/>
+                        <mxPoint x="950" y="640" as="sourcePoint"/>
+                        <Array as="points">
+                            <mxPoint x="1000" y="640"/>
+                            <mxPoint x="1000" y="740"/>
+                            <mxPoint x="580" y="740"/>
+                            <mxPoint x="580" y="476"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="198" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.242;entryY=0.049;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#FFCC00;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" edge="1" parent="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="580" y="583.5" as="sourcePoint"/>
+                        <mxPoint x="653.13031" y="583.8665399999999" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="187" value="Writeback data" style="edgeStyle=none;html=1;entryX=0.322;entryY=0.013;entryDx=0;entryDy=0;strokeColor=#FFCC00;entryPerimeter=0;jumpStyle=line;labelBorderColor=#FFCC00;labelBackgroundColor=#1C1C1C;fontColor=#E8E8E8;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1239" y="613" as="sourcePoint"/>
+                        <mxPoint x="610.00278" y="487.14412000000004" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="1285" y="613"/>
+                            <mxPoint x="1285" y="720"/>
+                            <mxPoint x="590" y="720"/>
+                            <mxPoint x="590" y="487"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="199" value="" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#FFCC00;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;" edge="1" parent="1">
+                    <mxGeometry width="80" relative="1" as="geometry">
+                        <mxPoint x="590" y="570" as="sourcePoint"/>
+                        <mxPoint x="648" y="570" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="196" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FFCC00;dashed=1;fontFamily=Consolas;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DConsolas;rounded=0;curved=0;jumpStyle=gap;" edge="1" parent="1" source="182" target="185">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="769" y="430"/>
+                            <mxPoint x="710" y="430"/>
+                            <mxPoint x="710" y="510"/>
+                            <mxPoint x="683" y="510"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
