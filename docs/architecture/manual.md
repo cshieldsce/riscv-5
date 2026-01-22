@@ -6,10 +6,10 @@ This document proves to anchor every design decision in the `riscv-5` core to th
 
 To understand why we build pipelined processors, we first have to look at the limitations of a **Single Cycle CPU**. In a single-cycle implementation, the entire execution of an instruction—fetching from memory, decoding, calculating in the ALU, accessing data memory, and finally writing back to registers must happen in exactly one clock tick. 
 
+You can think of a Single Cycle CPU as one giant combinational circuit, and the critical path as "one long wire" spanning from the Fetch $\to$ Writeback. If the signal has to travel through 50 gates to get from the Instruction Memory to the Register Writeback, your clock cycle must be long enough for the electricity to traverse all 50 gates at once. While this design is simple to understand, it is practically inefficient.
+
 > **FPGA Tip: The "Long Wire" Problem**
 > If you have used Xilinx Vivado to synthesize a core, you likely encountered **Total Negative Slack (TNS)**. In a Single Cycle CPU, the "Critical Path" (the longest path between two registers) is effectively the entire length of the CPU. Vivado will report timing violations because the signal physically cannot travel to the logic gates fast enough.
-
-You can think of a Single Cycle CPU as one giant combinational circuit, and the critical path as "one long wire" spanning from the Fetch $\to$ Writeback. If the signal has to travel through 50 gates to get from the Instruction Memory to the Register Writeback, your clock cycle must be long enough for the electricity to traverse all 50 gates at once. While this design is simple to understand, it is practically inefficient.
 
 ### The Solution: Pipelining
 
@@ -23,6 +23,8 @@ This architecture shift dramatically increases **Throughput**. While the time to
 | **Instructions Per Cycle** | 1 | 1 (Ideal) |
 | **Logic Depth** | 50+ Gates (Deep) | ~10 Gates (Shallow) |
 | **Vivado Timing** | Negative Slack (-) | Positive Slack (+) |
+
+> **Latency vs. Throughput**: It is a common misconception that pipelining reduces the execution time of a single instruction; in fact, individual latency often increases slightly due to register overhead. The true performance gain comes from throughput, as the processor completes one instruction every clock cycle rather than waiting for the entire datapath to finish. We accept this minor latency cost to achieve a massive increase in overall system frequency and processing rate.
 
 ## Building the Core
 
@@ -97,9 +99,11 @@ In a standard Single-Cycle processor, the concept of a "Data Hazard" does not ex
 
 However, in our Pipelined design we violate this assumption. We now have up to five instructions executing simultaneously.
 
-> **The Dependency Paradox**: If Instruction B relies on a value calculated by Instruction A, Instruction B might try to read that value from the Register File *before* Instruction A has actually written the value to the register.
+> **The Dependency Paradox**:<br> If Instruction B relies on a value calculated by Instruction A, Instruction B might try to read that value from the Register File *before* Instruction A has actually written the value to the register.
 
 Without intervention, the CPU would process stale data leading to calculation errors. To maintain the illusion of sequential execution while enjoying the speed of parallel processing, we implemented a sophisticated Hazard Resolution system using **Forwarding** (bypassing storage) and **Stalling** (injecting wait states).
+
+> **Implementation:** When a Data Hazard occurs, the hardware must choose between an aggressive optimization (Forwarding) or a defensive pause (Stalling).<br><br>**Forwarding** relies on the fact that the calculated data already exists inside the pipeline registers somewhere even though it hasn't been written back to the Register File. The Forwarding Unit detects routes the data directly to the ALU inputs via multiplexers. This allows the pipeline to maintain full speed, executing dependent instructions with zero latency penalty.<br><br>**Stalling** is the fallback used when forwarding is physically impossible (case study link), the Hazard Unit must freeze the Program Counter and flush the `ID/EX` register. This injects a "bubble" (or NOP) into the pipeline, forcing the instruction to wait exactly one clock cycle so that the memory access can complete.
 
 ---
 
