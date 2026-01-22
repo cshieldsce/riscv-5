@@ -1,53 +1,83 @@
-# RISC-V 5-Stage Pipelined Processor (RV32I)
+# riscv-5: A Pipelined Processor (RV32I)
 
 [![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml)
 [![Compliance Status](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-gray.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://cshieldsce.github.io/riscv-5/)
 
-A high-fidelity, silicon-ready implementation of the RISC-V RV32I ISA, optimized for microarchitectural transparency and formal compliance. This project serves as a comprehensive demonstration of digital design maturity, bridging the gap between academic theory and industrial-grade verification.
+A synthesizable 5-stage pipelined RISC-V core (RV32I) implemented in SystemVerilog, featuring integrated hazard detection, data forwarding, and formal verification via the RISCOF framework.
+
+---
+##  Documentation
+
+**[Full Documentation Site →](https://cshieldsce.github.io/riscv-5/)**
+
+Comprehensive technical documentation including:
+- **[Architecture Manual](https://cshieldsce.github.io/riscv-5/architecture/manual.html)** - Theoretical foundations and design rationale
+- **[Pipeline Stages](https://cshieldsce.github.io/riscv-5/architecture/stages.html)** - Microarchitectural implementation details
+- **[Hazard Resolution](https://cshieldsce.github.io/riscv-5/architecture/hazards.html)** - Forwarding logic and stall mechanisms
+- **[Verification Report](https://cshieldsce.github.io/riscv-5/verification/report.html)** - ISA compliance testing and results
+- **[Developer Guide](https://cshieldsce.github.io/riscv-5/developer/guide.html)** - Setup instructions and workflow
 
 ---
 
-## 🏛️ Architecture at a Glance
+## Design Overview
 
-The core implements a classic 5-stage Harvard-architecture pipeline, strictly adhering to the microarchitectural patterns defined in *Patterson & Hennessy (Chapter 4)*.
+This project implements a cycle-accurate RISC-V processor that adheres to the RV32I unprivileged ISA specification. The project also follows the architectural patterns from *Patterson & Hennessy* while incorporating some modern hazard mitigation techniques.
 
-[INSERT DRAW.IO DIAGRAM: High-Level Block Diagram Viewport (LR Flow, Subgraph Boundaries for IF, ID, EX, MEM, WB)]
+### Complete Datapath
 
-### Core Technical Specifications
-- **ISA Support:** Base RV32I (User-level ISA Vol. I v2.3).
-- **Pipeline Depth:** 5 stages (`IF`, `ID`, `EX`, `MEM`, `WB`) with decoupled inter-stage registers.
-- **Hazard Management:** Full operand forwarding (EX-EX, MEM-EX) and hardware stall detection for load-use hazards.
-- **Control Flow:** Static not-taken branch prediction with single-cycle flush penalty.
-- **Verification:** 100% pass rate on official RISC-V Architectural Test Suite (RISCOF).
+![Complete Pipelined Datapath](docs/images/pipeline_complete.svg)
+*5-stage pipeline with integrated forwarding unit and hazard detection*
 
----
+### Key Features
 
-## 🗺️ Documentation Portal
-
-Structured to meet the specific requirements of recruiters, academic evaluators, and peer engineers.
-
-### 💼 For Recruiters: The "30-Second Scan"
-- **[Verification Compliance Matrix](./docs/verification/report.md#compliance-matrix):** Objective proof of ISA adherence.
-- **[Debugging War Stories](./docs/verification/report.md#war-stories):** STAR retrospectives on resolving complex microarchitectural hazards.
-
-### 🎓 For Professors: The "Theoretical Audit"
-- **[Architecture Manual](./docs/architecture/manual.md):** Formal mapping of RTL modules to Patterson & Hennessy textbook equations.
-- **[Datapath Topology](./docs/architecture/manual.md#pipeline-stages):** Stage-by-stage analysis of signal transitions.
-
-### 🛠️ For Peers: The "Integration View"
-- **[Developer Guide](./docs/developer/guide.md):** Step-by-step instructions for toolchain setup and functional simulation.
+- **5-Stage Pipeline:** IF → ID → EX → MEM → WB stages with pipeline registers
+- **Data Forwarding:** Resolves RAW hazards via EX→EX and MEM→EX bypass paths
+- **Load-Use Stalls:** Automatic bubble insertion for unavoidable data hazards
+- **ISA Compliance:** 100% pass rate on RISC-V Architectural Test Suite (RISCOF)
+- **FPGA-Ready:** Synthesized and verified on Xilinx PYNQ-Z2 (Zynq-7000)
 
 ---
 
-## 📦 Project Structure
+## Quick Start
+```bash
+# Install iVerilog & GTKWave
+sudo apt-get install iverilog gtkwave
+
+# Clone repository
+git clone https://github.com/cshieldsce/riscv-5.git
+cd riscv-5
+```
+---
+
+## Project Structure
 
 ```text
-├── src/           # Synthesizable SystemVerilog RTL
-├── test/          # RISCOF Framework, Testbenches, and Memory Images
-├── docs/          # Strategic Documentation (Architecture, Verification, Developer)
-└── fpga/          # Vivado TCL Scripts and PYNQ-Z2 Constraints
+riscv-5/
+├── src/                    # SystemVerilog RTL
+│   ├── pipelined_cpu.sv    # Top-level module
+│   ├── control_unit.sv     # Instruction decoder
+│   ├── hazard_unit.sv      # Stall/flush logic
+│   └── forwarding_unit.sv  # Bypass control
+├── test/
+│   ├── verification/       # RISCOF compliance framework
+│   ├── programs/           # Assembly test cases
+│   └── scripts/            # Automation scripts
+├── fpga/
+│   ├── constraints/        # XDC timing constraints
+│   └── build.tcl           # Vivado synthesis script
+├── docs/                   # GitHub Pages documentation
+│   ├── architecture/       # Design documentation
+│   ├── verification/       # Test reports
+│   └── images/             # Datapath diagrams
+└── .github/workflows/      # CI/CD automation
 ```
-
 ---
-*Built with precision. Verified for compliance. Documented for clarity.*
+
+## References
+
+- [RISC-V ISA Specification v2.2](https://riscv.org/technical/specifications/)
+- *Computer Organization and Design: The Hardware/Software Interface (RISC-V Edition)* - Patterson & Hennessy
+- [RISC-V Architectural Test Suite](https://github.com/riscv-non-isa/riscv-arch-test)
+---
