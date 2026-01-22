@@ -8,18 +8,6 @@
 A synthesizable 5-stage pipelined RISC-V core (RV32I) implemented in SystemVerilog, featuring integrated hazard detection, data forwarding, and formal verification via the RISCOF framework.
 
 ---
-##  Documentation
-
-**[Full Documentation Site →](https://cshieldsce.github.io/riscv-5/)**
-
-Comprehensive technical documentation including:
-- **[Architecture Manual](https://cshieldsce.github.io/riscv-5/architecture/manual.html)** - Theoretical foundations and design rationale
-- **[Pipeline Stages](https://cshieldsce.github.io/riscv-5/architecture/stages.html)** - Microarchitectural implementation details
-- **[Hazard Resolution](https://cshieldsce.github.io/riscv-5/architecture/hazards.html)** - Forwarding logic and stall mechanisms
-- **[Verification Report](https://cshieldsce.github.io/riscv-5/verification/report.html)** - ISA compliance testing and results
-- **[Developer Guide](https://cshieldsce.github.io/riscv-5/developer/guide.html)** - Setup instructions and workflow
-
----
 
 ## Design Overview
 
@@ -30,6 +18,7 @@ This project implements a cycle-accurate RISC-V processor that adheres to the RV
 ![Complete Pipelined Datapath](docs/images/pipeline_complete.svg)
 *5-stage pipeline with integrated forwarding unit and hazard detection*
 
+
 ### Key Features
 
 - **5-Stage Pipeline:** IF → ID → EX → MEM → WB stages with pipeline registers
@@ -37,6 +26,19 @@ This project implements a cycle-accurate RISC-V processor that adheres to the RV
 - **Load-Use Stalls:** Automatic bubble insertion for unavoidable data hazards
 - **ISA Compliance:** 100% pass rate on RISC-V Architectural Test Suite (RISCOF)
 - **FPGA-Ready:** Synthesized and verified on Xilinx PYNQ-Z2 (Zynq-7000)
+
+---
+
+## Documentation
+
+**[Full Documentation Site →](https://cshieldsce.github.io/riscv-5/)**
+
+Comprehensive technical documentation including:
+- **[Architecture Manual](https://cshieldsce.github.io/riscv-5/architecture/manual.html)** - Theoretical foundations and design rationale
+- **[Pipeline Stages](https://cshieldsce.github.io/riscv-5/architecture/stages.html)** - Microarchitectural implementation details
+- **[Hazard Resolution](https://cshieldsce.github.io/riscv-5/architecture/hazards.html)** - Forwarding logic and stall mechanisms
+- **[Verification Report](https://cshieldsce.github.io/riscv-5/verification/report.html)** - ISA compliance testing and results
+- **[Developer Guide](https://cshieldsce.github.io/riscv-5/developer/guide.html)** - Setup instructions and workflow
 
 ---
 
