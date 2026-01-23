@@ -2,7 +2,6 @@ import riscv_pkg::*;
 
 module PipelineRegister #(
     parameter WIDTH = 32    //  WIDTH: The number of bits this register needs to store.
-                            //         (e.g., 32 for PC, 100+ for ID/EX control signals)
 )(
     input  logic             clk, rst, en, clear, // Control signals 
     input  logic [WIDTH-1:0] in,                  // Data from input to stage

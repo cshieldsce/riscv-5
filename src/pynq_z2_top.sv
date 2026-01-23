@@ -27,19 +27,6 @@ module pynq_z2_top (
     assign cpu_reset = reset_btn || !clk_locked;
 
     // ===================================
-    // 2. HEARTBEAT DEBUG LOGIC
-    // ===================================
-    // 27-bit counter. At 10MHz, bit [23] toggles every ~0.8 seconds.
-    logic [26:0] heartbeat_cnt;
-    always_ff @(posedge cpu_clk) begin
-        if (cpu_reset) begin
-            heartbeat_cnt <= 0;
-        end else begin
-            heartbeat_cnt <= heartbeat_cnt + 1;
-        end
-    end
-
-    // ===================================
     // CPU Signals
     // ===================================
     logic [ALEN-1:0] imem_addr;
@@ -79,9 +66,7 @@ module pynq_z2_top (
 
 
     // Data Memory
-    DataMemory #(
-        .CLKS_PER_BIT(87) // 10MHz / 115200 = 86.8
-    ) dmem_inst (
+    DataMemory dmem_inst (
         .clk(cpu_clk),
         .rst(cpu_reset),
         .MemWrite(dmem_we),
@@ -90,13 +75,13 @@ module pynq_z2_top (
         .Address(dmem_addr),
         .WriteData(dmem_wdata),
         .ReadData(dmem_rdata),
-        .leds_out(dmem_leds),
-        .uart_tx_wire(uart_tx)
+        .leds_out(dmem_leds)
     );
 
     // ===================================
     // LED OUTPUT MAPPING
     // ===================================
+    
     // Display the lower 4 bits of the CPU's memory-mapped LED register.
     // This allows visual verification of programs (like Fibonacci).
     assign led = dmem_leds;
@@ -157,18 +142,18 @@ module pynq_z2_top (
     ila_0 my_ila (
         .clk(cpu_clk), 
 
-        .probe0(ila_pc),             // 32-bit
-        .probe1(ila_instruction),    // 32-bit
-        .probe2(ila_hazard_signals), // 3-bit (was ila_branch_en, 1-bit)
-        .probe3(ila_branch_taken),   // 1-bit
-        .probe4(ila_branch_target),  // 32-bit
-        .probe5(ila_alu_zero),       // 1-bit
-        .probe6(ila_mem_wb_controls), // 3-bit (was ila_funct3, 3-bit)
-        .probe7(ila_rs1_data),       // 32-bit
-        .probe8(ila_rs2_data),       // 32-bit
-        .probe9(ila_alu_result),     // 32-bit
-        .probe10(ila_mem_wb_rd),     // 5-bit (was ila_pcsrc, 1-bit)
-        .probe11(ila_wb_data)        // 32-bit (NEW probe)
+        .probe0(ila_pc),                // 32-bit
+        .probe1(ila_instruction),       // 32-bit
+        .probe2(ila_hazard_signals),    // 3-bit (was ila_branch_en, 1-bit)
+        .probe3(ila_branch_taken),      // 1-bit
+        .probe4(ila_branch_target),     // 32-bit
+        .probe5(ila_alu_zero),          // 1-bit
+        .probe6(ila_mem_wb_controls),   // 3-bit (was ila_funct3, 3-bit)
+        .probe7(ila_rs1_data),          // 32-bit
+        .probe8(ila_rs2_data),          // 32-bit
+        .probe9(ila_alu_result),        // 32-bit
+        .probe10(ila_mem_wb_rd),        // 5-bit (was ila_pcsrc, 1-bit)
+        .probe11(ila_wb_data)           // 32-bit (NEW probe)
     );
 
 endmodule

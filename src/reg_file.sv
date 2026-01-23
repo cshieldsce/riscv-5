@@ -35,7 +35,7 @@ module RegFile (
     output logic [XLEN-1:0]  read_data2
 );
 
-    logic [XLEN-1:0] register_memory [0:31];
+    logic [XLEN-1:0] register_memory [0:REG_SIZE-1]; // 32 registers of XLEN bits
 
     // ASYNC READ (With x0 Protection and Write-Through Forwarding)
     // If reading from the register currently being written, bypass the memory and use write_data.
@@ -48,14 +48,14 @@ module RegFile (
     // SYNCHRONOUS WRITE
     always_ff @(posedge clk) begin
         if (rst) begin
-             for (int i=0; i<32; i++) register_memory[i] <= 0;
+             for (int i=0; i<REG_SIZE; i++) register_memory[i] <= 0;
         end else if (RegWrite && (rd != 5'b0)) begin
              register_memory[rd] <= write_data;
         end
     end
     
     initial begin
-        for (int i=0; i<32; i++) register_memory[i] = 0;
+        for (int i=0; i<REG_SIZE; i++) register_memory[i] = 0;
     end
 
 endmodule

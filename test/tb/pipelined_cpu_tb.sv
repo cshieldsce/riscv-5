@@ -7,8 +7,8 @@ module pipelined_cpu_tb;
 
     // Memory interface signals
     logic [ALEN-1:0] imem_addr;
-    logic [31:0]     imem_data; // Instruction is always 32 bits
-    logic            imem_en;   // Instruction Memory Enable
+    logic [XLEN-1:0] imem_data; 
+    logic            imem_en;
     
     logic [ALEN-1:0] dmem_addr;
     logic [XLEN-1:0] dmem_rdata, dmem_wdata;
@@ -16,7 +16,6 @@ module pipelined_cpu_tb;
     logic [3:0] dmem_be;
     logic [2:0] dmem_funct3;
     logic [LED_WIDTH-1:0] leds_out;
-    logic                 uart_tx_wire;
 
     // CPU instance
     PipelinedCPU cpu_inst (
@@ -42,9 +41,7 @@ module pipelined_cpu_tb;
     );
 
     // Data memory instance
-    DataMemory #(
-        .CLKS_PER_BIT(868) // 100MHz / 115200 = 868
-    ) dmem_inst (
+    DataMemory dmem_inst (
         .clk(clk),
         .MemWrite(dmem_we),
         .be(dmem_be),
@@ -52,8 +49,7 @@ module pipelined_cpu_tb;
         .Address(dmem_addr),
         .WriteData(dmem_wdata),
         .ReadData(dmem_rdata),
-        .leds_out(),
-        .uart_tx_wire(uart_tx_wire)
+        .leds_out()
     );
 
     // Clock generator

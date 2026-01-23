@@ -55,7 +55,7 @@ module EX_Stage (
     // --- 3. Handle LUI/AUIPC MUX ---
     always_comb begin
         case (alu_src_a)
-            2'b00:   alu_in_a = alu_in_a_forwarded; // Register
+            2'b00:   alu_in_a = alu_in_a_forwarded;  // Register
             2'b01:   alu_in_a = pc;                  // PC
             2'b10:   alu_in_a = {XLEN{1'b0}};        // Zero
             default: alu_in_a = alu_in_a_forwarded;
@@ -71,7 +71,7 @@ module EX_Stage (
         .B(alu_in_b),
         .ALUControl(alu_control),
         .Result(alu_result),
-        .Zero(alu_zero)  // Now correctly drives the output port
+        .Zero(alu_zero)
     );
 
     // --- 6. Branch Logic ---

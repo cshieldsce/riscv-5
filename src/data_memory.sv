@@ -1,8 +1,31 @@
 import riscv_pkg::*;
 
-module DataMemory #(
-    parameter CLKS_PER_BIT = 87
-)(
+/**
+ * @brief Data Memory Module with Memory-Mapped I/O for RISC-V CPU
+ * 
+ * Implements synchronous RAM with support for:
+ * - Unaligned memory access (byte/halfword/word loads and stores)
+ * - Byte-enable control for partial word writes
+ * - Sign-extension and zero-extension for sub-word loads
+ * - Memory-mapped I/O (LED register at 0x80000000)
+ * - RISC-V compliance test support (tohost register)
+ * 
+ * Memory Layout:
+ * - 0x00000000 - 0x003FFFFF: RAM (4MB simulation / 16KB FPGA)
+ * - 0x80000000: LED register (write-only, 4 bits)
+ * - 0x80001000: ToHost register (simulation only)
+ * 
+ * @param clk        System clock
+ * @param rst        Synchronous reset (active high)
+ * @param MemWrite   Enable memory write
+ * @param be         Byte enable [3:0] (be[i]=1 writes byte i)
+ * @param funct3     Load/Store type from instruction (LB, LH, LW, LBU, LHU, SB, SH, SW)
+ * @param Address    Byte-addressed memory location
+ * @param WriteData  Data to write to memory (32 bits)
+ * @param ReadData   Data read from memory (sign/zero-extended as needed)
+ * @param leds_out   LED output pins (connected to FPGA LEDs)
+ */
+module DataMemory (
     input  logic             clk,
     input  logic             rst, 
     input  logic             MemWrite,
@@ -11,85 +34,58 @@ module DataMemory #(
     input  logic [ALEN-1:0]  Address,
     input  logic [XLEN-1:0]  WriteData,
     output logic [XLEN-1:0]  ReadData, 
-    output logic [3:0]       leds_out,
-    output logic             uart_tx_wire
+    output logic [3:0]       leds_out
 );
+    // MEMORY ARRAYS
+    logic [XLEN-1:0] ram_memory [0:RAM_MEMORY_SIZE];    // Main RAM (size defined in riscv_pkg)
+    logic [3:0]      led_reg;                           // 4-bit LED register at 0x80000000
     
-    // UART TX Instance
-    logic [7:0] uart_data;
-    logic       uart_start;
-    logic       uart_busy;
-
-    uart_tx #(
-        .CLKS_PER_BIT(CLKS_PER_BIT)
-    ) uart_inst (
-        .clk(clk),
-        .rst(rst),
-        .tx_start(uart_start),
-        .tx_data(uart_data),
-        .tx(uart_tx_wire),
-        .tx_busy(uart_busy),
-        .tx_done()
-    );
-
-`ifndef SYNTHESIS
-    logic [31:0] ram_memory [0:1048575]; // 4MB for Simulation
-`else
-    logic [31:0] ram_memory [0:4095];    // 16KB for FPGA
-`endif
-
-    logic [3:0]  led_reg;
+    // ADDRESS DECODING
+    logic [ALEN-1:0] word_addr;                         // Word-aligned address (Address / 4)
+    logic [1:0]      byte_offset;                       // Byte position within word (0-3)
     
-    logic [ALEN-1:0] word_addr;
-    logic [1:0]      byte_offset;
-    
-    assign word_addr = Address >> 2;          
-    assign byte_offset = Address[1:0];        
-    assign leds_out = led_reg;
+    assign word_addr    = Address >> 2;                 // Divide by 4 to get word index
+    assign byte_offset  = Address[1:0];                 // Extract lower 2 bits for byte position
+    assign leds_out     = led_reg;                      // Connect LED register to output pins
 
-    // Pipeline registers
-    logic [31:0] mem_read_word_reg;
-    logic [2:0]  funct3_reg;
-    logic [1:0]  byte_offset_reg;
-    logic [ALEN-1:0] address_reg;
+    // PIPELINE REGISTERS
+    logic [XLEN-1:0]  mem_read_word_reg;                // Raw 32-bit word from RAM
+    logic [2:0]       funct3_reg;                       // Registered load type (LB/LH/LW/LBU/LHU)
+    logic [1:0]       byte_offset_reg;                  // Registered byte offset for extraction
+    logic [ALEN-1:0]  address_reg;                      // Registered address for MMIO detection
 
+    // WRITE DATA ALIGNMENT
+    logic [XLEN-1:0] wdata_shifted;                     // Write data shifted to align with byte offset
+
+    // SYNCHRONOUS MEMORY READ & WRITE
     always_ff @(posedge clk) begin
         if (rst) begin
-            led_reg <= 4'b0000;     // EXPLICIT RESET
-            uart_start <= 1'b0;
-            mem_read_word_reg <= 32'b0;
+            led_reg           <= 4'b0000;
+            mem_read_word_reg <= {XLEN{1'b0}};
         end else begin
-            // READ: Always read (synchronous BRAM behavior)
-`ifndef SYNTHESIS
-            if (word_addr < 1048576) 
-`else
-            if (word_addr < 4096) 
-`endif
-                mem_read_word_reg <= ram_memory[word_addr];
-            else
-                mem_read_word_reg <= 32'b0;
 
-            funct3_reg <= funct3;
+            // READ PATH: Always read from RAM (1-cycle latency for BRAM)
+            if (word_addr < RAM_MEMORY_SIZE) begin
+                mem_read_word_reg <= ram_memory[word_addr];      // Read full 32-bit word
+            end else begin
+                mem_read_word_reg <= {XLEN{1'b0}};               // Out-of-bounds = 0
+            end
+
+            // Register control signals for next cycle (pipeline stage)
+            funct3_reg      <= funct3;
             byte_offset_reg <= byte_offset;
-            address_reg <= Address;
+            address_reg     <= Address;
 
-            // WRITE
+            // WRITE PATH: Memory-mapped I/O and RAM writes
             if (MemWrite) begin
-                // 1. LED Register (0x80000000)
+                // LED Register (0x80000000) - Write lower 4 bits to LEDs
                 if (Address == 32'h80000000) begin
                     led_reg <= WriteData[3:0];
                 end
-                
-                // 2. UART TX Register (0x80000004)
-                else if (Address == 32'h80000004) begin
-                    if (!uart_busy) begin
-                        uart_data  <= WriteData[7:0];
-                        uart_start <= 1'b1;
-                    end
-                end
 
 `ifndef SYNTHESIS
-                // 3. ToHost (0x80001000) - Compliance Trigger
+                // ToHost Register (0x80001000) - RISC-V compliance test endpoint
+                // Writing 1 signals test completion and dumps signature
                 else if (Address == 32'h80001000) begin
                     if (WriteData[0] == 1'b1) begin
                         $display("Simulation hit tohost finish. Status: PASS");
@@ -99,35 +95,31 @@ module DataMemory #(
                 end
 `endif
                 
-                // 4. RAM Write (Byte Enabled)
-`ifndef SYNTHESIS
-                else if (word_addr < 1048576) begin
-`else
-                else if (word_addr < 4096) begin
-`endif
-                    logic [31:0] wdata_shifted;
+                // RAM Write with Byte-Enable Support (SB, SH, SW)
+                else if (word_addr < RAM_MEMORY_SIZE) begin
+                    // Shift write data to align with target byte position
                     wdata_shifted = WriteData << (byte_offset * 8);
 
-                    if (be[0]) ram_memory[word_addr][7:0]   <= wdata_shifted[7:0];
-                    if (be[1]) ram_memory[word_addr][15:8]  <= wdata_shifted[15:8];
-                    if (be[2]) ram_memory[word_addr][23:16] <= wdata_shifted[23:16];
-                    if (be[3]) ram_memory[word_addr][31:24] <= wdata_shifted[31:24];
+                    // Write each byte lane individually based on byte-enable
+                    // be[0]=byte 0, be[1]=byte 1, be[2]=byte 2, be[3]=byte 3
+                    for (int i = 0; i < (XLEN/8); i++) begin
+                        if (be[i]) 
+                            ram_memory[word_addr][(i*8)+:8] <= wdata_shifted[(i*8)+:8];
+                    end
                 end
-            end else begin
-                uart_start <= 1'b0;
             end
         end
     end
 
 `ifndef SYNTHESIS
+    // COMPLIANCE TEST SIGNATURE DUMP 
     task dump_signature;
         integer f;
         integer i;
         begin
+            // Dumps memory region 0x200000-0x202000 to signature.txt for verification
             f = $fopen("signature.txt", "w");
-            // Dump the data section starting at 0x200000 (Word index 524288)
-            // Dump 4KB worth of data (1024 words) which should cover the signature
-            for (i = 524288; i < 524288 + 2048; i = i + 1) begin
+            for (i = 524288; i < 524288 + 2048; i = i + 1) begin  // 0x200000 / 4 = 524288
                 $fwrite(f, "%h\n", ram_memory[i]);
             end
             $fclose(f);
@@ -136,56 +128,48 @@ module DataMemory #(
     endtask
 `endif
 
+    // READ DATA FORMATTING (extracts and sign/zero-extends sub-word loads)
     logic [XLEN-1:0] formatted_read_data;
 
-    // READ FORMATTING (combinational)
     always_comb begin
         case (funct3_reg)
+            // LB: Load Byte (sign-extended)
             F3_BYTE: begin
-                case (byte_offset_reg)
-                    2'b00: formatted_read_data = {{(XLEN-8){mem_read_word_reg[7]}},  mem_read_word_reg[7:0]};
-                    2'b01: formatted_read_data = {{(XLEN-8){mem_read_word_reg[15]}}, mem_read_word_reg[15:8]};
-                    2'b10: formatted_read_data = {{(XLEN-8){mem_read_word_reg[23]}}, mem_read_word_reg[23:16]};
-                    2'b11: formatted_read_data = {{(XLEN-8){mem_read_word_reg[31]}}, mem_read_word_reg[31:24]};
-                    default: formatted_read_data = 32'b0;
-                endcase
+                formatted_read_data = riscv_pkg::sign_extend_byte(riscv_pkg::get_byte(mem_read_word_reg, byte_offset_reg));
             end
+
+            // LH: Load Halfword (sign-extended)
             F3_HALF: begin
-                case (byte_offset_reg[1])
-                    1'b0: formatted_read_data = {{(XLEN-16){mem_read_word_reg[15]}}, mem_read_word_reg[15:0]};
-                    1'b1: formatted_read_data = {{(XLEN-16){mem_read_word_reg[31]}}, mem_read_word_reg[31:16]};
-                    default: formatted_read_data = 32'b0;
-                endcase
+                formatted_read_data = riscv_pkg::sign_extend_half(riscv_pkg::get_halfword(mem_read_word_reg, byte_offset_reg[1]));
             end
-            F3_WORD: formatted_read_data = mem_read_word_reg;
+
+            // LW: Load Word (no extension needed)
+            F3_WORD: begin
+                formatted_read_data = mem_read_word_reg;
+            end
+
+            // LBU: Load Byte Unsigned (zero-extended)
             F3_LBU: begin
-                case (byte_offset_reg)
-                    2'b00: formatted_read_data = {{(XLEN-8){1'b0}}, mem_read_word_reg[7:0]};
-                    2'b01: formatted_read_data = {{(XLEN-8){1'b0}}, mem_read_word_reg[15:8]};
-                    2'b10: formatted_read_data = {{(XLEN-8){1'b0}}, mem_read_word_reg[23:16]};
-                    2'b11: formatted_read_data = {{(XLEN-8){1'b0}}, mem_read_word_reg[31:24]};
-                    default: formatted_read_data = 32'b0;
-                endcase
+                formatted_read_data = riscv_pkg::zero_extend_byte(riscv_pkg::get_byte(mem_read_word_reg, byte_offset_reg));
             end
+
+            // LHU: Load Halfword Unsigned (zero-extended)
             F3_LHU: begin
-                case (byte_offset_reg[1])
-                    1'b0: formatted_read_data = {{(XLEN-16){1'b0}}, mem_read_word_reg[15:0]};
-                    1'b1: formatted_read_data = {{(XLEN-16){1'b0}}, mem_read_word_reg[31:16]};
-                    default: formatted_read_data = 32'b0;
-                endcase
+                formatted_read_data = riscv_pkg::zero_extend_half(riscv_pkg::get_halfword(mem_read_word_reg, byte_offset_reg[1]));
             end
-            default: formatted_read_data = mem_read_word_reg;
+
+            default: begin
+                formatted_read_data = mem_read_word_reg;  // Fallback: return full word
+            end
         endcase
     end
 
-    // MMIO Read Multiplexer
+    // OUTPUT MULTIPLEXER (Memory-Mapped I/O vs RAM)
     always_comb begin
-        if (address_reg == 32'h80000008) begin
-            ReadData = {31'b0, uart_busy}; // UART Status: bit 0 is busy
-        end else if (address_reg == 32'h80000000) begin
-            ReadData = {28'b0, led_reg};   // Optional: Read back LED values
+        if (address_reg == 32'h80000000) begin
+            ReadData = {{(XLEN-LED_WIDTH){1'b0}}, led_reg};     // Return LED register value (zero-extended)
         end else begin
-            ReadData = formatted_read_data;
+            ReadData = formatted_read_data;                     // Return RAM data with proper formatting
         end
     end
 

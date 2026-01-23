@@ -4,6 +4,16 @@ package riscv_pkg;
     parameter XLEN = 32;
     parameter ALEN = 32;
     parameter LED_WIDTH  = 4;
+
+    // --- MEMORY SIZE PARAMETERS ---
+
+`ifndef SYNTHESIS
+    localparam int RAM_MEMORY_SIZE = 1048576; // 4MB for Simulation
+`else
+    localparam int RAM_MEMORY_SIZE = 4096; // 16KB for FPGA
+`endif
+
+    parameter REG_SIZE = 32; // Number of registers in the Register File
     
     // --- MEMORY MAP ---
     parameter logic [ALEN-1:0] MMIO_LED_ADDR = 32'hFFFF_FFF0;
@@ -67,5 +77,70 @@ package riscv_pkg;
         F3_BLTU = 3'b110,
         F3_BGEU = 3'b111
     } funct3_branch_t;
+
+    // ========================================================================
+    // BIT SLICE HELPER FUNCTIONS FOR BYTE/HALFWORD EXTRACTION
+    // ========================================================================
+    
+    /**
+     * @brief Extract a byte from a word based on byte offset
+     * @param word       32-bit input word
+     * @param offset     Byte position (0-3)
+     * @return           Selected 8-bit byte
+     */
+    function automatic logic [7:0] get_byte(logic [31:0] word, logic [1:0] offset);
+        case (offset)
+            2'b00: return word[7:0];
+            2'b01: return word[15:8];
+            2'b10: return word[23:16];
+            2'b11: return word[31:24];
+        endcase
+    endfunction
+
+    /**
+     * @brief Extract a halfword from a word based on halfword offset
+     * @param word       32-bit input word
+     * @param offset     Halfword position (0=lower, 1=upper)
+     * @return           Selected 16-bit halfword
+     */
+    function automatic logic [15:0] get_halfword(logic [31:0] word, logic offset);
+        return offset ? word[31:16] : word[15:0];
+    endfunction
+
+    /**
+     * @brief Sign-extend an 8-bit value to XLEN bits
+     * @param value      8-bit signed value
+     * @return           XLEN-bit sign-extended value
+     */
+    function automatic logic [XLEN-1:0] sign_extend_byte(logic [7:0] value);
+        return {{(XLEN-8){value[7]}}, value};
+    endfunction
+
+    /**
+     * @brief Sign-extend a 16-bit value to XLEN bits
+     * @param value      16-bit signed value
+     * @return           XLEN-bit sign-extended value
+     */
+    function automatic logic [XLEN-1:0] sign_extend_half(logic [15:0] value);
+        return {{(XLEN-16){value[15]}}, value};
+    endfunction
+
+    /**
+     * @brief Zero-extend an 8-bit value to XLEN bits
+     * @param value      8-bit unsigned value
+     * @return           XLEN-bit zero-extended value
+     */
+    function automatic logic [XLEN-1:0] zero_extend_byte(logic [7:0] value);
+        return {{(XLEN-8){1'b0}}, value};
+    endfunction
+
+    /**
+     * @brief Zero-extend a 16-bit value to XLEN bits
+     * @param value      16-bit unsigned value
+     * @return           XLEN-bit zero-extended value
+     */
+    function automatic logic [XLEN-1:0] zero_extend_half(logic [15:0] value);
+        return {{(XLEN-16){1'b0}}, value};
+    endfunction
 
 endpackage

@@ -60,7 +60,6 @@ module PipelinedCPU (
     // IF/ID PIPELINE REGISTER
     logic [XLEN-1:0] if_id_pc, if_id_pc_plus_4;
     logic [31:0]     if_id_instruction;  // ADD THIS
-    logic [31:0]     if_id_valid_vector;
     logic            if_id_valid;
 
     // --- ID: INSTRUCTION DECODE ---
@@ -124,8 +123,6 @@ module PipelinedCPU (
 
     // FORWARDING UNIT
     logic [1:0]      forward_a, forward_b; 
-    logic [XLEN-1:0] alu_in_a, alu_in_b;   
-    logic [XLEN-1:0] alu_in_a_forwarded;   
 
     // HAZARD UNIT
     logic stall_if, stall_id, flush_ex, flush_id;
@@ -370,18 +367,6 @@ module PipelinedCPU (
     assign dmem_wdata = mem_store_data;  // Use forwarded data
     assign dmem_we = ex_mem_mem_write;
     assign dmem_funct3 = ex_mem_funct3;
-
-    // MEM_Stage mem_stage_inst (
-    //     .clk(clk),
-    //     .rst(rst),
-    //     .alu_result(ex_mem_alu_result),
-    //     .write_data(ex_mem_write_data),
-    //     .mem_write_en(ex_mem_mem_write),
-    //     .funct3(ex_mem_funct3),
-    //     .dmem_be(dmem_be),
-    //     .leds_out(leds_out),
-    //     .uart_tx_wire(uart_tx_wire)
-    // );
     
     // Generate byte enables directly here:
     always_comb begin

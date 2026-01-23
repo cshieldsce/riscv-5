@@ -1,39 +1,48 @@
 import riscv_pkg::*;
 
+/**
+ * @brief Arithmetic Logic Unit (ALU) for RISC-V CPU
+ * 
+ * Performs arithmetic and logical operations based on the ALUControl signal.
+ * Supports all RV32I integer operations including:
+ * - Arithmetic: ADD, SUB
+ * - Logical: AND, OR, XOR
+ * - Comparison: SLT (signed), SLTU (unsigned)
+ * - Shifts: SLL (logical left), SRL (logical right), SRA (arithmetic right)
+ * 
+ * @param A           First operand (typically rs1 or PC)
+ * @param B           Second operand (typically rs2 or immediate)
+ * @param ALUControl  Operation selector from alu_op_t enum
+ * @param Result      32-bit output result
+ * @param Zero        Flag indicating if Result == 0 (used for branch decisions)
+ */
 module ALU (
     input  logic [XLEN-1:0] A, B,
     input  alu_op_t         ALUControl,
     output logic [XLEN-1:0] Result,
     output logic            Zero
 );
-    // Create a wire for the shift amount (log2(XLEN) bits of B)
+    // Extract shift amount: Only lower log2(XLEN) bits used per RISC-V spec
+    // For RV32I: bits [4:0] = 0-31 range, For RV64I: bits [5:0] = 0-63 range
     logic [$clog2(XLEN)-1:0] shamt;
     assign shamt = B[$clog2(XLEN)-1:0];
 
     always_comb begin
         case (ALUControl)
-            ALU_AND: Result = A & B;
-            ALU_OR:  Result = A | B;
-            ALU_ADD: Result = A + B;
-            ALU_SUB: Result = A - B;
-
-            // Set Less Than (Signed)
-            ALU_SLT: Result = ($signed(A) < $signed(B)) ? {{XLEN-1{1'b0}}, 1'b1} : {XLEN{1'b0}};
-            
-            // Set Less Than (Unsigned)
-            ALU_SLTU: Result = (A < B) ? {{XLEN-1{1'b0}}, 1'b1} : {XLEN{1'b0}};
-            
-            ALU_XOR: Result = A ^ B;
-            
-            // Shifts
-            ALU_SLL: Result = A << shamt;
-            ALU_SRL: Result = A >> shamt;
-            ALU_SRA: Result = $signed(A) >>> shamt; // Arithmetic shift preserves sign
-
-            default: Result = {XLEN{1'b0}};
+            ALU_AND:  Result = A & B;                                                              // Bitwise AND (AND, ANDI)
+            ALU_OR:   Result = A | B;                                                              // Bitwise OR (OR, ORI)
+            ALU_XOR:  Result = A ^ B;                                                              // Bitwise XOR (XOR, XORI)
+            ALU_ADD:  Result = A + B;                                                              // Addition, modulo 2^32 (ADD, ADDI, AUIPC, load/store addr calc)
+            ALU_SUB:  Result = A - B;                                                              // Subtraction, modulo 2^32 (SUB, branch comparisons)
+            ALU_SLT:  Result = ($signed(A) < $signed(B)) ? {{XLEN-1{1'b0}}, 1'b1} : {XLEN{1'b0}};  // Set if A < B (signed), used by SLT, SLTI, BLT, BGE
+            ALU_SLTU: Result = (A < B) ? {{XLEN-1{1'b0}}, 1'b1} : {XLEN{1'b0}};                    // Set if A < B (unsigned), used by SLTU, SLTIU, BLTU, BGEU
+            ALU_SLL:  Result = A << shamt;                                                         // Shift left logical, fill with zeros (SLL, SLLI)
+            ALU_SRL:  Result = A >> shamt;                                                         // Shift right logical, fill with zeros (SRL, SRLI)
+            ALU_SRA:  Result = $signed(A) >>> shamt;                                               // Shift right arithmetic, sign-extend (SRA, SRAI)
+            default:  Result = {XLEN{1'b0}};                                                       // Invalid operation = 0 (prevents latches)
         endcase
     end
 
-    assign Zero = (Result == {XLEN{1'b0}});
+    assign Zero = (Result == {XLEN{1'b0}});  // Zero flag: 1 if Result==0, used by BEQ/BNE for equality check
 
 endmodule
