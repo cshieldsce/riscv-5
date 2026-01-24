@@ -2,9 +2,14 @@ import riscv_pkg::*;
 
 /**
  * @brief Writeback Stage (WB)
+ * @details Selects the final data to be written back to the Register File.
+ *          Muxes between ALU result, Memory Read Data (for loads), and PC+4 (for jumps).
  * 
- * Selects the final data to be written back to the Register File.
- * Muxes between ALU result, Memory Read Data (for loads), and PC+4 (for jumps).
+ * @param mem_wb_mem_to_reg Control Signal: Selects write back source (0=ALU, 1=MEM, 2=PC+4)
+ * @param mem_wb_alu_result ALU Result from MEM stage
+ * @param mem_wb_pc_plus_4  PC+4 from MEM stage (for JAL/JALR)
+ * @param dmem_read_data    Data read from Data Memory (from MEM stage)
+ * @param wb_write_data     Final Data to be written to Register File
  */
 module WB_Stage (
     input  logic [1:0]       mem_wb_mem_to_reg,

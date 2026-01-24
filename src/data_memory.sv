@@ -2,18 +2,17 @@ import riscv_pkg::*;
 
 /**
  * @brief Data Memory Module with Memory-Mapped I/O for RISC-V CPU
+ * @details Implements synchronous RAM with support for:
+ *          - Unaligned memory access (byte/halfword/word loads and stores)
+ *          - Byte-enable control for partial word writes
+ *          - Sign-extension and zero-extension for sub-word loads
+ *          - Memory-mapped I/O (LED register at 0x80000000)
+ *          - RISC-V compliance test support (tohost register)
  * 
- * Implements synchronous RAM with support for:
- * - Unaligned memory access (byte/halfword/word loads and stores)
- * - Byte-enable control for partial word writes
- * - Sign-extension and zero-extension for sub-word loads
- * - Memory-mapped I/O (LED register at 0x80000000)
- * - RISC-V compliance test support (tohost register)
- * 
- * Memory Layout:
- * - 0x00000000 - 0x003FFFFF: RAM (4MB simulation / 16KB FPGA)
- * - 0x80000000: LED register (write-only, 4 bits)
- * - 0x80001000: ToHost register (simulation only)
+ *          Memory Layout:
+ *          - 0x00000000 - 0x003FFFFF: RAM (4MB simulation / 16KB FPGA)
+ *          - 0x80000000: LED register (write-only, 4 bits)
+ *          - 0x80001000: ToHost register (simulation only)
  * 
  * @param clk        System clock
  * @param rst        Synchronous reset (active high)
@@ -38,47 +37,47 @@ module DataMemory (
 );
     // MEMORY ARRAYS
     logic [XLEN-1:0] ram_memory [0:RAM_MEMORY_SIZE];    // Main RAM (size defined in riscv_pkg)
-    logic [3:0]      led_reg;                           // 4-bit LED register at 0x80000000
+    logic [3:0]      mem_led_reg;                       // 4-bit LED register at 0x80000000
     
     // ADDRESS DECODING
-    logic [ALEN-1:0] word_addr;                         // Word-aligned address (Address / 4)
-    logic [1:0]      byte_offset;                       // Byte position within word (0-3)
+    logic [ALEN-1:0] mem_word_addr;                     // Word-aligned address (Address / 4)
+    logic [1:0]      mem_byte_offset;                   // Byte position within word (0-3)
     
-    assign word_addr    = Address >> 2;                 // Divide by 4 to get word index
-    assign byte_offset  = Address[1:0];                 // Extract lower 2 bits for byte position
-    assign leds_out     = led_reg;                      // Connect LED register to output pins
+    assign mem_word_addr    = Address >> 2;             // Divide by 4 to get word index
+    assign mem_byte_offset  = Address[1:0];             // Extract lower 2 bits for byte position
+    assign leds_out         = mem_led_reg;              // Connect LED register to output pins
 
     // PIPELINE REGISTERS
-    logic [XLEN-1:0]  mem_read_word_reg;                // Raw 32-bit word from RAM
-    logic [2:0]       funct3_reg;                       // Registered load type (LB/LH/LW/LBU/LHU)
-    logic [1:0]       byte_offset_reg;                  // Registered byte offset for extraction
-    logic [ALEN-1:0]  address_reg;                      // Registered address for MMIO detection
+    logic [XLEN-1:0]  mem_rdata_reg;                    // Raw 32-bit word from RAM
+    logic [2:0]       mem_funct3_reg;                   // Registered load type (LB/LH/LW/LBU/LHU)
+    logic [1:0]       mem_byte_offset_reg;              // Registered byte offset for extraction
+    logic [ALEN-1:0]  mem_addr_reg;                     // Registered address for MMIO detection
 
     // WRITE DATA ALIGNMENT
-    logic [XLEN-1:0] wdata_shifted;                     // Write data shifted to align with byte offset
+    logic [XLEN-1:0] mem_wdata_shifted;                 // Write data shifted to align with byte offset
 
     always_ff @(posedge clk) begin : MemoryAccess
         if (rst) begin : ResetMemory
-            led_reg           <= 4'b0000;
-            mem_read_word_reg <= {XLEN{1'b0}};
+            mem_led_reg       <= 4'b0000;
+            mem_rdata_reg     <= {XLEN{1'b0}};
         end else begin : NormalOperation
 
             // READ PATH
-            if (word_addr < RAM_MEMORY_SIZE) begin : ValidRead
-                mem_read_word_reg <= ram_memory[word_addr];    // Read full 32-bit word
+            if (mem_word_addr < RAM_MEMORY_SIZE) begin : ValidRead
+                mem_rdata_reg <= ram_memory[mem_word_addr];    // Read full 32-bit word
             end else begin : OutOfBoundsRead
-                mem_read_word_reg <= {XLEN{1'b0}};             // Out-of-bounds reads return 0
+                mem_rdata_reg <= {XLEN{1'b0}};                 // Out-of-bounds reads return 0
             end
 
             // Register control signals for next cycle (pipeline stage)
-            funct3_reg      <= funct3;
-            byte_offset_reg <= byte_offset;
-            address_reg     <= Address;
+            mem_funct3_reg      <= funct3;
+            mem_byte_offset_reg <= mem_byte_offset;
+            mem_addr_reg        <= Address;
 
             // WRITE PATH
             if (MemWrite) begin : MemoryWrite                  
                 if (Address == 32'h80000000) begin : LEDWrite
-                    led_reg <= WriteData[3:0];                 // Update LED register (lower 4 bits)
+                    mem_led_reg <= WriteData[3:0];             // Update LED register (lower 4 bits)
                 end
 
 `ifndef SYNTHESIS
@@ -93,15 +92,15 @@ module DataMemory (
 `endif
                 
                 // RAM Write with Byte-Enable Support (SB, SH, SW)
-                else if (word_addr < RAM_MEMORY_SIZE) begin : RAMWrite
+                else if (mem_word_addr < RAM_MEMORY_SIZE) begin : RAMWrite
                     // Shift write data to align with target byte position
-                    wdata_shifted = WriteData << (byte_offset * 8);
+                    mem_wdata_shifted = WriteData << (mem_byte_offset * 8);
 
                     // Write each byte lane individually based on byte-enable
                     // be[0]=byte 0, be[1]=byte 1, be[2]=byte 2, be[3]=byte 3
                     for (int i = 0; i < (XLEN/8); i++) begin : ByteEnableWrite
                         if (be[i]) 
-                            ram_memory[word_addr][(i*8)+:8] <= wdata_shifted[(i*8)+:8];
+                            ram_memory[mem_word_addr][(i*8)+:8] <= mem_wdata_shifted[(i*8)+:8];
                     end
                 end
             end : MemoryWrite
@@ -125,41 +124,41 @@ module DataMemory (
 `endif
 
     // READ DATA FORMATTING (extracts and sign/zero-extends sub-word loads)
-    logic [XLEN-1:0] formatted_read_data;
+    logic [XLEN-1:0] mem_formatted_rdata;
 
     always_comb begin : ReadDataFormatting
-        case (funct3_reg)
+        case (mem_funct3_reg)
             F3_BYTE: begin : LoadByte
-                formatted_read_data = riscv_pkg::sign_extend_byte(riscv_pkg::get_byte(mem_read_word_reg, byte_offset_reg));
+                mem_formatted_rdata = riscv_pkg::sign_extend_byte(riscv_pkg::get_byte(mem_rdata_reg, mem_byte_offset_reg));
             end
 
             F3_HALF: begin : LoadHalfword
-                formatted_read_data = riscv_pkg::sign_extend_half(riscv_pkg::get_halfword(mem_read_word_reg, byte_offset_reg[1]));
+                mem_formatted_rdata = riscv_pkg::sign_extend_half(riscv_pkg::get_halfword(mem_rdata_reg, mem_byte_offset_reg[1]));
             end
 
             F3_WORD: begin : LoadWord
-                formatted_read_data = mem_read_word_reg;
+                mem_formatted_rdata = mem_rdata_reg;
             end
 
             F3_LBU: begin : LoadByteUnsigned
-                formatted_read_data = riscv_pkg::zero_extend_byte(riscv_pkg::get_byte(mem_read_word_reg, byte_offset_reg));
+                mem_formatted_rdata = riscv_pkg::zero_extend_byte(riscv_pkg::get_byte(mem_rdata_reg, mem_byte_offset_reg));
             end
 
             F3_LHU: begin : LoadHalfwordUnsigned
-                formatted_read_data = riscv_pkg::zero_extend_half(riscv_pkg::get_halfword(mem_read_word_reg, byte_offset_reg[1]));
+                mem_formatted_rdata = riscv_pkg::zero_extend_half(riscv_pkg::get_halfword(mem_rdata_reg, mem_byte_offset_reg[1]));
             end
 
             default: begin : DefaultCase
-                formatted_read_data = mem_read_word_reg;  // Fallback: return full word
+                mem_formatted_rdata = mem_rdata_reg;  // Fallback: return full word
             end
         endcase
     end
 
     always_comb begin : OutputMultiplexer
-        if (address_reg == 32'h80000000) begin : LEDRead        // MMIO Read for LEDs
-            ReadData = {{(XLEN-LED_WIDTH){1'b0}}, led_reg};     // Return LED register value (zero-extended)
+        if (mem_addr_reg == 32'h80000000) begin : LEDRead        // MMIO Read for LEDs
+            ReadData = {{(XLEN-LED_WIDTH){1'b0}}, mem_led_reg};  // Return LED register value (zero-extended)
         end else begin : NormalRead
-            ReadData = formatted_read_data;                     // Return RAM data with proper formatting
+            ReadData = mem_formatted_rdata;                      // Return RAM data with proper formatting
         end
     end
 

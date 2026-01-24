@@ -2,13 +2,31 @@ import riscv_pkg::*;
 
 /**
  * @brief Execute Stage (EX)
+ * @details Performs ALU operations and resolves branches.
+ *          Responsibilities:
+ *          - ALU operand MUXing (Forwarding logic + Source selection)
+ *          - ALU calculation
+ *          - Branch target calculation (PC + Immediate)
+ *          - Branch resolution (Comparator)
  * 
- * Performs ALU operations and resolves branches.
- * Responsibilities:
- * - ALU operand MUXing (Forwarding logic + Source selection)
- * - ALU calculation
- * - Branch target calculation (PC + Immediate)
- * - Branch resolution (Comparator)
+ * @param pc                Program Counter
+ * @param imm               Immediate value
+ * @param rs1_data          Data from Register File (rs1)
+ * @param rs2_data          Data from Register File (rs2)
+ * @param forward_a         Forwarding Select A (00=Reg, 01=WB, 10=MEM)
+ * @param forward_b         Forwarding Select B (00=Reg, 01=WB, 10=MEM)
+ * @param ex_mem_alu_result Forwarded ALU result from MEM stage
+ * @param wb_write_data     Forwarded write data from WB stage
+ * @param alu_control       ALU Operation Control
+ * @param alu_src           ALU Source B Select (0=Reg, 1=Imm)
+ * @param alu_src_a         ALU Source A Select (0=Reg, 1=PC, 2=Zero)
+ * @param branch_en         Branch Enable
+ * @param funct3            Branch Type (BEQ, BNE, etc.)
+ * @param alu_result        ALU Calculation Result
+ * @param alu_zero          Zero Flag (Result == 0)
+ * @param branch_taken      Branch Taken Flag
+ * @param branch_target     Calculated Branch Target Address
+ * @param rs2_data_forwarded Forwarded rs2 data (for Store operations)
  */
 module EX_Stage (
     // Data Inputs
@@ -38,16 +56,16 @@ module EX_Stage (
     output logic [XLEN-1:0] rs2_data_forwarded // Passed to MEM stage for Store
 );
 
-    logic [XLEN-1:0] alu_in_a_forwarded;
-    logic [XLEN-1:0] alu_in_a;
-    logic [XLEN-1:0] alu_in_b;
+    logic [XLEN-1:0] ex_alu_in_a_fwd;
+    logic [XLEN-1:0] ex_alu_in_a;
+    logic [XLEN-1:0] ex_alu_in_b;
 
     always_comb begin : ForwardA_MUX
         case (forward_a)
-            2'b00:   alu_in_a_forwarded = rs1_data;          // Forward rs1 from Register File
-            2'b01:   alu_in_a_forwarded = wb_write_data;     // Forward write data from WB
-            2'b10:   alu_in_a_forwarded = ex_mem_alu_result; // Forward ALU result from MEM
-            default: alu_in_a_forwarded = rs1_data;          // Fallback: rs1 from Register File
+            2'b00:   ex_alu_in_a_fwd = rs1_data;          // Forward rs1 from Register File
+            2'b01:   ex_alu_in_a_fwd = wb_write_data;     // Forward write data from WB
+            2'b10:   ex_alu_in_a_fwd = ex_mem_alu_result; // Forward ALU result from MEM
+            default: ex_alu_in_a_fwd = rs1_data;          // Fallback: rs1 from Register File
         endcase
     end
 
@@ -62,21 +80,21 @@ module EX_Stage (
 
     always_comb begin : ALUInputA_MUX
         case (alu_src_a)
-            2'b00:   alu_in_a = alu_in_a_forwarded;  // Regular register op
-            2'b01:   alu_in_a = pc;                  // AUIPC
-            2'b10:   alu_in_a = {XLEN{1'b0}};        // LUI
-            default: alu_in_a = alu_in_a_forwarded;  // Fallback: regular register op
+            2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;  // Regular register op
+            2'b01:   ex_alu_in_a = pc;               // AUIPC
+            2'b10:   ex_alu_in_a = {XLEN{1'b0}};     // LUI
+            default: ex_alu_in_a = ex_alu_in_a_fwd;  // Fallback: regular register op
         endcase
     end
 
     // --- ALU Input B MUX: ---
     // Selects between Register (rs2) and Immediate
-    assign alu_in_b = alu_src ? imm : rs2_data_forwarded;
+    assign ex_alu_in_b = alu_src ? imm : rs2_data_forwarded;
 
     // --- ALU Instantiation ---
     ALU alu_inst (
-        .A(alu_in_a),
-        .B(alu_in_b),
+        .A(ex_alu_in_a),
+        .B(ex_alu_in_b),
         .ALUControl(alu_control),
         .Result(alu_result),
         .Zero(alu_zero)

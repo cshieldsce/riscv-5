@@ -30,14 +30,14 @@ Apply the new header standards and signal naming conventions to the early stages
 ## Phase 3: Execution and Backend Refactoring (EX, MEM, WB)
 Apply refactoring to the remaining execution stages and memory interface.
 
-- [ ] Task: Refactor EX Stage (`ex_stage.sv`, `alu.sv`)
-    - [ ] Update module headers.
-    - [ ] Rename internal signals using the `ex_` prefix.
-    - [ ] Refactor ALU or mux logic into helper functions for clarity.
-- [ ] Task: Refactor MEM and WB Stages (`mem_stage.sv`, `data_memory.sv`, `wb_stage.sv`)
-    - [ ] Update module headers.
-    - [ ] Rename internal signals using `mem_` and `wb_` prefixes.
-- [ ] Task: Run Compliance Suite to ensure zero regression.
+- [x] Task: Refactor EX Stage (`ex_stage.sv`, `alu.sv`)
+    - [x] Update module headers.
+    - [x] Rename internal signals using the `ex_` prefix.
+    - [x] Refactor ALU or mux logic into helper functions for clarity.
+- [x] Task: Refactor MEM and WB Stages (`mem_stage.sv`, `data_memory.sv`, `wb_stage.sv`)
+    - [x] Update module headers.
+    - [x] Rename internal signals using `mem_` and `wb_` prefixes.
+- [x] Task: Run Compliance Suite to ensure zero regression.
 
 ## Phase 4: Control and Hazard Logic Refactoring
 Refactor the most complex coordination logic in the CPU.
