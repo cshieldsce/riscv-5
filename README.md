@@ -44,12 +44,17 @@ Comprehensive technical documentation including:
 
 ## Quick Start
 ```bash
-# Install iVerilog & GTKWave
-sudo apt-get install iverilog gtkwave
+# 1. Install dependencies
+sudo apt-get install -y iverilog gtkwave python3-pip git gcc-riscv64-unknown-elf
+pip3 install riscof
 
-# Clone repository
+# 2. Clone and setup project
 git clone https://github.com/cshieldsce/riscv-5.git
 cd riscv-5
+./setup_project.sh
+
+# 3. Run compliance tests
+./test/verification/run_compliance.sh
 ```
 ---
 
@@ -64,7 +69,8 @@ riscv-5/
 │   └── forwarding_unit.sv  # Bypass control
 ├── test/
 │   ├── verification/       # RISCOF compliance framework
-│   ├── programs/           # Assembly test cases
+│   ├── mem/                # Hex memory test files
+│   ├── tb/                 # SystemVerilog testbenches
 │   └── scripts/            # Automation scripts
 ├── fpga/
 │   ├── constraints/        # XDC timing constraints

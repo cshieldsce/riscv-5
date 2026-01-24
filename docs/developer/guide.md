@@ -1,11 +1,8 @@
-layout: post
-title: Developer Guide
-
-# Developer Guide: Technical Onboarding
+# Developer Guide
 
 This guide provides the technical instructions for building, simulating, and extending the `riscv-5` core. For this audience, clarity of instruction and reproducibility of results are paramount.
 
-## 🏛️ Rationale: Engineering Reproducibility
+## Engineering Rationale
 
 A core that only runs on the original designer's machine is not a professional product. The "Developer Guide" quadrant ensures that the design is portable, the toolchain dependencies are clear, and the simulation results are reproducible. By providing copy-pasteable onboarding instructions, we prove that the project is built with collaboration and "Open Source" scalability in mind.
 
@@ -21,22 +18,61 @@ sudo apt-get install -y iverilog gtkwave python3 python3-pip git
 sudo apt-get install gcc-riscv64-unknown-elf
 ```
 
-### 1.2 RISCOF Framework
+### 1.2 RISCOF Compliance Framework
 ```bash
 pip3 install riscof
+```
+
+### 1.3 Project Setup
+```bash
+# Clone the repository
+git clone https://github.com/cshieldsce/riscv-5.git
+cd riscv-5
+
+# Fetch external dependencies (RISC-V Architecture Test Suite)
+./setup_project.sh
+```
+The `setup_project.sh` script will:
+- Clone the [RISC-V Architecture Test Suite](https://github.com/riscv-non-isa/riscv-arch-test) into `test/verification/riscv-arch-test/`
+- Verify that `riscv64-unknown-elf-gcc` is available in your PATH
+
+### 1.4 Verify Installation
+```bash
+# Check tools
+iverilog -v
+riscv64-unknown-elf-gcc --version
+riscof --version
+
+# Verify test suite was cloned
+ls test/verification/riscv-arch-test/
 ```
 
 ---
 
 ## 2. Functional Simulation Workflow
 
-We use **Icarus Verilog** for simulation and **GTKWave** for waveform analysis.
+We use **Icarus Verilog** for simulation, you can also use **GTKWave** for waveform analysis.
 
-### 2.1 Running the Regression Suite
-To verify the core's basic functionality against the provided assembly programs:
+### 2.1 Running Individual Tests
 ```bash
-./test/scripts/regression_check.sh
+# Navigate to testbench directory
+cd test/tb
+
+# Compile the core with a specific test
+iverilog -g2012 -I ../../src/ -o sim.out \
+    ../../src/riscv_pkg.sv \
+    ../../src/*.sv \
+    pipelined_cpu_tb.sv
+
+# Run with a memory file
+vvp sim.out +TEST=../mem/fib_test.mem
+
+# View waveforms
+gtkwave waveform.vcd
 ```
+
+2.2 Running the Regression Suite
+
 
 ### 2.2 Manual Execution
 To compile the core and testbench against a specific memory initialization file (`.mem`):
@@ -74,10 +110,6 @@ Use the provided TCL script to generate the Vivado project:
 cd fpga
 vivado -mode batch -source create_project.tcl
 ```
-
-### 4.2 UART Communication
-Monitor core output via UART at **115200 baud**.
-<!-- ELABORATION POINT: Provide a brief troubleshooting section for FPGA deployment (e.g., what to do if the UART output is garbled or the LEDs don't blink as expected). -->
 
 ---
 *Built for the Silicon Industry. Verified for the Future.*

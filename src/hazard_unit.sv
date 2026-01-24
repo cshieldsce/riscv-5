@@ -1,5 +1,19 @@
 import riscv_pkg::*;
 
+/**
+ * @brief Hazard Detection Unit
+ * 
+ * Manages pipeline stalls and flushes to resolve hazards that cannot be 
+ * handled by forwarding alone.
+ * 
+ * Handled Hazards:
+ * 1. Load-Use Hazard: Instruction in ID needs data from a Load in EX.
+ *    - Action: Stall IF and ID, flush EX (insert bubble).
+ * 2. ALU-to-Branch Hazard: Branch in ID depends on ALU result still in EX.
+ *    - Action: Stall IF and ID, flush EX (insert bubble).
+ * 3. Control Hazards: Branch Taken or Jumps.
+ *    - Action: Flush fetched instructions in pipeline stages to discard wrong path.
+ */
 module HazardUnit (
     // Inputs from ID Stage (Current Instruction)
     input  logic [4:0] id_rs1,
@@ -8,64 +22,92 @@ module HazardUnit (
 
     // Inputs from EX Stage (Previous Instruction)
     input  logic [4:0] id_ex_rd,
-    input  logic       id_ex_mem_read, // High if instruction in EX is a load
+    input  logic       id_ex_mem_read, // High if instruction in EX is a Load
     
-    // Inputs from Branch Logic
-    input  logic       PCSrc,        // High if branch is taken
+    // Control Hazard Signals
+    input  logic       PCSrc,          // High if branch/JALR is taken (resolved in EX)
+    input  logic       jump_id_stage,  // High if JAL is detected (resolved in ID)
     
-    // Early jump detection from ID stage
-    input  logic       jump_id_stage,
-    
-    // Outputs to Control Signals
-    output logic       stall_if,        // Freeze PC
-    output logic       stall_id,        // Freeze IF/ID register
-    output logic       flush_ex,        // Flush ID/EX register (insert NOP)
-    output logic       flush_id         // Flush IF/ID register
+    // Pipeline Control Outputs
+    output logic       stall_if,       // Freeze PC and IF Stage
+    output logic       stall_id,       // Freeze IF/ID Pipeline Register
+    output logic       flush_ex,       // Flush ID/EX Pipeline Register (Insert NOP)
+    output logic       flush_id        // Flush IF/ID Pipeline Register (Discard Fetch)
 );
 
-    logic id_ex_is_alu_write;
-    assign id_ex_is_alu_write = (id_ex_rd != 0) && !id_ex_mem_read;
+    // --- Local Helper Functions ---
+    
+    /**
+     * @brief Check if register dependency exists (excluding x0)
+     */
+    function automatic logic has_register_dependency(
+        input logic [4:0] rd,
+        input logic [4:0] rs1,
+        input logic [4:0] rs2
+    );
+        return (rd != 5'b0) && ((rd == rs1) || (rd == rs2));
+    endfunction
 
-    always_comb begin : HazardUnit
-        // Default values (no hazards)
-        stall_if = 0;
-        stall_id = 0;
-        flush_ex = 0;
-        flush_id = 0;
+    /**
+     * @brief Detect Load-Use hazard
+     */
+    function automatic logic is_load_use_hazard(
+        input logic       ex_is_load,
+        input logic [4:0] ex_rd,
+        input logic [4:0] id_rs1,
+        input logic [4:0] id_rs2
+    );
+        return ex_is_load && has_register_dependency(ex_rd, id_rs1, id_rs2);
+    endfunction
 
-        // Hazard detection is prioritized. The first condition to match takes precedence.
+    /**
+     * @brief Detect ALU-to-Branch hazard
+     */
+    function automatic logic is_alu_branch_hazard(
+        input logic       ex_is_load,
+        input logic [4:0] ex_rd,
+        input logic       id_is_branch,
+        input logic [4:0] id_rs1,
+        input logic [4:0] id_rs2
+    );
+        return !ex_is_load && 
+               id_is_branch && 
+               has_register_dependency(ex_rd, id_rs1, id_rs2);
+    endfunction
 
-        // ========================================================================
-        // PRIORITY 1: LOAD-USE HAZARD
-        // ========================================================================
-        // Stalls the pipeline for one cycle if the instruction in ID depends on
-        // a load instruction currently in EX. This is the highest priority stall.
-        if (id_ex_mem_read && ((id_ex_rd == id_rs1) || (id_ex_rd == id_rs2))) begin
-            stall_if = 1; 
-            stall_id = 1;
-            flush_ex = 1; // Insert a bubble
+    // --- Hazard Detection Logic ---
+    
+    always_comb begin : HazardDetection
+        // Default: Normal Operation
+        stall_if = 1'b0;
+        stall_id = 1'b0;
+        flush_ex = 1'b0;
+        flush_id = 1'b0;
+
+        // 1. DATA HAZARD: LOAD-USE
+        if (is_load_use_hazard(id_ex_mem_read, id_ex_rd, id_rs1, id_rs2)) begin
+            stall_if = 1'b1;
+            stall_id = 1'b1;
+            flush_ex = 1'b1;
         end
         
-        // ========================================================================
-        // PRIORITY 2: ALU-to-BRANCH HAZARD
-        // ========================================================================
-        // Stalls if a branch in ID depends on an ALU result from EX.
-        else if ((id_ex_rd != 0) && !id_ex_mem_read && id_branch && ((id_ex_rd == id_rs1) || (id_ex_rd == id_rs2))) begin
-             stall_if = 1;
-             stall_id = 1;
-             flush_ex = 1; // Insert a bubble
+        // 2. DATA HAZARD: ALU-to-BRANCH
+        else if (is_alu_branch_hazard(id_ex_mem_read, id_ex_rd, id_branch, id_rs1, id_rs2)) begin
+            stall_if = 1'b1;
+            stall_id = 1'b1;
+            flush_ex = 1'b1;
         end
 
-        // ========================================================================
-        // PRIORITY 3: CONTROL HAZARDS (Jumps and Taken Branches)
-        // ========================================================================
-        // These hazards flush instructions that were fetched from the wrong path.
-        else if (PCSrc) begin // Branch/JALR is taken (resolved in EX)
-            flush_id = 1;
-            flush_ex = 1;
+        // 3. CONTROL HAZARD: BRANCH TAKEN / JALR
+        else if (PCSrc) begin
+            flush_id = 1'b1;
+            flush_ex = 1'b1;
         end
-        else if (jump_id_stage) begin // JAL is in ID stage
-            flush_id = 1;
+        
+        // 4. CONTROL HAZARD: UNCONDITIONAL JUMP (JAL)
+        else if (jump_id_stage) begin
+            flush_id = 1'b1;
         end
     end
+
 endmodule

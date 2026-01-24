@@ -78,9 +78,7 @@ package riscv_pkg;
         F3_BGEU = 3'b111
     } funct3_branch_t;
 
-    // ========================================================================
-    // BIT SLICE HELPER FUNCTIONS FOR BYTE/HALFWORD EXTRACTION
-    // ========================================================================
+    // --- Bit Slice Helper Functions ---
     
     /**
      * @brief Extract a byte from a word based on byte offset
@@ -141,6 +139,32 @@ package riscv_pkg;
      */
     function automatic logic [XLEN-1:0] zero_extend_half(logic [15:0] value);
         return {{(XLEN-16){1'b0}}, value};
+    endfunction
+
+    /**
+     * @brief Generate byte enable mask based on funct3 and address alignment
+     * @param funct3     Memory operation type (byte, half, word)
+     * @param addr_lsb   Lower 2 bits of the address
+     * @return           4-bit byte enable mask
+     */
+    function automatic logic [3:0] get_byte_enable(logic [2:0] funct3, logic [1:0] addr_lsb);
+        case (funct3)
+            F3_BYTE: begin : ByteEnable
+                case (addr_lsb)
+                    2'b00: return 4'b0001;
+                    2'b01: return 4'b0010;
+                    2'b10: return 4'b0100;
+                    2'b11: return 4'b1000;
+                endcase
+            end
+            F3_HALF: begin : HalfwordEnable
+                case (addr_lsb[1])
+                    1'b0: return 4'b0011;
+                    1'b1: return 4'b1100;
+                endcase
+            end
+            default: return 4'b1111; // F3_WORD or others
+        endcase
     endfunction
 
 endpackage

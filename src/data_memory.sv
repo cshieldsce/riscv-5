@@ -57,18 +57,17 @@ module DataMemory (
     // WRITE DATA ALIGNMENT
     logic [XLEN-1:0] wdata_shifted;                     // Write data shifted to align with byte offset
 
-    // SYNCHRONOUS MEMORY READ & WRITE
-    always_ff @(posedge clk) begin
-        if (rst) begin
+    always_ff @(posedge clk) begin : MemoryAccess
+        if (rst) begin : ResetMemory
             led_reg           <= 4'b0000;
             mem_read_word_reg <= {XLEN{1'b0}};
-        end else begin
+        end else begin : NormalOperation
 
-            // READ PATH: Always read from RAM (1-cycle latency for BRAM)
-            if (word_addr < RAM_MEMORY_SIZE) begin
-                mem_read_word_reg <= ram_memory[word_addr];      // Read full 32-bit word
-            end else begin
-                mem_read_word_reg <= {XLEN{1'b0}};               // Out-of-bounds = 0
+            // READ PATH
+            if (word_addr < RAM_MEMORY_SIZE) begin : ValidRead
+                mem_read_word_reg <= ram_memory[word_addr];    // Read full 32-bit word
+            end else begin : OutOfBoundsRead
+                mem_read_word_reg <= {XLEN{1'b0}};             // Out-of-bounds reads return 0
             end
 
             // Register control signals for next cycle (pipeline stage)
@@ -76,18 +75,16 @@ module DataMemory (
             byte_offset_reg <= byte_offset;
             address_reg     <= Address;
 
-            // WRITE PATH: Memory-mapped I/O and RAM writes
-            if (MemWrite) begin
-                // LED Register (0x80000000) - Write lower 4 bits to LEDs
-                if (Address == 32'h80000000) begin
-                    led_reg <= WriteData[3:0];
+            // WRITE PATH
+            if (MemWrite) begin : MemoryWrite                  
+                if (Address == 32'h80000000) begin : LEDWrite
+                    led_reg <= WriteData[3:0];                 // Update LED register (lower 4 bits)
                 end
 
 `ifndef SYNTHESIS
-                // ToHost Register (0x80001000) - RISC-V compliance test endpoint
-                // Writing 1 signals test completion and dumps signature
-                else if (Address == 32'h80001000) begin
-                    if (WriteData[0] == 1'b1) begin
+                // RISC-V COMPLIANCE TEST SUPPORT
+                else if (Address == 32'h80001000) begin : ToHostWrite
+                    if (WriteData[0] == 1'b1) begin : ToHostFinish
                         $display("Simulation hit tohost finish. Status: PASS");
                         dump_signature();
                         $finish;
@@ -96,31 +93,30 @@ module DataMemory (
 `endif
                 
                 // RAM Write with Byte-Enable Support (SB, SH, SW)
-                else if (word_addr < RAM_MEMORY_SIZE) begin
+                else if (word_addr < RAM_MEMORY_SIZE) begin : RAMWrite
                     // Shift write data to align with target byte position
                     wdata_shifted = WriteData << (byte_offset * 8);
 
                     // Write each byte lane individually based on byte-enable
                     // be[0]=byte 0, be[1]=byte 1, be[2]=byte 2, be[3]=byte 3
-                    for (int i = 0; i < (XLEN/8); i++) begin
+                    for (int i = 0; i < (XLEN/8); i++) begin : ByteEnableWrite
                         if (be[i]) 
                             ram_memory[word_addr][(i*8)+:8] <= wdata_shifted[(i*8)+:8];
                     end
                 end
-            end
-        end
-    end
+            end : MemoryWrite
+        end : NormalOperation
+    end : MemoryAccess
 
 `ifndef SYNTHESIS
     // COMPLIANCE TEST SIGNATURE DUMP 
     task dump_signature;
         integer f;
         integer i;
-        begin
-            // Dumps memory region 0x200000-0x202000 to signature.txt for verification
+        begin : DumpSignature
             f = $fopen("signature.txt", "w");
-            for (i = 524288; i < 524288 + 2048; i = i + 1) begin  // 0x200000 / 4 = 524288
-                $fwrite(f, "%h\n", ram_memory[i]);
+            for (i = 524288; i < 524288 + 2048; i = i + 1) begin : SignatureDumpLoop // 0x200000 / 4 = 524288
+                $fwrite(f, "%h\n", ram_memory[i]);                                   // Write each word in hex
             end
             $fclose(f);
             $display("Signature dumped to signature.txt");
@@ -131,44 +127,38 @@ module DataMemory (
     // READ DATA FORMATTING (extracts and sign/zero-extends sub-word loads)
     logic [XLEN-1:0] formatted_read_data;
 
-    always_comb begin
+    always_comb begin : ReadDataFormatting
         case (funct3_reg)
-            // LB: Load Byte (sign-extended)
-            F3_BYTE: begin
+            F3_BYTE: begin : LoadByte
                 formatted_read_data = riscv_pkg::sign_extend_byte(riscv_pkg::get_byte(mem_read_word_reg, byte_offset_reg));
             end
 
-            // LH: Load Halfword (sign-extended)
-            F3_HALF: begin
+            F3_HALF: begin : LoadHalfword
                 formatted_read_data = riscv_pkg::sign_extend_half(riscv_pkg::get_halfword(mem_read_word_reg, byte_offset_reg[1]));
             end
 
-            // LW: Load Word (no extension needed)
-            F3_WORD: begin
+            F3_WORD: begin : LoadWord
                 formatted_read_data = mem_read_word_reg;
             end
 
-            // LBU: Load Byte Unsigned (zero-extended)
-            F3_LBU: begin
+            F3_LBU: begin : LoadByteUnsigned
                 formatted_read_data = riscv_pkg::zero_extend_byte(riscv_pkg::get_byte(mem_read_word_reg, byte_offset_reg));
             end
 
-            // LHU: Load Halfword Unsigned (zero-extended)
-            F3_LHU: begin
+            F3_LHU: begin : LoadHalfwordUnsigned
                 formatted_read_data = riscv_pkg::zero_extend_half(riscv_pkg::get_halfword(mem_read_word_reg, byte_offset_reg[1]));
             end
 
-            default: begin
+            default: begin : DefaultCase
                 formatted_read_data = mem_read_word_reg;  // Fallback: return full word
             end
         endcase
     end
 
-    // OUTPUT MULTIPLEXER (Memory-Mapped I/O vs RAM)
-    always_comb begin
-        if (address_reg == 32'h80000000) begin
+    always_comb begin : OutputMultiplexer
+        if (address_reg == 32'h80000000) begin : LEDRead        // MMIO Read for LEDs
             ReadData = {{(XLEN-LED_WIDTH){1'b0}}, led_reg};     // Return LED register value (zero-extended)
-        end else begin
+        end else begin : NormalRead
             ReadData = formatted_read_data;                     // Return RAM data with proper formatting
         end
     end

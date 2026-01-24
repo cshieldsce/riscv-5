@@ -1,5 +1,16 @@
 import riscv_pkg::*;
 
+/**
+ * @brief Instruction Decode Stage (ID)
+ * 
+ * Decodes the fetched instruction and sets up control signals.
+ * Responsibilities:
+ * - Decodes opcode, register indices (rs1, rs2, rd), and immediates
+ * - Instantiates the Main Control Unit
+ * - Instantiates the Register File (read ports)
+ * - Instantiates the Immediate Generator
+ * - Passes control signals and data to ID/EX pipeline register
+ */
 module ID_Stage (
     input  logic             clk,
     input  logic             rst,
@@ -14,9 +25,9 @@ module ID_Stage (
     input  logic [4:0]       rd_wb,
     
     // Outputs to ID/EX register and Hazard Unit
-    output logic [XLEN-1:0]  read_data1,
-    output logic [XLEN-1:0]  read_data2,
-    output logic [XLEN-1:0]  imm_out,
+    output logic [XLEN-1:0]  read_data1,    // Data from RegFile rs1
+    output logic [XLEN-1:0]  read_data2,    // Data from RegFile rs2
+    output logic [XLEN-1:0]  imm_out,       // Sign-extended immediate
     output logic [4:0]       rs1,
     output logic [4:0]       rs2,
     output logic [4:0]       rd,
@@ -28,15 +39,15 @@ module ID_Stage (
     output logic             reg_write,
     output logic             mem_write,
     output alu_op_t          alu_control,
-    output logic             alu_src,
-    output logic [1:0]       alu_src_a,
-    output logic [1:0]       mem_to_reg,
+    output logic             alu_src,       // 0=rs2, 1=imm
+    output logic [1:0]       alu_src_a,     // 0=rs1, 1=PC, 2=Zero
+    output logic [1:0]       mem_to_reg,    // 0=ALU, 1=Mem, 2=PC+4
     output logic             branch,
     output logic             jump,
     output logic             jalr
 );
 
-    // --- Instruction Decoding ---
+    // --- Instruction Field Decoding ---
     assign opcode = opcode_t'(instruction[6:0]);
     assign rd     = instruction[11:7];
     assign funct3 = instruction[14:12];
@@ -60,22 +71,22 @@ module ID_Stage (
         .jalr(jalr)
     );
 
-    // ===================================
-    // REGISTER FILE INSTANTIATION
-    // ===================================
+    // --- Register File Instantiation ---
+    // Asynchronous read, synchronous write
     RegFile reg_file_inst (
         .clk(clk),
         .rst(rst),
-        .RegWrite(reg_write_wb),
+        .RegWrite(reg_write_wb),     // Write enable from WB stage
         .rs1(rs1),                   
         .rs2(rs2),                   
-        .rd(rd_wb),               
-        .write_data(write_data_wb),  
+        .rd(rd_wb),                  // Write address from WB stage
+        .write_data(write_data_wb),  // Data from WB stage
         .read_data1(read_data1),   
         .read_data2(read_data2)     
     );
 
     // --- Immediate Generator ---
+    // Generates 32-bit sign-extended immediates based on instruction type
     ImmGen imm_gen_inst (
         .instruction(instruction),
         .opcode(opcode),

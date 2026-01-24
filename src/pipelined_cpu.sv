@@ -1,6 +1,22 @@
 // 5-Stage Pipelined RISC-V CPU Top-Level
 import riscv_pkg::*;
 
+/**
+ * @brief 5-Stage Pipelined RISC-V CPU Top-Level Module
+ * 
+ * Implements a standard 5-stage pipeline:
+ * 1. IF (Instruction Fetch): Fetches instruction from memory
+ * 2. ID (Instruction Decode): Decodes instruction, reads registers, resolves hazards
+ * 3. EX (Execute): ALU operations, branch resolution, address calculation
+ * 4. MEM (Memory): Data memory access (Load/Store)
+ * 5. WB (Writeback): Writes results back to register file
+ * 
+ * Features:
+ * - Full forwarding (EX-to-EX, MEM-to-EX, WB-to-MEM)
+ * - Hazard detection (Load-Use stalls, Control hazards/flushes)
+ * - Dynamic branch prediction (assuming branch not taken, flushing on misprediction)
+ * - Memory-Mapped I/O support via Data Memory interface
+ */
 module PipelinedCPU (
     input  logic             clk,
     input  logic             rst,
@@ -19,50 +35,40 @@ module PipelinedCPU (
     output logic [2:0]       dmem_funct3
 );
 
-    // ========================================================================
-    // PIPELINE REGISTER WIDTHS
-    // ========================================================================
+    // --- Pipeline Register Widths ---
     // IF/ID: PC(XLEN) + Inst(32) + PC+4(XLEN)
     localparam IF_ID_WIDTH = XLEN + 32 + XLEN;
     
     // ID/EX: 
     // Data: PC(X), PC+4(X), RD1(X), RD2(X), Imm(X), rs1(5), rs2(5), rd(5), funct3(3)
     // Control: RegWrite(1), MemWrite(1), ALUControl(4), ALUSrc(1), ALUSrcA(2), MemToReg(2), Branch(1), Jump(1), Jalr(1)
-    // Total Data: 5*XLEN + 18
-    // Total Control: 14
     localparam ID_EX_WIDTH = (5 * XLEN) + 18 + 14;
 
     // EX/MEM:
-    // Data: ALUResult(X), WriteData(X), rd(5), PC+4(X), funct3(3), rs2(5)  // ADD rs2
+    // Data: ALUResult(X), WriteData(X), rd(5), PC+4(X), funct3(3), rs2(5)
     // Control: RegWrite(1), MemWrite(1), MemToReg(2)
-    // Total Data: 3*XLEN + 8 + 5 = 3*XLEN + 13
-    // Total Control: 4
-    localparam EX_MEM_WIDTH = (3 * XLEN) + 13 + 4;  // CHANGED: Added 5 bits for rs2
+    localparam EX_MEM_WIDTH = (3 * XLEN) + 13 + 4;
 
     // MEM/WB:
     // Data: ReadData(X), ALUResult(X), rd(5), PC+4(X)
     // Control: RegWrite(1), MemToReg(2)
-    // Total Data: 3*XLEN + 5
-    // Total Control: 3
     localparam MEM_WB_WIDTH = (3 * XLEN) + 5 + 3;
 
     localparam PC_MASK_WIDTH = XLEN - 1;
-    localparam INSTR_PAD_WIDTH = XLEN - 32;
 
-    // ========================================================================
-    // STAGES CONTROL SIGNALS AND WIRES
-    // ========================================================================
+    // --- Internal Signals ---
     
-    // --- IF: INSTRUCTION FETCH ---
+    // --- IF STAGE SIGNALS ---
     logic [XLEN-1:0] if_pc, if_instruction_wire, if_pc_plus_4;
-    logic [31:0]     if_instruction; // Instruction is always 32-bit
+    logic [31:0]     if_instruction; 
+    logic [XLEN-1:0] next_pc; 
 
-    // IF/ID PIPELINE REGISTER
+    // IF/ID Pipeline Register Outputs
     logic [XLEN-1:0] if_id_pc, if_id_pc_plus_4;
-    logic [31:0]     if_id_instruction;  // ADD THIS
+    logic [31:0]     if_id_instruction;
     logic            if_id_valid;
 
-    // --- ID: INSTRUCTION DECODE ---
+    // --- ID STAGE SIGNALS ---
     logic [XLEN-1:0] id_read_data1, id_read_data2, id_imm_out;
     logic [4:0]      id_rs1, id_rs2, id_rd;
     opcode_t         id_opcode;
@@ -77,10 +83,11 @@ module PipelinedCPU (
     logic [1:0]      id_mem_to_reg;
     logic            id_branch, id_jump, id_jalr;
 
-    // ID/EX PIPELINE REGISTER
+    // ID/EX Pipeline Register Outputs
     logic [XLEN-1:0] id_ex_pc, id_ex_pc_plus_4;
     logic [XLEN-1:0] id_ex_read_data1, id_ex_read_data2, id_ex_imm;
     logic [4:0]      id_ex_rs1, id_ex_rs2, id_ex_rd;
+    logic [2:0]      id_ex_funct3;
 
     // ID/EX Control Signals
     logic            id_ex_reg_write, id_ex_mem_write;
@@ -90,26 +97,27 @@ module PipelinedCPU (
     logic [1:0]      id_ex_mem_to_reg;
     logic            id_ex_branch, id_ex_jump, id_ex_jalr;
 
-    // --- EX: EXECUTE ---
+    // --- EX STAGE SIGNALS ---
     logic [XLEN-1:0] ex_alu_result, ex_alu_b_input; 
     logic            ex_zero;
     logic [XLEN-1:0] ex_branch_target;
     logic            branch_taken;
 
-    // EX/MEM PIPELINE REGISTER
+    // EX/MEM Pipeline Register Outputs
     logic [XLEN-1:0] ex_mem_alu_result, ex_mem_write_data; 
     logic [4:0]      ex_mem_rd;
     logic [4:0]      ex_mem_rs2;        
     logic [XLEN-1:0] ex_mem_pc_plus_4;
+    logic [2:0]      ex_mem_funct3; 
 
     // EX/MEM Control Signals
     logic            ex_mem_reg_write, ex_mem_mem_write;
     logic [1:0]      ex_mem_mem_to_reg;
 
-    // --- MEM: MEMORY ---
+    // --- MEM STAGE SIGNALS ---
     logic [XLEN-1:0] mem_read_data;
 
-    // MEM/WB PIPELINE REGISTER
+    // MEM/WB Pipeline Register Outputs
     logic [XLEN-1:0] mem_wb_read_data, mem_wb_alu_result;
     logic [4:0]      mem_wb_rd;
     logic [XLEN-1:0] mem_wb_pc_plus_4;
@@ -118,96 +126,62 @@ module PipelinedCPU (
     logic            mem_wb_reg_write;
     logic [1:0]      mem_wb_mem_to_reg;
 
-    // --- WB: WRITEBACK ---
+    // --- WB STAGE SIGNALS ---
     logic [XLEN-1:0] wb_write_data; 
 
-    // FORWARDING UNIT
+    // --- HAZARD & FORWARDING SIGNALS ---
     logic [1:0]      forward_a, forward_b; 
+    logic            stall_if, stall_id, flush_ex, flush_id;
+    logic            pcsrc; 
 
-    // HAZARD UNIT
-    logic stall_if, stall_id, flush_ex, flush_id;
-    logic pcsrc; 
-
-    // MMIO signals
-    logic [2:0] id_ex_funct3;  
-    logic [2:0] ex_mem_funct3; 
-
-    // ========================================================================
-    // IF: INSTRUCTION FETCH
-    // ========================================================================    
-
-    logic [XLEN-1:0] next_pc; 
-
-    // Early jump detection in ID stage (ONLY for JAL, NOT JALR)
-    logic jump_id_stage;
-    assign jump_id_stage = id_jump; 
-    
-    // Combine branch/jalr (from EX)
     assign pcsrc = branch_taken | id_ex_jalr;
 
-    // Calculate JAL target early
+    // --- IF: Instruction Fetch Stage ---    
+
+    // Calculate JAL target early (in ID stage)
     logic [XLEN-1:0] jump_target_id;
     assign jump_target_id = if_id_pc + id_imm_out;
 
+    // JALR target masking (LSB must be 0)
     logic [XLEN-1:0] jalr_masked_pc;
-    assign jalr_masked_pc = ex_alu_result & {{ (PC_MASK_WIDTH){1'b1} }, 1'b0};
+    assign jalr_masked_pc = ex_alu_result & {{(PC_MASK_WIDTH){1'b1}}, 1'b0};
 
-    always_comb begin
-        if (stall_if) begin
-            next_pc = if_pc;
-        end else if (id_ex_jalr) begin
-            // JALR (Resolved in EX stage) - Clear LSB
-            next_pc = jalr_masked_pc; 
-        end else if (branch_taken) begin
-            // Conditional Branch (Resolved in EX stage)
-            next_pc = ex_branch_target;
-        end else if (id_jump) begin
-            // JAL (Resolved in ID stage)
-            next_pc = jump_target_id;
-        end else begin
-            // Normal execution
-            next_pc = if_pc_plus_4;
-        end
-    end
-
-    logic [XLEN-1:0] instruction_in_padded;
-    assign instruction_in_padded = imem_data; // XLEN=32, so direct assignment works.
-
-    // --- IF_Stage ---
     IF_Stage if_stage_inst (
         .clk(clk),
         .rst(rst),
-        .next_pc_in(next_pc),
-        .instruction_in(instruction_in_padded),
-        .instruction_out(if_instruction_wire),
+        .stall(stall_if),
+        .branch_taken(branch_taken),
+        .jalr_taken(id_ex_jalr),
+        .jal_taken(id_jump),
+        .branch_target(ex_branch_target),
+        .jalr_target(jalr_masked_pc),
+        .jal_target(jump_target_id),
+        .instruction_in(imem_data),
         .pc_out(if_pc),
-        .pc_plus_4_out(if_pc_plus_4)
+        .pc_plus_4(if_pc_plus_4),
+        .instruction_out(if_instruction_wire)
     );
     
     assign if_instruction = if_instruction_wire[31:0];
     assign imem_addr = if_pc;
     assign imem_en = ~stall_id;
 
-    // IF/ID PIPELINE REGISTER
-    // Note: We repurpose the "Instruction" field to store a "Valid" flag (32'd1).
-    // If flushed, the register clears to 0, invalidating the instruction.
+    // --- IF/ID Pipeline Register ---
     PipelineRegister #(IF_ID_WIDTH) if_id_reg (
         .clk(clk),
         .rst(rst),
         .en(~stall_id),
         .clear(flush_id),
-        .in({if_pc, if_instruction, if_pc_plus_4}),  // Store actual instruction
-        .out({if_id_pc, if_id_instruction, if_id_pc_plus_4})  // Output instruction
+        .in({if_pc, if_instruction, if_pc_plus_4}),
+        .out({if_id_pc, if_id_instruction, if_id_pc_plus_4})
     );
     
-    assign if_id_valid = (if_id_instruction != 32'h00000013); // Check if not NOP
+    assign if_id_valid = (if_id_instruction != 32'h00000013); // Not NOP
 
-    // ========================================================================
-    // ID: INSTRUCTION DECODE
-    // ========================================================================
+    // --- ID: Instruction Decode Stage ---
 
     logic [31:0] id_instruction_muxed;
-    assign id_instruction_muxed = if_id_instruction;  // Use stored instruction
+    assign id_instruction_muxed = if_id_instruction;
 
     ID_Stage id_stage_inst (
         .clk(clk),
@@ -237,7 +211,7 @@ module PipelinedCPU (
         .jalr(id_jalr)
     );
 
-    // --- Hazard Unit ---
+    // --- Hazard Detection Unit ---
     HazardUnit hazard_unit_inst (
         .id_rs1(id_rs1),
         .id_rs2(id_rs2),
@@ -245,14 +219,14 @@ module PipelinedCPU (
         .id_ex_rd(id_ex_rd),
         .id_ex_mem_read(id_ex_mem_to_reg[0]), 
         .PCSrc(pcsrc),
-        .jump_id_stage(jump_id_stage),
+        .jump_id_stage(id_jump),
         .stall_if(stall_if),
         .stall_id(stall_id),
         .flush_ex(flush_ex),
         .flush_id(flush_id)
     );
 
-    // ID/EX PIPELINE REGISTER
+    // --- ID/EX Pipeline Register ---
     PipelineRegister #(ID_EX_WIDTH) id_ex_reg (
         .clk(clk),
         .rst(rst),
@@ -280,9 +254,7 @@ module PipelinedCPU (
         })
     );
 
-    // ========================================================================
-    // EX: EXECUTE
-    // ========================================================================
+    // --- EX: Execute Stage ---
 
     // --- Forwarding Unit ---
     ForwardingUnit forwarding_unit_inst (
@@ -314,10 +286,10 @@ module PipelinedCPU (
         .alu_zero(ex_zero),
         .branch_taken(branch_taken),
         .branch_target(ex_branch_target),
-        .rs2_data_forwarded(ex_alu_b_input) // Reuse ex_alu_b_input wire for forwarded rs2
+        .rs2_data_forwarded(ex_alu_b_input) 
     );
 
-    // EX/MEM PIPELINE REGISTER
+    // --- EX/MEM Pipeline Register ---
     PipelineRegister #(EX_MEM_WIDTH) ex_mem_reg (
         .clk(clk),
         .rst(rst),
@@ -330,7 +302,7 @@ module PipelinedCPU (
             id_ex_rd,           
             id_ex_pc_plus_4,    
             id_ex_funct3,
-            id_ex_rs2,          // Track rs2 for store forwarding
+            id_ex_rs2,
             // Control Payload
             id_ex_reg_write, id_ex_mem_write, id_ex_mem_to_reg
         }),
@@ -343,55 +315,34 @@ module PipelinedCPU (
         })
     );
 
-    // ========================================================================
-    // MEM: Memory
-    // ========================================================================
+    // --- MEM: Memory Stage ---
 
-    // MEM-stage forwarding for store data
-    logic [XLEN-1:0] mem_store_data;
-    
-    // Forwarding logic for store data in MEM stage
-    always_comb begin
-        // Forward from WB if:
-        // 1. WB is writing to a register
-        // 2. That register matches the source of our store data
-        // 3. The register is not x0
-        if (mem_wb_reg_write && (mem_wb_rd != 0) && (mem_wb_rd == ex_mem_rs2)) begin
-            mem_store_data = wb_write_data;
-        end else begin
-            mem_store_data = ex_mem_write_data;
-        end
-    end
-
-    assign dmem_addr = ex_mem_alu_result;
-    assign dmem_wdata = mem_store_data;  // Use forwarded data
-    assign dmem_we = ex_mem_mem_write;
-    assign dmem_funct3 = ex_mem_funct3;
-    
-    // Generate byte enables directly here:
-    always_comb begin
-        case (ex_mem_funct3)
-            F3_BYTE: begin
-                case (ex_mem_alu_result[1:0])
-                    2'b00: dmem_be = 4'b0001;
-                    2'b01: dmem_be = 4'b0010;
-                    2'b10: dmem_be = 4'b0100;
-                    2'b11: dmem_be = 4'b1000;
-                endcase
-            end
-            F3_HALF: begin
-                case (ex_mem_alu_result[1])
-                    1'b0: dmem_be = 4'b0011;
-                    1'b1: dmem_be = 4'b1100;
-                endcase
-            end
-            default: dmem_be = 4'b1111; // Word
-        endcase
-    end
+    MEM_Stage mem_stage_inst (
+        .clk(clk),
+        .rst(rst),
+        .ex_mem_reg_write(ex_mem_reg_write),
+        .ex_mem_mem_write(ex_mem_mem_write),
+        .ex_mem_mem_to_reg(ex_mem_mem_to_reg),
+        .ex_mem_alu_result(ex_mem_alu_result),
+        .ex_mem_write_data(ex_mem_write_data),
+        .ex_mem_rd(ex_mem_rd),
+        .ex_mem_funct3(ex_mem_funct3),
+        .ex_mem_rs2(ex_mem_rs2),
+        // Forwarding inputs from WB
+        .wb_reg_write(mem_wb_reg_write),
+        .wb_rd(mem_wb_rd),
+        .wb_write_data(wb_write_data),
+        // Memory Outputs
+        .dmem_addr(dmem_addr),
+        .dmem_wdata(dmem_wdata),
+        .dmem_we(dmem_we),
+        .dmem_be(dmem_be),
+        .dmem_funct3(dmem_funct3)
+    );
     
     assign mem_read_data = dmem_rdata;
     
-    // MEM/WB PIPELINE REGISTER
+    // --- MEM/WB Pipeline Register ---
     PipelineRegister #(MEM_WB_WIDTH) mem_wb_reg (
         .clk(clk),
         .rst(rst),
@@ -414,17 +365,14 @@ module PipelinedCPU (
         })
     );
 
-    // ========================================================================
-    // WB: Write Back
-    // ========================================================================
+    // --- WB: Writeback Stage ---
 
-    // --- Write Back MUX ---
-    always_comb begin
-        case (mem_wb_mem_to_reg)
-            2'b00: wb_write_data = mem_wb_alu_result; 
-            2'b01: wb_write_data = mem_read_data;     // Bypassed MEM/WB register for BRAM
-            2'b10: wb_write_data = mem_wb_pc_plus_4;  
-            default: wb_write_data = {XLEN{1'b0}};
-        endcase
-    end
+    WB_Stage wb_stage_inst (
+        .mem_wb_mem_to_reg(mem_wb_mem_to_reg),
+        .mem_wb_alu_result(mem_wb_alu_result),
+        .mem_wb_pc_plus_4(mem_wb_pc_plus_4),
+        .dmem_read_data(mem_read_data), // Bypass from Memory
+        .wb_write_data(wb_write_data)
+    );
+
 endmodule

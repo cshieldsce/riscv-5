@@ -7,9 +7,7 @@ module pynq_z2_top (
     output logic       uart_tx
 );
 
-    // ===================================
-    // 1. CLOCK GENERATION
-    // ===================================
+    // --- Clock Generation ---
     logic cpu_clk;
     logic clk_locked;
     logic cpu_reset;
@@ -26,9 +24,7 @@ module pynq_z2_top (
     // The CPU is held in reset if the button is pressed OR the clock isn't ready.
     assign cpu_reset = reset_btn || !clk_locked;
 
-    // ===================================
-    // CPU Signals
-    // ===================================
+    // --- CPU Signals ---
     logic [ALEN-1:0] imem_addr;
     logic [31:0]     imem_data;
     logic            imem_en;
@@ -64,7 +60,6 @@ module pynq_z2_top (
         .Instruction(imem_data)
     );
 
-
     // Data Memory
     DataMemory dmem_inst (
         .clk(cpu_clk),
@@ -78,20 +73,12 @@ module pynq_z2_top (
         .leds_out(dmem_leds)
     );
 
-    // ===================================
-    // LED OUTPUT MAPPING
-    // ===================================
-    
+    // --- LED Output Mapping ---
     // Display the lower 4 bits of the CPU's memory-mapped LED register.
     // This allows visual verification of programs (like Fibonacci).
     assign led = dmem_leds;
 
-
-
-    // ===================================
-    // ILA DEBUG
-    // ===================================
-
+    // --- ILA Debug ---
     // ILA Probe Signals with mark_debug attribute
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_pc;
     (* mark_debug = "true" *) logic [31:0]     ila_instruction;
@@ -105,7 +92,6 @@ module pynq_z2_top (
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_alu_result;
     (* mark_debug = "true" *) logic [4:0]      ila_mem_wb_rd; // Register being written in WB
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_wb_data;   // Data being written in WB
-
 
     // Tap into CPU internals
     // NOTE: Pipeline Stage Mismatch in Debug Signals
@@ -141,7 +127,6 @@ module pynq_z2_top (
     // ILA Instance
     ila_0 my_ila (
         .clk(cpu_clk), 
-
         .probe0(ila_pc),                // 32-bit
         .probe1(ila_instruction),       // 32-bit
         .probe2(ila_hazard_signals),    // 3-bit (was ila_branch_en, 1-bit)
