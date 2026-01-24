@@ -51,12 +51,12 @@ Refactor the most complex coordination logic in the CPU.
 ## Phase 5: Verification and Final Polish
 Ensure the refactoring has not introduced any bugs and the overall presentation is cohesive.
 
-- [ ] Task: Regression Testing
-    - [ ] Run all local unit tests (`test/tb/*.sv`).
-    - [ ] Run the full RISCOF compliance suite (`run_compliance.sh`).
-    - [ ] Fix any logic regressions discovered.
-- [ ] Task: Final Documentation Review
-    - [ ] Review all headers in `src/` for consistency with `product-guidelines.md`.
-    - [ ] Ensure the Architectural Manual diagrams match the updated naming.
-- [ ] Task: Generate Final Report
-    - [ ] Compile a comprehensive report summarizing all changes and verification results.
+- [x] Task: Regression Testing
+    - [x] Run all local unit tests (`test/tb/*.sv`).
+    - [x] Run the full RISCOF compliance suite (`run_compliance.sh`).
+    - [x] Fix any logic regressions discovered.
+- [x] Task: Final Documentation Review
+    - [x] Review all headers in `src/` for consistency with `product-guidelines.md`.
+    - [x] Ensure the Architectural Manual diagrams match the updated naming.
+- [x] Task: Generate Final Report
+    - [x] Compile a comprehensive report summarizing all changes and verification results.

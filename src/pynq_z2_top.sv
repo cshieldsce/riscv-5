@@ -1,5 +1,18 @@
 import riscv_pkg::*;
 
+/**
+ * @brief Top-Level Module for PYNQ-Z2 FPGA
+ * @details Integrates the Pipelined CPU with FPGA-specific peripherals.
+ *          - Instantiates Clock Wizard (125MHz -> 10MHz)
+ *          - Instantiates Block RAMs for Instruction and Data Memory
+ *          - Maps MMIO LEDs to physical LED pins
+ *          - Includes ILA (Integrated Logic Analyzer) for hardware debugging
+ * 
+ * @param sysclk    125MHz System Clock
+ * @param reset_btn Reset Button (Active High)
+ * @param led       4-bit LED Output
+ * @param uart_tx   UART Transmit (Not currently implemented)
+ */
 module pynq_z2_top (
     input  logic       sysclk,
     input  logic       reset_btn,

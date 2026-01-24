@@ -3,19 +3,30 @@ import riscv_pkg::*;
 
 /**
  * @brief 5-Stage Pipelined RISC-V CPU Top-Level Module
+ * @details Implements a standard 5-stage pipeline:
+ *          1. IF (Instruction Fetch): Fetches instruction from memory
+ *          2. ID (Instruction Decode): Decodes instruction, reads registers, resolves hazards
+ *          3. EX (Execute): ALU operations, branch resolution, address calculation
+ *          4. MEM (Memory): Data memory access (Load/Store)
+ *          5. WB (Writeback): Writes results back to register file
  * 
- * Implements a standard 5-stage pipeline:
- * 1. IF (Instruction Fetch): Fetches instruction from memory
- * 2. ID (Instruction Decode): Decodes instruction, reads registers, resolves hazards
- * 3. EX (Execute): ALU operations, branch resolution, address calculation
- * 4. MEM (Memory): Data memory access (Load/Store)
- * 5. WB (Writeback): Writes results back to register file
+ *          Features:
+ *          - Full forwarding (EX-to-EX, MEM-to-EX, WB-to-MEM)
+ *          - Hazard detection (Load-Use stalls, Control hazards/flushes)
+ *          - Dynamic branch prediction (assuming branch not taken, flushing on misprediction)
+ *          - Memory-Mapped I/O support via Data Memory interface
  * 
- * Features:
- * - Full forwarding (EX-to-EX, MEM-to-EX, WB-to-MEM)
- * - Hazard detection (Load-Use stalls, Control hazards/flushes)
- * - Dynamic branch prediction (assuming branch not taken, flushing on misprediction)
- * - Memory-Mapped I/O support via Data Memory interface
+ * @param clk        System Clock
+ * @param rst        System Reset (Active High)
+ * @param imem_addr  Instruction Memory Address
+ * @param imem_data  Instruction Memory Data Input
+ * @param imem_en    Instruction Memory Enable
+ * @param dmem_addr  Data Memory Address
+ * @param dmem_rdata Data Memory Read Data Input
+ * @param dmem_wdata Data Memory Write Data Output
+ * @param dmem_we    Data Memory Write Enable
+ * @param dmem_be    Data Memory Byte Enable
+ * @param dmem_funct3 Data Memory Access Type
  */
 module PipelinedCPU (
     input  logic             clk,
