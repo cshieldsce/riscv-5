@@ -5,14 +5,14 @@ This plan outlines the steps to refactor the RISC-V CPU codebase to enhance its 
 ## Phase 1: Global Logic Centralization and Packages
 Focus on extracting reusable logic and constants into `riscv_pkg.sv` to reduce duplication and improve clarity across the project.
 
-- [ ] Task: Audit codebase for reusable logic and constants
-    - [ ] Scan all files in `src/` for duplicated functions or hardcoded constants.
-    - [ ] Document candidates for `riscv_pkg.sv`.
-- [ ] Task: Refactor `riscv_pkg.sv`
-    - [ ] Move identified helper functions and constants to `riscv_pkg.sv`.
-    - [ ] Update imports in affected modules.
-    - [ ] Verify that the project compiles successfully.
-- [ ] Task: Run Compliance Suite to ensure zero regression.
+- [x] Task: Audit codebase for reusable logic and constants
+    - [x] Scan all files in `src/` for duplicated functions or hardcoded constants.
+    - [x] Document candidates for `riscv_pkg.sv`.
+- [x] Task: Refactor `riscv_pkg.sv`
+    - [x] Move identified helper functions and constants to `riscv_pkg.sv`.
+    - [x] Update imports in affected modules.
+    - [x] Verify that the project compiles successfully.
+- [x] Task: Run Compliance Suite to ensure zero regression.
 
 ## Phase 2: Frontend Pipeline Refactoring (IF and ID Stages)
 Apply the new header standards and signal naming conventions to the early stages of the pipeline.
