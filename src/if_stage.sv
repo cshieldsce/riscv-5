@@ -2,12 +2,25 @@ import riscv_pkg::*;
 
 /**
  * @brief Instruction Fetch Stage (IF)
+ * @details Responsibilities:
+ *          - Manages Program Counter (PC)
+ *          - Calculates next PC based on control flow decisions
+ *          - Fetches instructions from memory
+ *          - Handles PC stalls and control hazards
  * 
- * Responsibilities:
- * - Manages Program Counter (PC)
- * - Calculates next PC based on control flow decisions
- * - Fetches instructions from memory
- * - Handles PC stalls and control hazards
+ * @param clk               System Clock
+ * @param rst               System Reset (Active High)
+ * @param stall             Stall signal from Hazard Unit (Freeze PC)
+ * @param branch_taken      Branch Taken flag from EX Stage
+ * @param jalr_taken        JALR Taken flag from EX Stage
+ * @param jal_taken         JAL Taken flag from ID Stage
+ * @param branch_target     Branch Target Address from EX Stage
+ * @param jalr_target       JALR Target Address from EX Stage
+ * @param jal_target        JAL Target Address from ID Stage
+ * @param instruction_in    Raw Instruction from Instruction Memory
+ * @param pc_out            Current Program Counter
+ * @param pc_plus_4         Program Counter + 4
+ * @param instruction_out   Instruction for ID Stage
  */
 module IF_Stage (
     input  logic             clk,
@@ -34,9 +47,9 @@ module IF_Stage (
 );
     // --- Local Signals ---
     
-    logic [XLEN-1:0] pc_reg;
-    logic [XLEN-1:0] next_pc;
-    logic [XLEN-1:0] pc_plus_4_calc;
+    logic [XLEN-1:0] if_pc_reg;
+    logic [XLEN-1:0] if_next_pc;
+    logic [XLEN-1:0] if_pc_plus_4_calc;
 
     // --- Local Helper Functions ---
     
@@ -87,9 +100,9 @@ module IF_Stage (
     endfunction
 
     // --- Next PC Logic ---
-    assign pc_plus_4_calc = calc_pc_plus_4(pc_reg);
+    assign if_pc_plus_4_calc = calc_pc_plus_4(if_pc_reg);
     
-    assign next_pc = select_next_pc(
+    assign if_next_pc = select_next_pc(
         stall,
         jalr_taken,
         branch_taken,
@@ -97,21 +110,21 @@ module IF_Stage (
         jalr_target,
         branch_target,
         jal_target,
-        pc_plus_4_calc,
-        pc_reg
+        if_pc_plus_4_calc,
+        if_pc_reg
     );
 
     // --- Program Counter Register ---
     always_ff @(posedge clk) begin : PC_Register
         if (rst) begin : ResetPC
-            pc_reg <= {XLEN{1'b0}};
+            if_pc_reg <= {XLEN{1'b0}};
         end else begin : UpdatePC
-            pc_reg <= next_pc;
+            if_pc_reg <= if_next_pc;
         end
     end
 
     // --- Outputs ---
-    assign pc_out         = pc_reg;
-    assign pc_plus_4      = pc_plus_4_calc;
+    assign pc_out         = if_pc_reg;
+    assign pc_plus_4      = if_pc_plus_4_calc;
     assign instruction_out = instruction_in;
 endmodule

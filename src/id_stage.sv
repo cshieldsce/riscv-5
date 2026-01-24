@@ -2,14 +2,39 @@ import riscv_pkg::*;
 
 /**
  * @brief Instruction Decode Stage (ID)
+ * @details Decodes the fetched instruction and sets up control signals.
+ *          Responsibilities:
+ *          - Decodes opcode, register indices (rs1, rs2, rd), and immediates
+ *          - Instantiates the Main Control Unit
+ *          - Instantiates the Register File (read ports)
+ *          - Instantiates the Immediate Generator
+ *          - Passes control signals and data to ID/EX pipeline register
  * 
- * Decodes the fetched instruction and sets up control signals.
- * Responsibilities:
- * - Decodes opcode, register indices (rs1, rs2, rd), and immediates
- * - Instantiates the Main Control Unit
- * - Instantiates the Register File (read ports)
- * - Instantiates the Immediate Generator
- * - Passes control signals and data to ID/EX pipeline register
+ * @param clk             System Clock
+ * @param rst             System Reset (Active High)
+ * @param instruction     Fetched Instruction from IF Stage
+ * @param pc              Program Counter from IF Stage
+ * @param reg_write_wb    Register Write Enable from WB Stage
+ * @param write_data_wb   Data to write to Register File from WB Stage
+ * @param rd_wb           Destination Register Address from WB Stage
+ * @param read_data1      Data read from Register File (rs1)
+ * @param read_data2      Data read from Register File (rs2)
+ * @param imm_out         Sign-extended Immediate value
+ * @param rs1             Source Register 1 Address
+ * @param rs2             Source Register 2 Address
+ * @param rd              Destination Register Address
+ * @param opcode          Decoded Opcode
+ * @param funct3          Decoded Funct3 field
+ * @param funct7          Decoded Funct7 field
+ * @param reg_write       Control: Register Write Enable
+ * @param mem_write       Control: Memory Write Enable
+ * @param alu_control     Control: ALU Operation Selector
+ * @param alu_src         Control: ALU Source B Mux Select (0=Reg, 1=Imm)
+ * @param alu_src_a       Control: ALU Source A Mux Select (0=rs1, 1=PC, 2=Zero)
+ * @param mem_to_reg      Control: Result Mux Select
+ * @param branch          Control: Branch Enable
+ * @param jump            Control: Jump Enable (JAL)
+ * @param jalr            Control: Jump Register Enable (JALR)
  */
 module ID_Stage (
     input  logic             clk,

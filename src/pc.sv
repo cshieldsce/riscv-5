@@ -2,9 +2,8 @@ import riscv_pkg::*;
 
 /**
  * @brief Program Counter (PC) Register
- * 
- * Holds the address of the current instruction.
- * Updates synchronously on the rising edge of the clock.
+ * @details Holds the address of the current instruction.
+ *          Updates synchronously on the rising edge of the clock.
  * 
  * @param clk     System clock
  * @param rst     System reset (Active High) - Resets PC to 0x00000000

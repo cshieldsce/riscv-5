@@ -2,9 +2,12 @@ import riscv_pkg::*;
 
 /**
  * @brief Immediate Generator
+ * @details Extracts and sign-extends immediate values from instructions.
+ *          Supports all RV32I immediate formats (I, S, B, J, U).
  * 
- * Extracts and sign-extends immediate values from instructions.
- * Supports all RV32I immediate formats.
+ * @param instruction   32-bit Instruction
+ * @param opcode        Decoded Opcode
+ * @param imm_out       Sign-extended 32-bit Immediate
  */
 module ImmGen (
     input  logic [XLEN-1:0] instruction,

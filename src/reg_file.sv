@@ -2,16 +2,25 @@ import riscv_pkg::*;
 
 /**
  * @brief 32x32-bit RISC-V Register File (x0-x31)
+ * @details Features:
+ *          - Asynchronous dual-port reads
+ *          - Synchronous write on posedge clk
+ *          - x0 hardwired to zero
+ *          - Write-through forwarding to resolve WB-to-ID hazards (internal forwarding)
  * 
- * Features:
- *  - Asynchronous dual-port reads
- *  - Synchronous write on posedge clk
- *  - x0 hardwired to zero
- *  - Write-through forwarding to resolve WB-to-ID hazards
+ *          Write-Through Forwarding:
+ *          If an instruction reads a register in the same cycle it's being written,
+ *          the new value is forwarded directly, bypassing the memory array.
  * 
- * Write-Through Forwarding:
- *  If an instruction reads a register in the same cycle it's being written,
- *  the new value is forwarded directly, bypassing the memory array.
+ * @param clk           System Clock
+ * @param rst           System Reset (Active High)
+ * @param RegWrite      Write Enable Control
+ * @param rs1           Read Address 1
+ * @param rs2           Read Address 2
+ * @param rd            Write Address
+ * @param write_data    Data to write to rd
+ * @param read_data1    Data read from rs1
+ * @param read_data2    Data read from rs2
  */
 module RegFile (
     input  logic             clk,

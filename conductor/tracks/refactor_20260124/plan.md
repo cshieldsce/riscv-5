@@ -17,15 +17,15 @@ Focus on extracting reusable logic and constants into `riscv_pkg.sv` to reduce d
 ## Phase 2: Frontend Pipeline Refactoring (IF and ID Stages)
 Apply the new header standards and signal naming conventions to the early stages of the pipeline.
 
-- [ ] Task: Refactor IF Stage (`if_stage.sv`, `pc.sv`, `instruction_memory.sv`)
-    - [ ] Update module headers with architectural context and I/O descriptions.
-    - [ ] Rename internal signals using the `if_` prefix and descriptive naming.
-    - [ ] Extract local helper functions where logic can be simplified.
-- [ ] Task: Refactor ID Stage (`id_stage.sv`, `imm_gen.sv`, `reg_file.sv`)
-    - [ ] Update module headers with architectural context and I/O descriptions.
-    - [ ] Rename internal signals using the `id_` prefix and descriptive naming.
-    - [ ] Extract local helper functions for decoding logic or control signal generation.
-- [ ] Task: Run Compliance Suite to ensure zero regression.
+- [x] Task: Refactor IF Stage (`if_stage.sv`, `pc.sv`, `instruction_memory.sv`)
+    - [x] Update module headers with architectural context and I/O descriptions.
+    - [x] Rename internal signals using the `if_` prefix and descriptive naming.
+    - [x] Extract local helper functions where logic can be simplified.
+- [x] Task: Refactor ID Stage (`id_stage.sv`, `imm_gen.sv`, `reg_file.sv`)
+    - [x] Update module headers with architectural context and I/O descriptions.
+    - [x] Rename internal signals using the `id_` prefix and descriptive naming.
+    - [x] Extract local helper functions for decoding logic or control signal generation.
+- [x] Task: Run Compliance Suite to ensure zero regression.
 
 ## Phase 3: Execution and Backend Refactoring (EX, MEM, WB)
 Apply refactoring to the remaining execution stages and memory interface.

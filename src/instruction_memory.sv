@@ -2,17 +2,13 @@ import riscv_pkg::*;
 
 /**
  * @brief Instruction Memory (Read-Only)
+ * @details Stores the program code to be executed.
+ *          Implemented as a ROM (Read-Only Memory) with asynchronous read access.
+ *          Note: Asynchronous reads simplify the single-cycle IF stage timing.
  * 
- * Stores the program code to be executed.
- * Implemented as a ROM (Read-Only Memory) with asynchronous read access.
- * 
- * Note: While real FPGA block RAMs are often synchronous, this model uses
- * asynchronous reads to simplify the single-cycle IF stage timing in this 
- * specific pipeline design.
- * 
- * @param clk        System clock (unused for async read, kept for interface consistency)
+ * @param clk        System clock (unused for async read)
  * @param rst        System reset (unused for ROM)
- * @param en         Enable signal (unused in this simple model, assumes always enabled)
+ * @param en         Enable signal (unused, assumes always enabled)
  * @param Address    Byte address of the instruction
  * @param Instruction 32-bit fetched instruction
  */
