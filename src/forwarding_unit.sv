@@ -2,15 +2,23 @@ import riscv_pkg::*;
 
 /**
  * @brief Forwarding Unit
+ * @details Solves Data Hazards by forwarding data from later pipeline stages (MEM, WB) 
+ *          to the EX stage, bypassing the Register File.
  * 
- * Solves Data Hazards by forwarding data from later pipeline stages (MEM, WB) 
- * to the EX stage, bypassing the Register File.
+ *          Logic Priorities:
+ *          1. EX Hazard (Highest): Data is in the EX/MEM pipeline register (just computed).
+ *          2. MEM Hazard (Lowest): Data is in the MEM/WB pipeline register (waiting for WB).
+ *             - Note: Only forward from MEM/WB if the EX/MEM stage is NOT writing to the 
+ *               same register (Double Hazard condition).
  * 
- * Logic Priorities:
- * 1. EX Hazard (Highest): Data is in the EX/MEM pipeline register (just computed).
- * 2. MEM Hazard (Lowest): Data is in the MEM/WB pipeline register (waiting for WB).
- *    - Note: Only forward from MEM/WB if the EX/MEM stage is NOT writing to the 
- *      same register (Double Hazard condition).
+ * @param id_ex_rs1        Source Register 1 from ID/EX Pipeline Register
+ * @param id_ex_rs2        Source Register 2 from ID/EX Pipeline Register
+ * @param ex_mem_rd        Destination Register from EX/MEM Pipeline Register
+ * @param ex_mem_reg_write Register Write Enable from EX/MEM Pipeline Register
+ * @param mem_wb_rd        Destination Register from MEM/WB Pipeline Register
+ * @param mem_wb_reg_write Register Write Enable from MEM/WB Pipeline Register
+ * @param forward_a        Output: Forwarding MUX A Select (00=Reg, 10=MEM, 01=WB)
+ * @param forward_b        Output: Forwarding MUX B Select (00=Reg, 10=MEM, 01=WB)
  */
 module ForwardingUnit (
     input  logic [4:0] id_ex_rs1,       // Source register 1 address (EX stage)

@@ -42,11 +42,11 @@ Apply refactoring to the remaining execution stages and memory interface.
 ## Phase 4: Control and Hazard Logic Refactoring
 Refactor the most complex coordination logic in the CPU.
 
-- [ ] Task: Refactor Hazard and Forwarding Units (`hazard_unit.sv`, `forwarding_unit.sv`, `control_unit.sv`)
-    - [ ] Update headers with detailed architectural reasoning.
-    - [ ] Rename complex internal signals (e.g., stall requests, forwarding mux selects) for maximum clarity.
-    - [ ] Add "why" comments to complex combinatorial logic blocks.
-- [ ] Task: Run Compliance Suite to ensure zero regression.
+- [x] Task: Refactor Hazard and Forwarding Units (`hazard_unit.sv`, `forwarding_unit.sv`, `control_unit.sv`)
+    - [x] Update headers with detailed architectural reasoning.
+    - [x] Rename complex internal signals (e.g., stall requests, forwarding mux selects) for maximum clarity.
+    - [x] Add "why" comments to complex combinatorial logic blocks.
+- [x] Task: Run Compliance Suite to ensure zero regression.
 
 ## Phase 5: Verification and Final Polish
 Ensure the refactoring has not introduced any bugs and the overall presentation is cohesive.

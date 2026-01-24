@@ -2,28 +2,27 @@ import riscv_pkg::*;
 
 /**
  * @brief Main Control Unit Decoder for RISC-V CPU
- * 
- * Decodes RISC-V instruction opcodes and generates control signals for datapath.
- * Implements the control logic for RV32I base instruction set:
- * - R-type: Register-register operations (ADD, SUB, AND, OR, XOR, SLL, SRL, SRA, SLT, SLTU)
- * - I-type: Immediate operations (ADDI, SLTI, XORI, ORI, ANDI, SLLI, SRLI, SRAI) and Loads (LB, LH, LW, LBU, LHU)
- * - S-type: Store operations (SB, SH, SW)
- * - B-type: Conditional branches (BEQ, BNE, BLT, BGE, BLTU, BGEU)
- * - U-type: Upper immediate operations (LUI, AUIPC)
- * - J-type: Unconditional jumps (JAL, JALR)
+ * @details Decodes RISC-V instruction opcodes and generates control signals for datapath.
+ *          Implements the control logic for RV32I base instruction set:
+ *          - R-type: Register-register operations (ADD, SUB, AND, OR, XOR, SLL, SRL, SRA, SLT, SLTU)
+ *          - I-type: Immediate operations (ADDI, SLTI, XORI, ORI, ANDI, SLLI, SRLI, SRAI) and Loads (LB, LH, LW, LBU, LHU)
+ *          - S-type: Store operations (SB, SH, SW)
+ *          - B-type: Conditional branches (BEQ, BNE, BLT, BGE, BLTU, BGEU)
+ *          - U-type: Upper immediate operations (LUI, AUIPC)
+ *          - J-type: Unconditional jumps (JAL, JALR)
  * 
  * @param opcode      7-bit instruction opcode [6:0]
  * @param funct3      3-bit function field [14:12] (operation selector within opcode class)
  * @param funct7      7-bit function field [31:25] (distinguishes ADD/SUB, SRL/SRA in R-type)
- * @param reg_write   Enable register file write
- * @param alu_control ALU operation selector (from alu_op_t enum)
- * @param alu_mux_a   ALU input A mux: 00=rs1, 01=PC, 10=zero
- * @param alu_mux_b     ALU input B mux: 0=rs2, 1=immediate
- * @param mem_write   Enable data memory write
- * @param mem_to_reg  Result mux: 00=ALU, 01=Memory, 10=PC+4
- * @param branch      Enable conditional branch logic
- * @param jump        Enable unconditional jump (JAL)
- * @param jalr        Enable jump-and-link register (JALR)
+ * @param reg_write   Output: Enable register file write
+ * @param alu_control Output: ALU operation selector (from alu_op_t enum)
+ * @param alu_src_a   Output: ALU input A mux: 00=rs1, 01=PC, 10=zero
+ * @param alu_src     Output: ALU input B mux: 0=rs2, 1=immediate
+ * @param mem_write   Output: Enable data memory write
+ * @param mem_to_reg  Output: Result mux: 00=ALU, 01=Memory, 10=PC+4
+ * @param branch      Output: Enable conditional branch logic
+ * @param jump        Output: Enable unconditional jump (JAL)
+ * @param jalr        Output: Enable jump-and-link register (JALR)
  */
 module ControlUnit (
     input  opcode_t         opcode,

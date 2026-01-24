@@ -2,17 +2,28 @@ import riscv_pkg::*;
 
 /**
  * @brief Hazard Detection Unit
+ * @details Manages pipeline stalls and flushes to resolve hazards that cannot be 
+ *          handled by forwarding alone.
  * 
- * Manages pipeline stalls and flushes to resolve hazards that cannot be 
- * handled by forwarding alone.
+ *          Handled Hazards:
+ *          1. Load-Use Hazard: Instruction in ID needs data from a Load in EX.
+ *             - Action: Stall IF and ID, flush EX (insert bubble).
+ *          2. ALU-to-Branch Hazard: Branch in ID depends on ALU result still in EX.
+ *             - Action: Stall IF and ID, flush EX (insert bubble).
+ *          3. Control Hazards: Branch Taken or Jumps.
+ *             - Action: Flush fetched instructions in pipeline stages to discard wrong path.
  * 
- * Handled Hazards:
- * 1. Load-Use Hazard: Instruction in ID needs data from a Load in EX.
- *    - Action: Stall IF and ID, flush EX (insert bubble).
- * 2. ALU-to-Branch Hazard: Branch in ID depends on ALU result still in EX.
- *    - Action: Stall IF and ID, flush EX (insert bubble).
- * 3. Control Hazards: Branch Taken or Jumps.
- *    - Action: Flush fetched instructions in pipeline stages to discard wrong path.
+ * @param id_rs1         Source Register 1 from ID Stage
+ * @param id_rs2         Source Register 2 from ID Stage
+ * @param id_branch      Branch instruction detected in ID Stage
+ * @param id_ex_rd       Destination Register from EX Stage (ID/EX reg)
+ * @param id_ex_mem_read Memory Read Enable from EX Stage (ID/EX reg) - indicates Load
+ * @param PCSrc          Branch/Jump Taken signal (from EX Stage)
+ * @param jump_id_stage  Unconditional Jump detected in ID Stage
+ * @param stall_if       Output: Stall IF Stage (Freeze PC)
+ * @param stall_id       Output: Stall ID Stage (Freeze IF/ID reg)
+ * @param flush_ex       Output: Flush EX Stage (Clear ID/EX reg)
+ * @param flush_id       Output: Flush ID Stage (Clear IF/ID reg)
  */
 module HazardUnit (
     // Inputs from ID Stage (Current Instruction)
@@ -85,27 +96,27 @@ module HazardUnit (
         flush_id = 1'b0;
 
         // 1. DATA HAZARD: LOAD-USE
-        if (is_load_use_hazard(id_ex_mem_read, id_ex_rd, id_rs1, id_rs2)) begin
+        if (is_load_use_hazard(id_ex_mem_read, id_ex_rd, id_rs1, id_rs2)) begin : LoadUse_Flush
             stall_if = 1'b1;
             stall_id = 1'b1;
             flush_ex = 1'b1;
         end
         
         // 2. DATA HAZARD: ALU-to-BRANCH
-        else if (is_alu_branch_hazard(id_ex_mem_read, id_ex_rd, id_branch, id_rs1, id_rs2)) begin
+        else if (is_alu_branch_hazard(id_ex_mem_read, id_ex_rd, id_branch, id_rs1, id_rs2)) begin : ALUBranch_Flush
             stall_if = 1'b1;
             stall_id = 1'b1;
             flush_ex = 1'b1;
         end
 
         // 3. CONTROL HAZARD: BRANCH TAKEN / JALR
-        else if (PCSrc) begin
+        else if (PCSrc) begin : BranchJALR_Flush
             flush_id = 1'b1;
             flush_ex = 1'b1;
         end
         
         // 4. CONTROL HAZARD: UNCONDITIONAL JUMP (JAL)
-        else if (jump_id_stage) begin
+        else if (jump_id_stage) begin : JAL_Flush
             flush_id = 1'b1;
         end
     end
