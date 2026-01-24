@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Refactor RISC-V CPU for Better Code Self-Documentation and Portfolio Presentation**
+- [x] **Track: Refactor RISC-V CPU for Better Code Self-Documentation and Portfolio Presentation**
 *Link: [./tracks/refactor_20260124/](./tracks/refactor_20260124/)*
