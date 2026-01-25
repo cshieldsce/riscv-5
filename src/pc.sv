@@ -14,9 +14,8 @@ module PC (
     input  logic            clk, 
     input  logic            rst,
     input  logic [XLEN-1:0] pc_in,
-    output logic [XLEN-1:0] pc_out = {XLEN{1'b0}} // Initialize to 0
+    output logic [XLEN-1:0] pc_out = {XLEN{1'b0}}
 );
-
     always_ff @(posedge clk) begin : PC_Update
         if (rst) begin : ResetPC
             pc_out <= {XLEN{1'b0}};

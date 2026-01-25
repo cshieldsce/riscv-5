@@ -19,20 +19,17 @@ module InstructionMemory (
     input  logic [ALEN-1:0] Address,
     output logic [XLEN-1:0] Instruction
 );
-    // ROM Array (Size defined in riscv_pkg)
-    logic [XLEN-1:0] rom_memory [0:RAM_MEMORY_SIZE];
+    logic [ALEN-1:0] word_addr;
+    logic [XLEN-1:0] rom_memory [0:RAM_MEMORY_SIZE]; // Size defined in riscv_pkg
 
     initial begin : InitROM
-        for (int i = 0; i < RAM_MEMORY_SIZE; i++) rom_memory[i] = 32'h00000013; // NOP (ADDI x0, x0, 0)
+        for (int i = 0; i < RAM_MEMORY_SIZE; i++) rom_memory[i] = NOP_A;
     end
 
-    logic [ALEN-1:0] word_addr;
-    
-    // Word Alignment: RISC-V instructions are 4-byte aligned
+    // --- Note: RISC-V instructions are 4-byte aligned --- 
     assign word_addr = Address >> 2;
     
-    // --- COMBINATIONAL READ (Asynchronous) ---
+    // --- Asynchronous Read ---
     // Fetch instruction immediately when address changes.
-    // Returns NOP (ADDI x0, x0, 0) if address is out of bounds.
-    assign Instruction = (word_addr < RAM_MEMORY_SIZE) ? rom_memory[word_addr] : 32'h00000013;
+    assign Instruction = (word_addr < RAM_MEMORY_SIZE) ? rom_memory[word_addr] : NOP_A;
 endmodule

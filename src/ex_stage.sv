@@ -29,43 +29,37 @@ import riscv_pkg::*;
  * @param rs2_data_forwarded Forwarded rs2 data (for Store operations)
  */
 module EX_Stage (
-    // Data Inputs
     input  logic [XLEN-1:0] pc,
     input  logic [XLEN-1:0] imm,
     input  logic [XLEN-1:0] rs1_data,
     input  logic [XLEN-1:0] rs2_data,
-    
-    // Forwarding Inputs (from Forwarding Unit)
-    input  logic [1:0]      forward_a, // Mux select for SrcA
-    input  logic [1:0]      forward_b, // Mux select for SrcB (reg portion)
-    input  logic [XLEN-1:0] ex_mem_alu_result, // Forwarded from MEM stage
-    input  logic [XLEN-1:0] wb_write_data,     // Forwarded from WB stage
-    
-    // Control Inputs
+    input  logic [1:0]      forward_a,
+    input  logic [1:0]      forward_b,
+    input  logic [XLEN-1:0] ex_mem_alu_result,
+    input  logic [XLEN-1:0] wb_write_data,
     input  alu_op_t         alu_control,
-    input  logic            alu_src,   // ALU B Src: 0: register, 1: immediate
-    input  logic [1:0]      alu_src_a, // ALU A Src: 0: register, 1: PC, 2: Zero
+    input  logic            alu_src, 
+    input  logic [1:0]      alu_src_a,
     input  logic            branch_en,
-    input  logic [2:0]      funct3,    // Branch type
-    
-    // Outputs
+    input  logic [2:0]      funct3,
+
     output logic [XLEN-1:0] alu_result,
     output logic            alu_zero,
     output logic            branch_taken,
     output logic [XLEN-1:0] branch_target,
-    output logic [XLEN-1:0] rs2_data_forwarded // Passed to MEM stage for Store
+    output logic [XLEN-1:0] rs2_data_forwarded
 );
-
+    // --- ALU Operand MUXing with Forwarding ---
     logic [XLEN-1:0] ex_alu_in_a_fwd;
     logic [XLEN-1:0] ex_alu_in_a;
     logic [XLEN-1:0] ex_alu_in_b;
 
     always_comb begin : ForwardA_MUX
         case (forward_a)
-            2'b00:   ex_alu_in_a_fwd = rs1_data;          // Forward rs1 from Register File
-            2'b01:   ex_alu_in_a_fwd = wb_write_data;     // Forward write data from WB
-            2'b10:   ex_alu_in_a_fwd = ex_mem_alu_result; // Forward ALU result from MEM
-            default: ex_alu_in_a_fwd = rs1_data;          // Fallback: rs1 from Register File
+            2'b00:   ex_alu_in_a_fwd = rs1_data;            // Forward rs1 from Register File
+            2'b01:   ex_alu_in_a_fwd = wb_write_data;       // Forward write data from WB
+            2'b10:   ex_alu_in_a_fwd = ex_mem_alu_result;   // Forward ALU result from MEM
+            default: ex_alu_in_a_fwd = rs1_data;            // Fallback: rs1 from Register File
         endcase
     end
 
@@ -80,18 +74,16 @@ module EX_Stage (
 
     always_comb begin : ALUInputA_MUX
         case (alu_src_a)
-            2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;  // Regular register op
-            2'b01:   ex_alu_in_a = pc;               // AUIPC
-            2'b10:   ex_alu_in_a = {XLEN{1'b0}};     // LUI
-            default: ex_alu_in_a = ex_alu_in_a_fwd;  // Fallback: regular register op
+            2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;          // Regular register op
+            2'b01:   ex_alu_in_a = pc;                       // AUIPC
+            2'b10:   ex_alu_in_a = {XLEN{1'b0}};             // LUI
+            default: ex_alu_in_a = ex_alu_in_a_fwd;          // Fallback: regular register op
         endcase
     end
 
-    // --- ALU Input B MUX: ---
-    // Selects between Register (rs2) and Immediate
+    // --- ALU Input B MUX ---
     assign ex_alu_in_b = alu_src ? imm : rs2_data_forwarded;
 
-    // --- ALU Instantiation ---
     ALU alu_inst (
         .A(ex_alu_in_a),
         .B(ex_alu_in_b),
@@ -109,7 +101,7 @@ module EX_Stage (
                 F3_BGE:  branch_taken = ~alu_result[0];    // A >= B (signed) 
                 F3_BLTU: branch_taken = alu_result[0];     // A < B (unsigned) 
                 F3_BGEU: branch_taken = ~alu_result[0];    // A >= B (unsigned)
-                default: branch_taken = 1'b0;
+                default: branch_taken = 1'b0;              // Branch not taken
             endcase
         end else begin : BranchDisabled
             branch_taken = 1'b0;

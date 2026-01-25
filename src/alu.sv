@@ -16,15 +16,13 @@ import riscv_pkg::*;
  * @param Zero        Flag indicating if Result == 0 (used for branch decisions)
  */
 module ALU (
-    input  logic [XLEN-1:0] A, B, // First operand (typically rs1 or PC)
+    input  logic [XLEN-1:0] A, B,
     input  alu_op_t         ALUControl,
     output logic [XLEN-1:0] Result,
     output logic            Zero
 );
-    // Extract shift amount: Only lower log2(XLEN) bits used per RISC-V spec
-    // For RV32I: bits [4:0] = 0-31 range, For RV64I: bits [5:0] = 0-63 range
-    logic [$clog2(XLEN)-1:0] alu_shamt;
-    assign alu_shamt = B[$clog2(XLEN)-1:0];
+    logic [$clog2(XLEN)-1:0] alu_shamt;                                                             // Shift amount: 5 bits for RV32, 6 bits for RV64
+    assign alu_shamt = B[$clog2(XLEN)-1:0];                                                         // Extract valid shift bits from  B
 
     always_comb begin : ALU_Operation
         case (ALUControl)
@@ -42,6 +40,6 @@ module ALU (
         endcase
     end
 
-    assign Zero = (Result == {XLEN{1'b0}});
+    assign Zero = (Result == {XLEN{1'b0}});                                                         // Zero flag for branch decisions
 
 endmodule

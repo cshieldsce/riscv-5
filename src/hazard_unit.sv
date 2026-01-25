@@ -26,30 +26,24 @@ import riscv_pkg::*;
  * @param flush_id       Output: Flush ID Stage (Clear IF/ID reg)
  */
 module HazardUnit (
-    // Inputs from ID Stage (Current Instruction)
     input  logic [4:0] id_rs1,
     input  logic [4:0] id_rs2,
     input  logic       id_branch,
-
-    // Inputs from EX Stage (Previous Instruction)
     input  logic [4:0] id_ex_rd,
-    input  logic       id_ex_mem_read, // High if instruction in EX is a Load
-    
-    // Control Hazard Signals
-    input  logic       PCSrc,          // High if branch/JALR is taken (resolved in EX)
-    input  logic       jump_id_stage,  // High if JAL is detected (resolved in ID)
-    
-    // Pipeline Control Outputs
-    output logic       stall_if,       // Freeze PC and IF Stage
-    output logic       stall_id,       // Freeze IF/ID Pipeline Register
-    output logic       flush_ex,       // Flush ID/EX Pipeline Register (Insert NOP)
-    output logic       flush_id        // Flush IF/ID Pipeline Register (Discard Fetch)
+    input  logic       id_ex_mem_read,
+    input  logic       PCSrc,         
+    input  logic       jump_id_stage,
+    output logic       stall_if,       
+    output logic       stall_id,       
+    output logic       flush_ex,       
+    output logic       flush_id        
 );
-
-    // --- Local Helper Functions ---
-    
     /**
      * @brief Check if register dependency exists (excluding x0)
+     * @param rd Destination register
+     * @param rs1 Source register 1
+     * @param rs2 Source register 2
+     * @return True if rd matches rs1 or rs2 (and rd != x0)
      */
     function automatic logic has_register_dependency(
         input logic [4:0] rd,
@@ -61,6 +55,11 @@ module HazardUnit (
 
     /**
      * @brief Detect Load-Use hazard
+     * @param ex_is_load Load instruction in EX stage
+     * @param ex_rd Destination register from EX stage
+     * @param id_rs1 Source register 1 from ID stage
+     * @param id_rs2 Source register 2 from ID stage
+     * @return True if load and dependency exists
      */
     function automatic logic is_load_use_hazard(
         input logic       ex_is_load,
@@ -73,6 +72,12 @@ module HazardUnit (
 
     /**
      * @brief Detect ALU-to-Branch hazard
+     * @param ex_is_load Load instruction in EX stage
+     * @param ex_rd Destination register from EX stage
+     * @param id_is_branch Branch instruction in ID stage
+     * @param id_rs1 Source register 1 from ID stage
+     * @param id_rs2 Source register 2 from ID stage
+     * @return True if not load, is branch, and dependency exists
      */
     function automatic logic is_alu_branch_hazard(
         input logic       ex_is_load,
@@ -81,41 +86,33 @@ module HazardUnit (
         input logic [4:0] id_rs1,
         input logic [4:0] id_rs2
     );
-        return !ex_is_load && 
-               id_is_branch && 
-               has_register_dependency(ex_rd, id_rs1, id_rs2);
+        return !ex_is_load && id_is_branch && has_register_dependency(ex_rd, id_rs1, id_rs2);
     endfunction
 
-    // --- Hazard Detection Logic ---
-    
     always_comb begin : HazardDetection
-        // Default: Normal Operation
+        // --- Default: Normal Operation --- 
         stall_if = 1'b0;
         stall_id = 1'b0;
         flush_ex = 1'b0;
         flush_id = 1'b0;
 
-        // 1. DATA HAZARD: LOAD-USE
         if (is_load_use_hazard(id_ex_mem_read, id_ex_rd, id_rs1, id_rs2)) begin : LoadUse_Flush
             stall_if = 1'b1;
             stall_id = 1'b1;
             flush_ex = 1'b1;
         end
         
-        // 2. DATA HAZARD: ALU-to-BRANCH
         else if (is_alu_branch_hazard(id_ex_mem_read, id_ex_rd, id_branch, id_rs1, id_rs2)) begin : ALUBranch_Flush
             stall_if = 1'b1;
             stall_id = 1'b1;
             flush_ex = 1'b1;
         end
 
-        // 3. CONTROL HAZARD: BRANCH TAKEN / JALR
         else if (PCSrc) begin : BranchJALR_Flush
             flush_id = 1'b1;
             flush_ex = 1'b1;
         end
         
-        // 4. CONTROL HAZARD: UNCONDITIONAL JUMP (JAL)
         else if (jump_id_stage) begin : JAL_Flush
             flush_id = 1'b1;
         end

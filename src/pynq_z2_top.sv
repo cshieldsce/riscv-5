@@ -19,7 +19,6 @@ module pynq_z2_top (
     output logic [3:0] led,
     output logic       uart_tx
 );
-
     // --- Clock Generation ---
     logic cpu_clk;
     logic clk_locked;
@@ -47,7 +46,7 @@ module pynq_z2_top (
     logic            dmem_we;
     logic [3:0]      dmem_be;
     logic [2:0]      dmem_funct3;
-    logic [3:0]      dmem_leds; // Missing declaration added here
+    logic [3:0]      dmem_leds;
 
     // CPU Instance
     PipelinedCPU cpu_inst (
@@ -95,7 +94,7 @@ module pynq_z2_top (
     // ILA Probe Signals with mark_debug attribute
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_pc;
     (* mark_debug = "true" *) logic [31:0]     ila_instruction;
-    (* mark_debug = "true" *) logic [2:0]      ila_hazard_signals; // stall_id, flush_ex, id_branch
+    (* mark_debug = "true" *) logic [2:0]      ila_hazard_signals;  // stall_id, flush_ex, id_branch
     (* mark_debug = "true" *) logic            ila_branch_taken;
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_branch_target;
     (* mark_debug = "true" *) logic            ila_alu_zero;
@@ -103,8 +102,8 @@ module pynq_z2_top (
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_rs1_data;
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_rs2_data;
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_alu_result;
-    (* mark_debug = "true" *) logic [4:0]      ila_mem_wb_rd; // Register being written in WB
-    (* mark_debug = "true" *) logic [XLEN-1:0] ila_wb_data;   // Data being written in WB
+    (* mark_debug = "true" *) logic [4:0]      ila_mem_wb_rd;       // Register being written in WB
+    (* mark_debug = "true" *) logic [XLEN-1:0] ila_wb_data;         // Data being written in WB
 
     // Tap into CPU internals
     // NOTE: Pipeline Stage Mismatch in Debug Signals
@@ -142,16 +141,16 @@ module pynq_z2_top (
         .clk(cpu_clk), 
         .probe0(ila_pc),                // 32-bit
         .probe1(ila_instruction),       // 32-bit
-        .probe2(ila_hazard_signals),    // 3-bit (was ila_branch_en, 1-bit)
+        .probe2(ila_hazard_signals),    // 3-bit
         .probe3(ila_branch_taken),      // 1-bit
         .probe4(ila_branch_target),     // 32-bit
         .probe5(ila_alu_zero),          // 1-bit
-        .probe6(ila_mem_wb_controls),   // 3-bit (was ila_funct3, 3-bit)
+        .probe6(ila_mem_wb_controls),   // 3-bit
         .probe7(ila_rs1_data),          // 32-bit
         .probe8(ila_rs2_data),          // 32-bit
         .probe9(ila_alu_result),        // 32-bit
-        .probe10(ila_mem_wb_rd),        // 5-bit (was ila_pcsrc, 1-bit)
-        .probe11(ila_wb_data)           // 32-bit (NEW probe)
+        .probe10(ila_mem_wb_rd),        // 5-bit
+        .probe11(ila_wb_data)           // 32-bit
     );
 
 endmodule

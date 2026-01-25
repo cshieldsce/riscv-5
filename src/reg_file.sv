@@ -25,19 +25,14 @@ import riscv_pkg::*;
 module RegFile (
     input  logic             clk,
     input  logic             rst,
-    input  logic             RegWrite,       // Write enable
-    
-    input  logic [4:0]       rs1,            // Read address 1
-    input  logic [4:0]       rs2,            // Read address 2
-    input  logic [4:0]       rd,             // Write address
-    input  logic [XLEN-1:0]  write_data,     // Write data
-    
-    output logic [XLEN-1:0]  read_data1,     // Read data 1
-    output logic [XLEN-1:0]  read_data2      // Read data 2
+    input  logic             RegWrite,      
+    input  logic [4:0]       rs1,         
+    input  logic [4:0]       rs2,      
+    input  logic [4:0]       rd,        
+    input  logic [XLEN-1:0]  write_data,   
+    output logic [XLEN-1:0]  read_data1,    
+    output logic [XLEN-1:0]  read_data2 
 );
-
-    // --- Register Memory ---
-    
     logic [XLEN-1:0] register_memory [0:REG_SIZE-1];
 
     // --- Local Helper Functions ---
@@ -81,12 +76,10 @@ module RegFile (
     endfunction
 
     // --- Asynchronous Read Ports ---
-    
     assign read_data1 = read_register(rs1, rd, RegWrite, write_data);
     assign read_data2 = read_register(rs2, rd, RegWrite, write_data);
 
     // --- Synchronous Write Port ---
-    
     always_ff @(posedge clk) begin: WriteRegister
         if (rst) begin : ResetRegisters
             for (int i = 0; i < REG_SIZE; i++) begin : ZeroReset
@@ -97,8 +90,6 @@ module RegFile (
         end
     end
 
-    // --- Initialization ---
-    
     initial begin : InitRegisters
         for (int i = 0; i < REG_SIZE; i++) begin : ZeroInit
             register_memory[i] = {XLEN{1'b0}};

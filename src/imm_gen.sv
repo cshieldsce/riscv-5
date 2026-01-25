@@ -14,9 +14,6 @@ module ImmGen (
     input  opcode_t         opcode,
     output logic [XLEN-1:0] imm_out
 );
-    // --- Local Helper Functions ---
-    // Moved to riscv_pkg.sv
-
     always_comb begin : ImmSelection
         case (opcode)
             OP_I_TYPE, 

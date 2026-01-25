@@ -21,22 +21,15 @@ import riscv_pkg::*;
  * @param forward_b        Output: Forwarding MUX B Select (00=Reg, 10=MEM, 01=WB)
  */
 module ForwardingUnit (
-    input  logic [4:0] id_ex_rs1,       // Source register 1 address (EX stage)
-    input  logic [4:0] id_ex_rs2,       // Source register 2 address (EX stage)
-    
-    // Inputs from MEM stage (The instruction immediately preceding the one in EX)
-    input  logic [4:0] ex_mem_rd,       // Destination register address
-    input  logic       ex_mem_reg_write,// Register write enable
-    
-    // Inputs from WB stage (The instruction 2 cycles ahead of the one in EX)
-    input  logic [4:0] mem_wb_rd,       // Destination register address
-    input  logic       mem_wb_reg_write,// Register write enable
-    
-    output logic [1:0] forward_a,       // Forwarding MUX A select: 00=Reg, 10=MEM, 01=WB
-    output logic [1:0] forward_b        // Forwarding MUX B select: 00=Reg, 10=MEM, 01=WB
+    input  logic [4:0] id_ex_rs1, 
+    input  logic [4:0] id_ex_rs2,
+    input  logic [4:0] ex_mem_rd,    
+    input  logic       ex_mem_reg_write,
+    input  logic [4:0] mem_wb_rd,      
+    input  logic       mem_wb_reg_write,
+    output logic [1:0] forward_a,
+    output logic [1:0] forward_b
 );
-
-    // --- LOCAL HELPER FUNCTIONS ---
     
     /**
      * @brief Check if EX/MEM stage creates a data hazard
@@ -77,8 +70,6 @@ module ForwardingUnit (
         return mem_match && !ex_match;
     endfunction
 
-    // --- Forwarding Logic ---
-    
     always_comb begin : ForwardingLogic
         // Default: No forwarding (use values read from Register File in ID stage)
         forward_a = 2'b00;

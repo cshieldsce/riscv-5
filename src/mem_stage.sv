@@ -29,32 +29,23 @@ import riscv_pkg::*;
 module MEM_Stage (
     input  logic             clk,         
     input  logic             rst,
-    
-    // Inputs from EX/MEM Pipeline Register
     input  logic             ex_mem_reg_write,
     input  logic             ex_mem_mem_write,
-    input  logic [1:0]       ex_mem_mem_to_reg, // Used to check if we are reading
+    input  logic [1:0]       ex_mem_mem_to_reg,
     input  logic [XLEN-1:0]  ex_mem_alu_result,
-    input  logic [XLEN-1:0]  ex_mem_write_data, // Data to store (Rs2)
+    input  logic [XLEN-1:0]  ex_mem_write_data,
     input  logic [4:0]       ex_mem_rd,
     input  logic [2:0]       ex_mem_funct3,
-    input  logic [4:0]       ex_mem_rs2,        // Source register for store data
-
-    // Inputs from WB Stage (for Forwarding)
+    input  logic [4:0]       ex_mem_rs2,    
     input  logic             wb_reg_write,
     input  logic [4:0]       wb_rd,
     input  logic [XLEN-1:0]  wb_write_data,
-
-    // Outputs to Data Memory
     output logic [ALEN-1:0]  dmem_addr,
     output logic [XLEN-1:0]  dmem_wdata,
     output logic             dmem_we,
     output logic [3:0]       dmem_be,
     output logic [2:0]       dmem_funct3
 );
-
-    // --- Local Helper Functions ---
-    
     /**
      * @brief Check if WB stage should forward to MEM stage store data
      * @param wb_reg_write Register write enable from WB stage
@@ -96,7 +87,6 @@ module MEM_Stage (
     // --- Store Data Forwarding ---
     logic [XLEN-1:0] mem_store_data_fwd;
 
-    // Solves hazard: Store instruction follows an instruction writing to the store's source register.
     assign mem_store_data_fwd = get_store_data(
         wb_reg_write,
         wb_rd,
@@ -111,7 +101,7 @@ module MEM_Stage (
     assign dmem_we     = ex_mem_mem_write;
     assign dmem_funct3 = ex_mem_funct3;
 
-    // Byte Enable Generation
+    // --- Byte Enable Generation ---
     assign dmem_be = riscv_pkg::get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 
 endmodule

@@ -19,21 +19,20 @@ module PipelineRegister #(
 )(
     input  logic             clk, 
     input  logic             rst, 
-    input  logic             en,    // Enable (High for normal op, Low for Stall)
-    input  logic             clear, // Flush (High to clear register)
-    input  logic [WIDTH-1:0] in,    // Data Input
-    output logic [WIDTH-1:0] out    // Data Output
+    input  logic             en,    
+    input  logic             clear,
+    input  logic [WIDTH-1:0] in,   
+    output logic [WIDTH-1:0] out   
 );
-
     always_ff @(posedge clk) begin : PipelineRegLogic
-        if (rst) begin
+        if (rst) begin : Reset
             out <= '0; 
         end else if (clear) begin : Flush
             out <= '0; 
         end else if (en) begin : Update
             out <= in; 
         end
-        // Else: Hold current value (Stall)
+        // --- Else: Hold current value (Stall) --- 
     end
 
 endmodule

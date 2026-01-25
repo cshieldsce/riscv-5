@@ -31,13 +31,9 @@ import riscv_pkg::*;
 module PipelinedCPU (
     input  logic             clk,
     input  logic             rst,
-    
-    // Instruction memory interface
     output logic [ALEN-1:0]  imem_addr,
     input  logic [31:0]      imem_data,
     output logic             imem_en,
-    
-    // Data memory interface
     output logic [ALEN-1:0]  dmem_addr,
     input  logic [XLEN-1:0]  dmem_rdata,
     output logic [XLEN-1:0]  dmem_wdata,
@@ -45,7 +41,6 @@ module PipelinedCPU (
     output logic [3:0]       dmem_be,
     output logic [2:0]       dmem_funct3
 );
-
     // --- Pipeline Register Widths ---
     // IF/ID: PC(XLEN) + Inst(32) + PC+4(XLEN)
     localparam IF_ID_WIDTH = XLEN + 32 + XLEN;
@@ -67,19 +62,19 @@ module PipelinedCPU (
 
     localparam PC_MASK_WIDTH = XLEN - 1;
 
-    // --- Internal Signals ---
-    
-    // --- IF STAGE SIGNALS ---
+    // --- CPU Internal Signals ---
+
+    // --- IF Stage Signals ---
     logic [XLEN-1:0] if_pc, if_instruction_wire, if_pc_plus_4;
     logic [31:0]     if_instruction; 
     logic [XLEN-1:0] next_pc; 
 
-    // IF/ID Pipeline Register Outputs
+    // IF/ID Register Signals
     logic [XLEN-1:0] if_id_pc, if_id_pc_plus_4;
     logic [31:0]     if_id_instruction;
     logic            if_id_valid;
 
-    // --- ID STAGE SIGNALS ---
+    // --- ID Stage Signals ---
     logic [XLEN-1:0] id_read_data1, id_read_data2, id_imm_out;
     logic [4:0]      id_rs1, id_rs2, id_rd;
     opcode_t         id_opcode;
@@ -94,7 +89,7 @@ module PipelinedCPU (
     logic [1:0]      id_mem_to_reg;
     logic            id_branch, id_jump, id_jalr;
 
-    // ID/EX Pipeline Register Outputs
+    // ID/EX Register Signals
     logic [XLEN-1:0] id_ex_pc, id_ex_pc_plus_4;
     logic [XLEN-1:0] id_ex_read_data1, id_ex_read_data2, id_ex_imm;
     logic [4:0]      id_ex_rs1, id_ex_rs2, id_ex_rd;
@@ -108,13 +103,13 @@ module PipelinedCPU (
     logic [1:0]      id_ex_mem_to_reg;
     logic            id_ex_branch, id_ex_jump, id_ex_jalr;
 
-    // --- EX STAGE SIGNALS ---
+    // --- EX Stage Signals ---
     logic [XLEN-1:0] ex_alu_result, ex_alu_b_input; 
     logic            ex_zero;
     logic [XLEN-1:0] ex_branch_target;
     logic            branch_taken;
 
-    // EX/MEM Pipeline Register Outputs
+    // EX/MEM Register Signals
     logic [XLEN-1:0] ex_mem_alu_result, ex_mem_write_data; 
     logic [4:0]      ex_mem_rd;
     logic [4:0]      ex_mem_rs2;        
@@ -125,10 +120,10 @@ module PipelinedCPU (
     logic            ex_mem_reg_write, ex_mem_mem_write;
     logic [1:0]      ex_mem_mem_to_reg;
 
-    // --- MEM STAGE SIGNALS ---
+    // --- MEM Stage Signals ---
     logic [XLEN-1:0] mem_read_data;
 
-    // MEM/WB Pipeline Register Outputs
+    // MEM/WB Register Signals
     logic [XLEN-1:0] mem_wb_read_data, mem_wb_alu_result;
     logic [4:0]      mem_wb_rd;
     logic [XLEN-1:0] mem_wb_pc_plus_4;
@@ -137,10 +132,10 @@ module PipelinedCPU (
     logic            mem_wb_reg_write;
     logic [1:0]      mem_wb_mem_to_reg;
 
-    // --- WB STAGE SIGNALS ---
+    // --- WB Stage Signals ---
     logic [XLEN-1:0] wb_write_data; 
 
-    // --- HAZARD & FORWARDING SIGNALS ---
+    // --- Hazard & Forwarding Signals ---
     logic [1:0]      forward_a, forward_b; 
     logic            stall_if, stall_id, flush_ex, flush_id;
     logic            pcsrc; 
@@ -150,7 +145,7 @@ module PipelinedCPU (
     // --- IF: Instruction Fetch Stage ---    
 
     // Calculate JAL target early (in ID stage)
-    logic [XLEN-1:0] jump_target_id;
+    logic [XLEN-1:0] jump_target_id; 
     assign jump_target_id = if_id_pc + id_imm_out;
 
     // JALR target masking (LSB must be 0)
@@ -187,7 +182,7 @@ module PipelinedCPU (
         .out({if_id_pc, if_id_instruction, if_id_pc_plus_4})
     );
     
-    assign if_id_valid = (if_id_instruction != 32'h00000013); // Not NOP
+    assign if_id_valid = (if_id_instruction != NOP_A); // Not NOP
 
     // --- ID: Instruction Decode Stage ---
 
@@ -222,7 +217,6 @@ module PipelinedCPU (
         .jalr(id_jalr)
     );
 
-    // --- Hazard Detection Unit ---
     HazardUnit hazard_unit_inst (
         .id_rs1(id_rs1),
         .id_rs2(id_rs2),
@@ -266,8 +260,6 @@ module PipelinedCPU (
     );
 
     // --- EX: Execute Stage ---
-
-    // --- Forwarding Unit ---
     ForwardingUnit forwarding_unit_inst (
         .id_ex_rs1(id_ex_rs1),
         .id_ex_rs2(id_ex_rs2),
@@ -327,7 +319,6 @@ module PipelinedCPU (
     );
 
     // --- MEM: Memory Stage ---
-
     MEM_Stage mem_stage_inst (
         .clk(clk),
         .rst(rst),
@@ -377,12 +368,11 @@ module PipelinedCPU (
     );
 
     // --- WB: Writeback Stage ---
-
     WB_Stage wb_stage_inst (
         .mem_wb_mem_to_reg(mem_wb_mem_to_reg),
         .mem_wb_alu_result(mem_wb_alu_result),
         .mem_wb_pc_plus_4(mem_wb_pc_plus_4),
-        .dmem_read_data(mem_read_data), // Bypass from Memory
+        .dmem_read_data(mem_read_data),
         .wb_write_data(wb_write_data)
     );
 

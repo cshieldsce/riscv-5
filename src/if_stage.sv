@@ -25,34 +25,18 @@ import riscv_pkg::*;
 module IF_Stage (
     input  logic             clk,
     input  logic             rst,
-    
-    // Control inputs
-    input  logic             stall,              // Freeze PC (from Hazard Unit)
-    input  logic             branch_taken,       // Branch taken in EX stage
-    input  logic             jalr_taken,         // JALR taken in EX stage
-    input  logic             jal_taken,          // JAL detected in ID stage
-    
-    // Target address inputs
-    input  logic [XLEN-1:0]  branch_target,      // Branch target from EX
-    input  logic [XLEN-1:0]  jalr_target,        // JALR target from EX (pre-masked)
-    input  logic [XLEN-1:0]  jal_target,         // JAL target from ID
-    
-    // Instruction input
-    input  logic [XLEN-1:0]  instruction_in,     // From instruction memory
-    
-    // Outputs
-    output logic [XLEN-1:0]  pc_out,             // Current PC
-    output logic [XLEN-1:0]  pc_plus_4,          // PC + 4
-    output logic [XLEN-1:0]  instruction_out     // Fetched instruction
+    input  logic             stall,              
+    input  logic             branch_taken,      
+    input  logic             jalr_taken,        
+    input  logic             jal_taken,        
+    input  logic [XLEN-1:0]  branch_target,     
+    input  logic [XLEN-1:0]  jalr_target,       
+    input  logic [XLEN-1:0]  jal_target,     
+    input  logic [XLEN-1:0]  instruction_in,
+    output logic [XLEN-1:0]  pc_out,           
+    output logic [XLEN-1:0]  pc_plus_4,        
+    output logic [XLEN-1:0]  instruction_out 
 );
-    // --- Local Signals ---
-    
-    logic [XLEN-1:0] if_pc_reg;
-    logic [XLEN-1:0] if_next_pc;
-    logic [XLEN-1:0] if_pc_plus_4_calc;
-
-    // --- Local Helper Functions ---
-    
     /**
      * @brief Calculate PC + 4 (next sequential instruction)
      * @param pc Current program counter
@@ -100,8 +84,11 @@ module IF_Stage (
     endfunction
 
     // --- Next PC Logic ---
+    logic [XLEN-1:0] if_pc_reg;
+    logic [XLEN-1:0] if_next_pc;
+    logic [XLEN-1:0] if_pc_plus_4_calc;
+
     assign if_pc_plus_4_calc = calc_pc_plus_4(if_pc_reg);
-    
     assign if_next_pc = select_next_pc(
         stall,
         jalr_taken,
@@ -114,7 +101,6 @@ module IF_Stage (
         if_pc_reg
     );
 
-    // --- Program Counter Register ---
     always_ff @(posedge clk) begin : PC_Register
         if (rst) begin : ResetPC
             if_pc_reg <= {XLEN{1'b0}};
@@ -124,7 +110,7 @@ module IF_Stage (
     end
 
     // --- Outputs ---
-    assign pc_out         = if_pc_reg;
-    assign pc_plus_4      = if_pc_plus_4_calc;
+    assign pc_out          = if_pc_reg;
+    assign pc_plus_4       = if_pc_plus_4_calc;
     assign instruction_out = instruction_in;
 endmodule

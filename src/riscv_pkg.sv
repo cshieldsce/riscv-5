@@ -17,6 +17,7 @@ package riscv_pkg;
     
     // --- MEMORY MAP ---
     parameter logic [ALEN-1:0] MMIO_LED_ADDR = 32'hFFFF_FFF0;
+    parameter logic [XLEN-1:0] NOP_A = 32'h00000013; // ADDI x0, x0, 0
 
     // --- OPCODES (RV32I) ---
     typedef enum logic [6:0] {
