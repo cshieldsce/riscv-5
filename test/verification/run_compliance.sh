@@ -15,6 +15,9 @@ riscof run --config compliance/config.ini \
            --suite riscv-arch-test/riscv-test-suite/ \
            --env riscv-arch-test/riscv-test-suite/env
 
+# Inline CSS for better portability (e.g. GitHub Actions artifacts)
+python3 inline_css.py
+
 # Check for success in logs
 if [ -f riscof_work/rv32i_m/I/src/add-01.S/dut/signature.txt ]; then
     echo "---------------------------------------------------"
