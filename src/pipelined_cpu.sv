@@ -41,35 +41,38 @@ module PipelinedCPU (
     output logic [3:0]       dmem_be,
     output logic [2:0]       dmem_funct3
 );
-    // --- Pipeline Register Widths ---
+    // ------------------------------------------- //
+    // -------- Pipeline Register Widths --------- //
+    // ------------------------------------------- //
+
     // IF/ID: PC(XLEN) + Inst(32) + PC+4(XLEN)
-    localparam IF_ID_WIDTH = XLEN + 32 + XLEN;
-    
+    localparam IF_ID_WIDTH   = XLEN + 32 + XLEN;
+
     // ID/EX: 
     // Data: PC(X), PC+4(X), RD1(X), RD2(X), Imm(X), rs1(5), rs2(5), rd(5), funct3(3)
     // Control: RegWrite(1), MemWrite(1), ALUControl(4), ALUSrc(1), ALUSrcA(2), MemToReg(2), Branch(1), Jump(1), Jalr(1)
-    localparam ID_EX_WIDTH = (5 * XLEN) + 18 + 14;
+    localparam ID_EX_WIDTH   = (5 * XLEN) + 18 + 14;
 
     // EX/MEM:
     // Data: ALUResult(X), WriteData(X), rd(5), PC+4(X), funct3(3), rs2(5)
     // Control: RegWrite(1), MemWrite(1), MemToReg(2)
-    localparam EX_MEM_WIDTH = (3 * XLEN) + 13 + 4;
+    localparam EX_MEM_WIDTH  = (3 * XLEN) + 13 + 4;
 
     // MEM/WB:
     // Data: ReadData(X), ALUResult(X), rd(5), PC+4(X)
     // Control: RegWrite(1), MemToReg(2)
-    localparam MEM_WB_WIDTH = (3 * XLEN) + 5 + 3;
+    localparam MEM_WB_WIDTH  = (3 * XLEN) + 5 + 3;
 
-    localparam PC_MASK_WIDTH = XLEN - 1;
-
-    // --- CPU Internal Signals ---
+    // ------------------------------------------- //
+    // ----------- CPU Internal Signals ---------- //
+    // ------------------------------------------- //
 
     // --- IF Stage Signals ---
     logic [XLEN-1:0] if_pc, if_instruction_wire, if_pc_plus_4;
     logic [31:0]     if_instruction; 
     logic [XLEN-1:0] next_pc; 
 
-    // IF/ID Register Signals
+    // IF/ID Register
     logic [XLEN-1:0] if_id_pc, if_id_pc_plus_4;
     logic [31:0]     if_id_instruction;
     logic            if_id_valid;
@@ -81,7 +84,7 @@ module PipelinedCPU (
     logic [2:0]      id_funct3;
     logic [6:0]      id_funct7;
 
-    // ID Control Signals
+    // Control Signals
     logic            id_reg_write, id_mem_write;
     alu_op_t         id_alu_control;
     logic            id_alu_src;
@@ -95,7 +98,7 @@ module PipelinedCPU (
     logic [4:0]      id_ex_rs1, id_ex_rs2, id_ex_rd;
     logic [2:0]      id_ex_funct3;
 
-    // ID/EX Control Signals
+    // ID/EX Control
     logic            id_ex_reg_write, id_ex_mem_write;
     alu_op_t         id_ex_alu_control;
     logic            id_ex_alu_src;
@@ -116,7 +119,7 @@ module PipelinedCPU (
     logic [XLEN-1:0] ex_mem_pc_plus_4;
     logic [2:0]      ex_mem_funct3; 
 
-    // EX/MEM Control Signals
+    // EX/MEM Control
     logic            ex_mem_reg_write, ex_mem_mem_write;
     logic [1:0]      ex_mem_mem_to_reg;
 
@@ -128,21 +131,23 @@ module PipelinedCPU (
     logic [4:0]      mem_wb_rd;
     logic [XLEN-1:0] mem_wb_pc_plus_4;
 
-    // MEM/WB Control Signals
+    // MEM/WB Control
     logic            mem_wb_reg_write;
     logic [1:0]      mem_wb_mem_to_reg;
 
     // --- WB Stage Signals ---
     logic [XLEN-1:0] wb_write_data; 
 
-    // --- Hazard & Forwarding Signals ---
+    // --- Hazard & Forwarding ---
     logic [1:0]      forward_a, forward_b; 
     logic            stall_if, stall_id, flush_ex, flush_id;
     logic            pcsrc; 
 
     assign pcsrc = branch_taken | id_ex_jalr;
 
-    // --- IF: Instruction Fetch Stage ---    
+    // -------------------------------------------------- //
+    // ----------- IF: Instruction Fetch Stage ---------- //
+    // -------------------------------------------------- //   
 
     // Calculate JAL target early (in ID stage)
     logic [XLEN-1:0] jump_target_id; 
@@ -150,7 +155,7 @@ module PipelinedCPU (
 
     // JALR target masking (LSB must be 0)
     logic [XLEN-1:0] jalr_masked_pc;
-    assign jalr_masked_pc = ex_alu_result & {{(PC_MASK_WIDTH){1'b1}}, 1'b0};
+    assign jalr_masked_pc = ex_alu_result & {{(XLEN-1){1'b1}}, 1'b0};
 
     IF_Stage if_stage_inst (
         .clk(clk),
@@ -182,9 +187,11 @@ module PipelinedCPU (
         .out({if_id_pc, if_id_instruction, if_id_pc_plus_4})
     );
     
-    assign if_id_valid = (if_id_instruction != NOP_A); // Not NOP
+    assign if_id_valid = (if_id_instruction != NOP_A);
 
-    // --- ID: Instruction Decode Stage ---
+    // --------------------------------------------------- //
+    // ----------- ID: Instruction Decode Stage ---------- //
+    // --------------------------------------------------- //
 
     logic [31:0] id_instruction_muxed;
     assign id_instruction_muxed = if_id_instruction;
@@ -259,7 +266,10 @@ module PipelinedCPU (
         })
     );
 
-    // --- EX: Execute Stage ---
+    // -------------------------------------------------- //
+    // ---------------- EX: Execute Stage --------------- //
+    // -------------------------------------------------- //
+
     ForwardingUnit forwarding_unit_inst (
         .id_ex_rs1(id_ex_rs1),
         .id_ex_rs2(id_ex_rs2),
@@ -318,7 +328,10 @@ module PipelinedCPU (
         })
     );
 
-    // --- MEM: Memory Stage ---
+    // -------------------------------------------------- //
+    // -------------- MEM: Memory Stage ----------------- //
+    // -------------------------------------------------- //
+
     MEM_Stage mem_stage_inst (
         .clk(clk),
         .rst(rst),
@@ -330,11 +343,9 @@ module PipelinedCPU (
         .ex_mem_rd(ex_mem_rd),
         .ex_mem_funct3(ex_mem_funct3),
         .ex_mem_rs2(ex_mem_rs2),
-        // Forwarding inputs from WB
         .wb_reg_write(mem_wb_reg_write),
         .wb_rd(mem_wb_rd),
         .wb_write_data(wb_write_data),
-        // Memory Outputs
         .dmem_addr(dmem_addr),
         .dmem_wdata(dmem_wdata),
         .dmem_we(dmem_we),
@@ -367,7 +378,10 @@ module PipelinedCPU (
         })
     );
 
-    // --- WB: Writeback Stage ---
+    // --------------------------------------------------- //
+    // ------------- WB: Writeback Stage ----------------- //
+    // --------------------------------------------------- //
+
     WB_Stage wb_stage_inst (
         .mem_wb_mem_to_reg(mem_wb_mem_to_reg),
         .mem_wb_alu_result(mem_wb_alu_result),
