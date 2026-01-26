@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 <div class="site-nav">
   <a href="../index.html">Home</a>
   <a href="./manual.html">Architecture Overview</a>
@@ -6,7 +5,7 @@
   <a href="./hazards.html">Hazard Resolution</a>
   <a href="../verification/report.html">Design Verification</a>
   <a href="../verification/fpga.html">FPGA Implementation</a>
-  <a href="../developer/guide.html">Setup</a>
+  <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
 # 3.0 Hazard Resolution

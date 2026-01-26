@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 <div class="site-nav">
   <a href="../index.html">Home</a>
   <a href="./manual.html">Architecture Overview</a>

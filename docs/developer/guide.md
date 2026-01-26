@@ -1,11 +1,11 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 <div class="site-nav">
   <a href="../index.html">Home</a>
-  <a href="../architecture//manual.html">Architecture Overview</a>
-  <a href="../architecture//stages.html">Pipeline Stages</a>
-  <a href="../architecture//hazards.html">Hazard Resolution</a>
-  <a href="../verification/report.html">VDesign Verification</a>
-  <a href="../veriifcation/fpga.html">FPGA Implementation</a>
+  <a href="../architecture/manual.html">Architecture Overview</a>
+  <a href="../architecture/stages.html">Pipeline Stages</a>
+  <a href="../architecture/hazards.html">Hazard Resolution</a>
+  <a href="../verification/report.html">Design Verification</a>
+  <a href="../verification/fpga.html">FPGA Implementation</a>
   <a href="./guide.html">Setup Guide</a>
 </div>
 
