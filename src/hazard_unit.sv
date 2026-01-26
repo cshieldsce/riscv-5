@@ -13,17 +13,17 @@ import riscv_pkg::*;
  *          3. Control Hazards: Branch Taken or Jumps.
  *             - Action: Flush fetched instructions in pipeline stages to discard wrong path.
  * 
- * @param id_rs1         Source Register 1 from ID Stage
- * @param id_rs2         Source Register 2 from ID Stage
- * @param id_branch      Branch instruction detected in ID Stage
- * @param id_ex_rd       Destination Register from EX Stage (ID/EX reg)
- * @param id_ex_mem_read Memory Read Enable from EX Stage (ID/EX reg) - indicates Load
- * @param PCSrc          Branch/Jump Taken signal (from EX Stage)
- * @param jump_id_stage  Unconditional Jump detected in ID Stage
- * @param stall_if       Output: Stall IF Stage (Freeze PC)
- * @param stall_id       Output: Stall ID Stage (Freeze IF/ID reg)
- * @param flush_ex       Output: Flush EX Stage (Clear ID/EX reg)
- * @param flush_id       Output: Flush ID Stage (Clear IF/ID reg)
+ * @param id_rs1          Source Register 1 from ID Stage
+ * @param id_rs2          Source Register 2 from ID Stage
+ * @param id_branch       Branch instruction detected in ID Stage
+ * @param id_ex_rd        Destination Register from EX Stage (ID/EX reg)
+ * @param id_ex_mem_read  Memory Read Enable from EX Stage (ID/EX reg) - indicates Load
+ * @param branch_taken_ex Branch/Jump Taken signal (from EX Stage)
+ * @param jump_id_stage   Unconditional Jump detected in ID Stage
+ * @param stall_if        Output: Stall IF Stage (Freeze PC)
+ * @param stall_id        Output: Stall ID Stage (Freeze IF/ID reg)
+ * @param flush_ex        Output: Flush EX Stage (Clear ID/EX reg)
+ * @param flush_id        Output: Flush ID Stage (Clear IF/ID reg)
  */
 module HazardUnit (
     input  logic [4:0] id_rs1,
@@ -31,7 +31,7 @@ module HazardUnit (
     input  logic       id_branch,
     input  logic [4:0] id_ex_rd,
     input  logic       id_ex_mem_read,
-    input  logic       PCSrc,         
+    input  logic       branch_taken_ex,         
     input  logic       jump_id_stage,
     output logic       stall_if,       
     output logic       stall_id,       
@@ -108,7 +108,7 @@ module HazardUnit (
             flush_ex = 1'b1;
         end
 
-        else if (PCSrc) begin : BranchJALR_Flush
+        else if (branch_taken_ex) begin : BranchJALR_Flush
             flush_id = 1'b1;
             flush_ex = 1'b1;
         end
