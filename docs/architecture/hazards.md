@@ -110,54 +110,69 @@ The Memory stage contains its own mini-forwarding logic to ensure the `dmem_wdat
 
 When an instruction depends on a `load` instruction, forwarding alone is insufficient because the data isn't available until the end of the Memory stage.
 
-### Case 4: Load-Use Stall
-The pipeline must "stall" for one cycle to allow the data to be fetched from RAM.
+### Case 4: Load-Use Stall (The "Hardware Pause")
+
+A Load-Use hazard is the only data hazard that **cannot** be solved by forwarding alone. Because the data is being fetched from external RAM, it simply isn't inside the CPU yet. We have to pause the pipeline.
 
 <script type="WaveDrom">
 { "signal": [
   { "name": "CLK", "wave": "p......" },
-  { "name": "IF",  "wave": "34.5...", "data": ["LW", "ADD", "OR"] },
-  { "name": "ID",  "wave": ".34.5..", "data": ["LW", "ADD", "OR"] },
-  { "name": "EX",  "wave": "..3x45.", "data": ["LW", "NOP", "ADD", "OR"] },
-  { "name": "MEM", "wave": "...3x45", "data": ["LW", "NOP", "ADD", "OR"] },
-  { "name": "WB",  "wave": "....3x4", "data": ["LW", "NOP", "ADD"] },
+  { "name": "IF (Fetch)",     "wave": "34.56..", "data": ["LW", "ADD", "OR", "SUB"] },
+  { "name": "ID (Decode)",    "wave": ".34.56.", "data": ["LW", "ADD", "OR", "SUB"] },
+  { "name": "EX (Execute)",   "wave": "..3x456", "data": ["LW", "BUBBLE", "ADD", "OR", "SUB"] },
+  { "name": "MEM (Memory)",   "wave": "...3x45", "data": ["LW", "NOP", "ADD", "OR"] },
+  { "name": "WB (Writeback)", "wave": "....3x4", "data": ["LW", "NOP", "ADD"] },
   {},
-  { "name": "Stall Unit", "wave": "..10...", "data": ["STALL"] },
-  { "name": "Forward A", "wave": "....5..", "data": ["01 (WB)"] }
+  { "name": "HAZARD UNIT",    "wave": "..10...", "data": ["DETECTED"] },
+  { "name": "PIPELINE STATE", "wave": "..345..", "data": ["Normal", "STALL", "Resume"] }
 ],
-  "head": { "text": "Load-Use Hazard (1 Cycle Stall)", "tick": 0 },
+  "head": { "text": "Load-Use Hazard Walkthrough", "tick": 0 },
   "config": { "hscale": 2 }
 }
 </script>
 
-**Hardware Action:**
-1. **Freeze PC:** The `stall_if` signal is asserted, keeping the Program Counter from advancing.
-2. **Freeze IF/ID:** The `stall_id` signal is asserted, keeping the `ADD` instruction in the Decode stage.
-3. **Inject Bubble:** The `flush_ex` signal clears the `ID/EX` register, effectively inserting a `NOP` into the Execute stage.
+**What is happening here?**
+*   **Cycle 2:** The `LW` is in **Execute** (calculating the address). The `ADD` is in **Decode**. The Hazard Unit sees that `ADD` needs the register `LW` is about to load.
+*   **Cycle 3 (The Stall):** 
+    *   The `IF` and `ID` stages are **Frozen**. Notice `ADD` stays in `ID` and `OR` stays in `IF`.
+    *   The `EX` stage is **Flushed**. The `ADD` instruction is prevented from moving forward, and a `BUBBLE` (NOP) is injected instead.
+    *   The `LW` moves to **Memory** to actually get the data.
+*   **Cycle 4:** The data is now available at the end of the Memory stage. The `ADD` finally moves into **Execute**, and the data is **Forwarded** to it.
 
 ---
 
 ## 3.4 Control Hazards
 
-Control hazards occur when the CPU fetches the wrong instructions following a branch or jump.
+Control hazards occur when the CPU fetches instructions from the wrong path (e.g., after a branch).
 
-### Case 5: Branch Misprediction (Taken Branch)
-Our CPU predicts "Not-Taken" by default. When a branch is actually taken, the two instructions already in the pipeline (`IF` and `ID`) must be discarded.
+### Case 5: Branch Misprediction (2-Cycle Flush)
+
+Our CPU assumes a branch is **Not Taken** to keep moving fast. If the branch *is* taken, we've already fetched two wrong instructions.
 
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p....." },
-  { "name": "IF",  "wave": "345.6.", "data": ["BEQ", "I+1", "I+2", "Tgt"] },
-  { "name": "ID",  "wave": ".345.6", "data": ["BEQ", "I+1", "I+2", "Tgt"] },
-  { "name": "EX",  "wave": "..3xx.", "data": ["BEQ", "FLUSH", "FLUSH"] },
+  { "name": "CLK", "wave": "p......" },
+  { "name": "IF (Fetch)",     "wave": "345.6..", "data": ["BEQ", "Wrong1", "Wrong2", "Target"] },
+  { "name": "ID (Decode)",    "wave": ".345.6.", "data": ["BEQ", "Wrong1", "Wrong2", "Target"] },
+  { "name": "EX (Execute)",   "wave": "..3xx6.", "data": ["BEQ", "FLUSH", "FLUSH", "Target"] },
   {},
-  { "name": "branch_taken", "wave": "..010." },
-  { "name": "flush_id/ex",  "wave": "..010." }
+  { "name": "Branch Taken",   "wave": "..010.." },
+  { "name": "PIPELINE ACTION","wave": "..34.3.", "data": ["Normal", "FLUSHING", "Resume"] }
 ],
-  "head": { "text": "Branch Taken Flush (2 Cycle Penalty)", "tick": 0 },
+  "head": { "text": "Branch Taken (Discarding the Wrong Path)", "tick": 0 },
   "config": { "hscale": 2 }
 }
 </script>
+
+**Why 2 cycles?**
+1.  **Cycle 2:** The `BEQ` reaches the **Execute** stage. This is the first time the CPU actually knows the branch is taken.
+2.  **The Penalty:** 
+    *   The instruction in `ID` (**Wrong1**) is killed.
+    *   The instruction in `IF` (**Wrong2**) is killed.
+    *   The PC is updated to the **Target** address.
+3.  **Cycle 3:** The pipeline is empty (bubbles) where the wrong instructions were, and the `Target` instruction is fetched.
+
+---
 
 ### Case 6: ALU-to-Branch Stall (Specific Implementation)
 In our architecture, if a branch in the Decode stage depends on an ALU result currently in the Execute stage, the `HazardUnit` triggers an additional stall. This is a design choice to simplify the branch comparison timing.
