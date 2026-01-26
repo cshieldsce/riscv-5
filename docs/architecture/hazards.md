@@ -24,7 +24,7 @@ div[id^="WaveDrom_Display_"] svg {
 }
 div[id^="WaveDrom_Display_"] {
   margin: 20px 0;
-  overflow-x: auto;
+  overflow-x: auto;]==]
 }
 </style>
 
@@ -57,22 +57,25 @@ This occurs when an instruction needs a result computed by the *immediately* pre
 addi x1, x10, 5  # Result calculated in EX, moves to EX/MEM register
 sub  x2, x1, x3   # Needs x1 NOW in its EX stage
 ```
-
 <script type="WaveDrom">
 { "signal": [
   { "name": "CLK", "wave": "p....." },
-  { "name": "IF",  "wave": "345...", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "ID",  "wave": ".345..", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "EX",  "wave": "..345.", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "MEM", "wave": "...345", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "WB",  "wave": "....34", "data": ["ADDI", "SUB"] },
+  { "name": "IF (Fetch)",     "wave": "345...", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "ID (Decode)",    "wave": ".345..", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "EX (Execute)",   "wave": "..345.", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "MEM (Memory)",   "wave": "...345", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "WB (Writeback)", "wave": "....34", "data": ["ADDI", "SUB"] },
   {},
-  { "name": "Forward A", "wave": "...5..", "data": ["10 (EX/MEM)"] }
+  { "name": "Forward A Select", "wave": "...2..", "data": ["10 (EX/MEM)"] }
 ],
-  "head": { "text": "EX-to-EX Forwarding", "tick": 0 },
-  "config": { "hscale": 2 }
+  "head": { "text": "EX-to-EX Forwarding (Bypassing at Cycle 4)", "tick": 0 },
+  "config": { "hscale": 2.2 }
 }
 </script>
+
+**Cycle-by-Cycle Breakdown:**
+*   **Cycle 3:** `ADDI` is in **Execute** calculating its result. `SUB` is in **Decode**.
+*   **Cycle 4 (Forwarding!):** `ADDI` moves to **Memory** (result is now in the `EX/MEM` register). `SUB` moves to **Execute**. The Forwarding Unit detects the hazard and tells the ALU to grab the result from the `EX/MEM` register instead of the Register File.
 
 **Implementation (`src/forwarding_unit.sv`):**
 The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
@@ -112,7 +115,7 @@ When an instruction depends on a `load` instruction, forwarding alone is insuffi
 
 ### Case 4: Load-Use Stall (The "Hardware Pause")
 
-A Load-Use hazard is the only data hazard that **cannot** be solved by forwarding alone. Because the data is being fetched from external RAM, it simply isn't inside the CPU yet. We have to pause the pipeline.
+A Load-Use hazard is the only data hazard that **cannot** be solved by forwarding alone. The data is still in RAM while the next instruction is already trying to use it.
 
 <script type="WaveDrom">
 { "signal": [
@@ -123,23 +126,54 @@ A Load-Use hazard is the only data hazard that **cannot** be solved by forwardin
   { "name": "MEM (Memory)",   "wave": "...3x45", "data": ["LW", "NOP", "ADD", "OR"] },
   { "name": "WB (Writeback)", "wave": "....3x4", "data": ["LW", "NOP", "ADD"] },
   {},
-  { "name": "HAZARD UNIT",    "wave": "..10...", "data": ["DETECTED"] },
-  { "name": "PIPELINE STATE", "wave": "..345..", "data": ["Normal", "STALL", "Resume"] }
+  { "name": "PIPELINE STATE", "wave": "...34..", "data": ["STALL", "Resume"] }
 ],
-  "head": { "text": "Load-Use Hazard Walkthrough", "tick": 0 },
-  "config": { "hscale": 2 }
+  "head": { "text": "Load-Use Hazard (Detection at Cycle 3, Stall at Cycle 4)", "tick": 0 },
+  "config": { "hscale": 2.2 }
 }
 </script>
 
-**What is happening here?**
-*   **Cycle 2:** The `LW` is in **Execute** (calculating the address). The `ADD` is in **Decode**. The Hazard Unit sees that `ADD` needs the register `LW` is about to load.
-*   **Cycle 3 (The Stall):** 
-    *   The `IF` and `ID` stages are **Frozen**. Notice `ADD` stays in `ID` and `OR` stays in `IF`.
-    *   The `EX` stage is **Flushed**. The `ADD` instruction is prevented from moving forward, and a `BUBBLE` (NOP) is injected instead.
-    *   The `LW` moves to **Memory** to actually get the data.
-*   **Cycle 4:** The data is now available at the end of the Memory stage. The `ADD` finally moves into **Execute**, and the data is **Forwarded** to it.
+**Cycle-by-Cycle Breakdown:**
+*   **Cycle 3 (Detection):** `LW` is in **Execute** (calculating the RAM address). `ADD` is in **Decode**. The Hazard Unit realizes `ADD` depends on `LW` and triggers a stall.
+*   **Cycle 4 (The Stall):** 
+    *   **IF & ID are Frozen:** `ADD` stays in Decode, and `OR` stays in Fetch.
+    *   **EX is Flushed:** A `BUBBLE` (NOP) is sent to Execute so that no "bad" math happens with the old register value.
+    *   `LW` is in **Memory** actually reading the data from RAM.
+*   **Cycle 5 (Resume):** `LW` is in **Writeback**. `ADD` finally moves to **Execute**, receiving its data via forwarding from the WB stage.
 
 ---
+
+## 3.4 Control Hazards
+
+Control hazards occur when the CPU fetches instructions from the wrong path (e.g., after a branch).
+
+### Case 5: Branch Misprediction (2-Cycle Flush)
+
+Our CPU assumes a branch is **Not Taken** by default. If the branch *is* taken, we must "kill" the instructions already behind it in the pipeline.
+
+<script type="WaveDrom">
+{ "signal": [
+  { "name": "CLK", "wave": "p......" },
+  { "name": "IF (Fetch)",     "wave": "345.6..", "data": ["BEQ", "Wrong1", "Wrong2", "Target"] },
+  { "name": "ID (Decode)",    "wave": ".345.6.", "data": ["BEQ", "Wrong1", "Wrong2", "Target"] },
+  { "name": "EX (Execute)",   "wave": "..3xx6.", "data": ["BEQ", "Flush1", "Flush2", "Target"] },
+  {},
+  { "name": "Branch Taken",   "wave": "..010.." },
+  { "name": "PIPELINE ACTION","wave": "...2.3.", "data": ["FLUSHING", "Resume"] }
+],
+  "head": { "text": "Branch Taken (Resolves at Cycle 3, Flushes at Cycle 4)", "tick": 0 },
+  "config": { "hscale": 2.2 }
+}
+</script>
+
+**Cycle-by-Cycle Breakdown:**
+*   **Cycle 3 (Resolution):** `BEQ` is in **Execute**. The ALU determines the branch is **TAKEN**. The PC is updated to the `Target` address, and the flush signal is asserted.
+*   **Cycle 4 (The Flush):** 
+    *   `Wrong1` (which was in Decode) and `Wrong2` (which was in Fetch) are both discarded (`Flush1` and `Flush2`).
+    *   The `Target` instruction is fetched from memory.
+*   **Cycle 5:** The pipeline contains bubbles where the wrong instructions were. The `Target` instruction moves to **Decode**.
+*   **Cycle 6:** `Target` reaches **Execute**.
+
 
 ## 3.4 Control Hazards
 
