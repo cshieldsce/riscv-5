@@ -8,6 +8,10 @@
   <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/skins/default.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/wavedrom.min.js" type="text/javascript"></script>
+<body onload="WaveDrom.ProcessAll()">
+
 # 3.0 Hazard Resolution
 
 ## The Problem: The Pipeline Illusion
@@ -57,8 +61,24 @@ Below is an analysis of every hazard scenario our architecture handles, includin
 
 ### Case 1: EX-to-EX Forwarding (Immediate Dependency)
 
-![EX-to-EX Timing](../images/timing_ex_hazard.svg)
-*Figure 8: Cycle-by-cycle view of `add` followed by `sub`. Data forwards from EX/MEM to ALU input in cycle 3.*
+<script type="WaveDrom">
+{ "signal": [
+  { "name": "CLK", "wave": "p...." },
+  { "name": "IF",  "wave": "34...", "data": ["ADD x1..", "SUB x5.."] },
+  { "name": "ID",  "wave": ".34..", "data": ["ADD x1..", "SUB x5.."] },
+  { "name": "EX",  "wave": "..34.", "data": ["ADD (Calc x1)", "SUB (Needs x1)"] },
+  { "name": "MEM", "wave": "...34", "data": ["ADD", "SUB"] },
+  { "name": "WB",  "wave": "....3", "data": ["ADD (Write x1)"] },
+  {},
+  { "name": "Forward A", "wave": "...5.", "data": ["10 (From EX/MEM)"] },
+  { "name": "ALU Input A", "wave": "...4.", "data": ["New x1 Value"] }
+],
+  "head": {
+    "text": "EX-to-EX Forwarding (No Stall)",
+    "tick": 0
+  }
+}
+</script>
 
 This is the most common hazard. An instruction needs the result of the *immediately preceding* operation.
 
@@ -121,7 +141,25 @@ This is a subtle but critical detail. The forwarding logic must prioritize the m
 
 ### Case 4: The Load-Use Hazard (The Physical Limit)
 
-![Load-Use Stall](../images/timing_load_use.svg)
+<script type="WaveDrom">
+{ "signal": [
+  { "name": "CLK", "wave": "p....." },
+  { "name": "IF",  "wave": "34.4..", "data": ["LW x1..", "ADD x3..", "ADD x3.."] },
+  { "name": "ID",  "wave": ".3445.", "data": ["LW x1..", "ADD (Stall)", "ADD (Stall)", "ADD (Decoded)"] },
+  { "name": "EX",  "wave": "..3.74", "data": ["LW (Addr)", "NOP (Bubble)", "ADD (Exec)"] },
+  { "name": "MEM", "wave": "...3.7", "data": ["LW (Read)", "NOP"] },
+  { "name": "WB",  "wave": "....3.", "data": ["LW (Write)"] },
+  {},
+  { "name": "Stall ID/IF", "wave": "..1.0." },
+  { "name": "Forward A", "wave": ".....5", "data": ["01 (From WB)"] }
+],
+  "head": {
+    "text": "Load-Use Hazard (1 Cycle Stall)",
+    "tick": 0
+  }
+}
+</script>
+
 *Figure 9: Load-use hazard showing PC stall, bubble insertion, and forwarding after memory access completes.*
 
 This is the only case where forwarding is physically impossible.
@@ -151,7 +189,23 @@ Cycle 3:  lw  (WB)  │ add (EX) ← x1 available via forwarding
 
 ### Case 5: Control Hazards (Branch Misprediction)
 
-![Branch Flush](../images/timing_branch_flush.svg)
+<script type="WaveDrom">
+{ "signal": [
+  { "name": "CLK", "wave": "p....." },
+  { "name": "IF",  "wave": "345.6.", "data": ["BEQ ...", "Inst A", "Inst B", "Target"] },
+  { "name": "ID",  "wave": ".345x6", "data": ["BEQ ...", "Inst A", "Inst B", "Target"] },
+  { "name": "EX",  "wave": "..345x", "data": ["BEQ (Taken)", "Inst A", "Inst B"] },
+  { "name": "Flush Signals", "wave": "..01.0" },
+  {},
+  { "name": "Pipeline Action", "wave": "...3.4", "data": ["Flush ID & EX", "Resume Correct Path"] }
+],
+  "head": {
+    "text": "Branch Misprediction (2 Cycle Flush)",
+    "tick": 0
+  }
+}
+</script>
+
 *Figure 10: Branch misprediction showing IF and ID stages flushed when branch resolves in EX.*
 
 Because we resolve branches in the **Execute (EX)** stage, we don't know if we need to jump until the instruction is halfway through the pipeline.

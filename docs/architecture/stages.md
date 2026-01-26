@@ -35,46 +35,52 @@ The IF stage is responsible for maintaining program flow. It receives a `next_pc
 ### RTL Implementation
 
 ```verilog
-module IF_Stage (
-    input  logic            clk, rst,
-    input  logic [XLEN-1:0] next_pc_in,
-    input  logic [XLEN-1:0] instruction_in,
-    output logic [XLEN-1:0] instruction_out,
-    output logic [XLEN-1:0] pc_out,
-    output logic [XLEN-1:0] pc_plus_4_out
-);
-    PC pc_inst (
-        .clk(clk),
-        .rst(rst),
-        .pc_in(next_pc_in),
-        .pc_out(pc_out)
-    );
+// --- Next PC Logic ---
+logic [XLEN-1:0] if_pc_reg;
+logic [XLEN-1:0] if_next_pc;
+logic [XLEN-1:0] if_pc_plus_4_calc;
 
-    assign instruction_out = instruction_in;
-    assign pc_plus_4_out = pc_out + 32'd4;
+assign if_pc_plus_4_calc = if_pc_reg + 4;
 
-endmodule
+// -- Select Next PC based on control signals ---
+always_comb begin: SelectNextPC
+    if (stall) begin : Stalled
+        if_next_pc = if_pc_reg;        
+    end else if (jalr_taken) begin : JALRTaken
+        if_next_pc = jalr_target;          
+    end else if (branch_taken) begin : BranchTaken
+        if_next_pc = branch_target;       
+    end else if (jal_taken) begin : JALTaken
+        if_next_pc = jal_target;         
+    end else begin : IncrementPC
+        if_next_pc = if_pc_plus_4_calc;
+    end 
+end
+
+// -- Update or Hold PC ---
+always_ff @(posedge clk) begin : PC_Register
+    if (rst) begin : ResetPC
+        if_pc_reg <= {XLEN{1'b0}};
+    end else begin : UpdatePC
+        if_pc_reg <= if_next_pc;
+    end
+end
+
+// --- Outputs ---
+assign pc_out          = if_pc_reg;
+assign pc_plus_4       = if_pc_plus_4_calc;
+assign instruction_out = instruction_in;
 ```
 
 ### PC Selection Logic
 
-The PC selection multiplexer determines the next instruction address based on control hazards. This logic prioritizes control flow changes in order of detection:
+The PC selection multiplexer determines the next instruction address based on control hazards. This logic prioritizes control flow changes in order of detection (stalls take highest priority, followed by resolved jumps/branches):
 
-```verilog
-always_comb begin
-    if (stall_if) begin
-        next_pc = if_pc;                    // Hold PC during stall
-    end else if (id_ex_jalr) begin
-        next_pc = jalr_masked_pc;           // JALR: indirect jump (EX stage)
-    end else if (branch_taken) begin
-        next_pc = ex_branch_target;         // Taken branch (EX stage)
-    end else if (id_jump) begin
-        next_pc = jump_target_id;           // JAL: direct jump (ID stage)
-    end else begin
-        next_pc = if_pc_plus_4;             // Normal sequential execution
-    end
-end
-```
+1.  **Stall:** Keep current PC.
+2.  **JALR:** Indirect jump resolved in EX stage.
+3.  **Branch:** Conditional branch resolved in EX stage.
+4.  **JAL:** Direct jump resolved in ID stage (optimization).
+5.  **Sequential:** `PC + 4`.
 
 ### Design Rationale
 
@@ -99,7 +105,7 @@ The ID stage is the "brain" of the pipeline, translating binary opcodes into con
 ### Instruction Field Extraction
 
 ```verilog
-assign opcode = opcode_t'(instruction[6:0]);
+assign opcode = opcode_t(instruction[6:0]);
 assign rd     = instruction[11:7];
 assign funct3 = instruction[14:12];
 assign rs1    = instruction[19:15];
@@ -131,31 +137,31 @@ The `EX` stage is where the actual computation happens. It receives operands (po
 The forwarding unit provides two 2-bit control signals (`forward_a`, `forward_b`) that select the most recent data:
 
 ```verilog
-always_comb begin
+always_comb begin : ForwardA_MUX
     case (forward_a)
-        2'b00:   alu_in_a_forwarded = rs1_data;         // No hazard
-        2'b01:   alu_in_a_forwarded = wb_write_data;    // Forward from WB
-        2'b10:   alu_in_a_forwarded = ex_mem_alu_result;// Forward from MEM
-        default: alu_in_a_forwarded = rs1_data;
+        2'b00:   ex_alu_in_a_fwd = rs1_data;            // No hazard (Register)
+        2'b01:   ex_alu_in_a_fwd = wb_write_data;       // Forward from WB
+        2'b10:   ex_alu_in_a_fwd = ex_mem_alu_result;   // Forward from MEM
+        default: ex_alu_in_a_fwd = rs1_data;
     endcase
 end
 ```
 
 ### 2. ALU Source Multiplexers
 
-The `alu_src_a` signal handles special cases like `LUI` (Load Upper Immediate) and `AUIPC` (Add Upper Immediate to PC):
+The `op_a_sel` signal handles special cases like `LUI` (Load Upper Immediate) and `AUIPC` (Add Upper Immediate to PC):
 
 ```verilog
-always_comb begin
-    case (alu_src_a)
-        2'b00:   alu_in_a = alu_in_a_forwarded;   // Normal: Register
-        2'b01:   alu_in_a = pc;                    // AUIPC: PC
-        2'b10:   alu_in_a = {XLEN{1'b0}};          // LUI: Zero
-        default: alu_in_a = alu_in_a_forwarded;
+always_comb begin : ALUInputA_MUX
+    case (op_a_sel)
+        2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;          // Regular register op
+        2'b01:   ex_alu_in_a = pc;                       // AUIPC: PC
+        2'b10:   ex_alu_in_a = {XLEN{1'b0}};             // LUI: Zero
+        default: ex_alu_in_a = ex_alu_in_a_fwd;
     endcase
 end
 
-assign alu_in_b = alu_src ? imm : rs2_data_forwarded;
+assign ex_alu_in_b = op_b_sel ? imm : rs2_data_forwarded;
 ```
 
 <div class="callout tip"><span class="title">LUI Trick</span>
@@ -192,57 +198,53 @@ The ALU computes both signed and unsigned comparison results. <code>BLT</code>/<
 
 ## 2.4 Memory Access (MEM)
 
-**Implementation:** `mem_stage.sv` (simplified), `pipelined_cpu.sv` (byte enable logic)  
+**Implementation:** `mem_stage.sv`  
 
-The `MEM` stage translates RISC-V load/store operations into physical memory accesses, respecting byte, halfword, and word boundaries. It also manages Memory-Mapped I/O (MMIO) for our FPGA implementation.
+The `MEM` stage translates RISC-V load/store operations into physical memory accesses. It includes logic for store data forwarding (handling the "EX-to-MEM" hazard for stores) and byte enable generation.
 
 ### Byte Enable Generation
 
-RISC-V supports sub-word memory accesses (`LB`, `LH`, `SB`, `SH`). The byte enable signal (`dmem_be`) tells the memory controller which bytes to write:
+RISC-V supports sub-word memory accesses (`LB`, `LH`, `SB`, `SH`). The `mem_stage.sv` module calculates the byte enable signal (`dmem_be`) using a helper function:
 
 ```verilog
-// From pipelined_cpu.sv
-always_comb begin
-    case (ex_mem_funct3)
-        F3_BYTE: begin  // Store/Load Byte
-            case (ex_mem_alu_result[1:0])
-                2'b00: dmem_be = 4'b0001;  // Byte 0
-                2'b01: dmem_be = 4'b0010;  // Byte 1
-                2'b10: dmem_be = 4'b0100;  // Byte 2
-                2'b11: dmem_be = 4'b1000;  // Byte 3
+function automatic logic [3:0] get_byte_enable(logic [2:0] funct3, logic [1:0] addr_lsb);
+    case (funct3)
+        F3_BYTE: begin : ByteEnable
+            case (addr_lsb)
+                2'b00: return 4'b0001;
+                2'b01: return 4'b0010;
+                2'b10: return 4'b0100;
+                2'b11: return 4'b1000;
             endcase
         end
-        F3_HALF: begin  // Store/Load Halfword
-            case (ex_mem_alu_result[1])
-                1'b0: dmem_be = 4'b0011;   // Lower halfword
-                1'b1: dmem_be = 4'b1100;   // Upper halfword
+        F3_HALF: begin : HalfwordEnable
+            case (addr_lsb[1])
+                1'b0: return 4'b0011;   // Lower halfword
+                1'b1: return 4'b1100;   // Upper halfword
             endcase
         end
-        default: dmem_be = 4'b1111;        // Word access
+        default: return 4'b1111;        // Word access
     endcase
-end
-```
+endfunction
 
-<div class="callout note"><span class="title">ISA Requirement</span>
-See <em>RISC-V Unprivileged ISA Specification</em>, Section 2.6: "Load and Store Instructions". The ISA mandates byte-granular memory access control. Addresses must be naturally aligned for their size (byte at any address, halfword at even addresses, word at 4-byte aligned addresses). This logic ensures compliance.
-</div>
+assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
+```
 
 ---
 
 ## 2.5 Writeback (WB)
 
-**Implementation:** `pipelined_cpu.sv` (writeback multiplexer)  
+**Implementation:** `wb_stage.sv`  
 
-The `WB` stage resolves the final value for the destination register using the `mem_to_reg` control signal:
+The `WB` stage resolves the final value for the destination register using the `wb_mux_sel` control signal:
 
 ```verilog
-// From pipelined_cpu.sv
-always_comb begin
-    case (mem_wb_mem_to_reg)
-        2'b00: wb_write_data = mem_wb_alu_result;  // R-type, I-type ALU ops
-        2'b01: wb_write_data = mem_read_data;      // Load instructions (LW, LH, LB)
-        2'b10: wb_write_data = mem_wb_pc_plus_4;   // JAL, JALR (return address)
-        default: wb_write_data = {XLEN{1'b0}};     // Safety default
+always_comb begin : WriteBackMUX
+    case (mem_wb_wb_mux_sel)
+        2'b00: wb_write_data = mem_wb_alu_result;     // ALU instructions
+        2'b01: wb_write_data = dmem_read_data;        // Load instructions
+        2'b10: wb_write_data = mem_wb_pc_plus_4;      // JAL/JALR (Return address)
+        default: wb_write_data = {XLEN{1'b0}};        // Safety default
     endcase
 end
 ```
