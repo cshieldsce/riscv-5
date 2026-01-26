@@ -15,5 +15,5 @@ __pycache__/
 vivado_project/
 
 # Local workflow
-conductor/
+conductor/.
 .gemini/
