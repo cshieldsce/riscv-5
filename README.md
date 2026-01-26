@@ -11,10 +11,6 @@ A synthesizable 5-stage pipelined RISC-V core (RV32I) implemented in SystemVeril
 
 ## Design Overview
 
-This project implements a cycle-accurate RISC-V processor that adheres to the RV32I unprivileged ISA specification. The project also follows the architectural patterns from *Patterson & Hennessy* while incorporating some modern hazard mitigation techniques.
-
-### Complete Datapath
-
 ![Complete Pipelined Datapath](docs/images/pipeline_complete.svg)
 *5-stage pipeline with integrated forwarding unit and hazard detection*
 
@@ -84,6 +80,8 @@ riscv-5/
 ---
 
 ## References
+
+This project implements a cycle-accurate RISC-V processor that adheres to the RV32I unprivileged ISA specification. The project also follows the architectural patterns from *Patterson & Hennessy* while incorporating some modern hazard mitigation techniques.
 
 - [RISC-V ISA Specification v2.2](https://riscv.org/technical/specifications/)
 - *Computer Organization and Design: The Hardware/Software Interface (RISC-V Edition)* - Patterson & Hennessy
