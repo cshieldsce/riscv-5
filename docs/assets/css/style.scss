@@ -14,7 +14,17 @@
 .site-nav a { 
   margin-right: 1.2rem;
   text-decoration: none;
+  position: relative;
 }
+
+.site-nav a:not(:last-child)::after {
+  content: "|";
+  color: #888;
+  margin-left: 1.2rem;
+  position: absolute;
+  right: -1.2rem;
+}
+
 .site-nav a:hover {
   text-decoration: underline;
 }

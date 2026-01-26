@@ -4,7 +4,8 @@
   <a href="./manual.html">Architecture Overview</a>
   <a href="./stages.html">Pipeline Stages</a>
   <a href="./hazards.html">Hazard Resolution</a>
-  <a href="../verification/report.html">Verification</a>
+  <a href="../verification/report.html">Design Verification</a>
+  <a href="../verification/fpga.html">FPGA Implementation</a>
   <a href="../developer/guide.html">Setup</a>
 </div>
 
