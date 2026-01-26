@@ -40,9 +40,9 @@ module HazardUnit (
 );
     /**
      * @brief Check if register dependency exists (excluding x0)
-     * @param rd Destination register
-     * @param rs1 Source register 1
-     * @param rs2 Source register 2
+     * @param rd Destination register from EX stage
+     * @param rs1 Source register 1 from ID stage
+     * @param rs2 Source register 2 from ID stage
      * @return True if rd matches rs1 or rs2 (and rd != x0)
      */
     function automatic logic has_register_dependency(
