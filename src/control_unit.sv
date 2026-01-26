@@ -16,10 +16,10 @@ import riscv_pkg::*;
  * @param funct7      7-bit function field [31:25] (distinguishes ADD/SUB, SRL/SRA in R-type)
  * @param reg_write   Output: Enable register file write
  * @param alu_control Output: ALU operation selector (from alu_op_t enum)
- * @param alu_src_a   Output: ALU input A mux: 00=rs1, 01=PC, 10=zero
- * @param alu_src     Output: ALU input B mux: 0=rs2, 1=immediate
+ * @param op_a_sel   Output: ALU input A mux: 00=rs1, 01=PC, 10=zero
+ * @param op_b_sel   Output: ALU input B mux: 0=rs2, 1=immediate
  * @param mem_write   Output: Enable data memory write
- * @param mem_to_reg  Output: Result mux: 00=ALU, 01=Memory, 10=PC+4
+ * @param wb_mux_sel  Output: Result mux: 00=ALU, 01=Memory, 10=PC+4
  * @param branch      Output: Enable conditional branch logic
  * @param jump        Output: Enable unconditional jump (JAL)
  * @param jalr        Output: Enable jump-and-link register (JALR)
@@ -30,10 +30,10 @@ module ControlUnit (
     input  logic [6:0]      funct7,
     output logic            reg_write,
     output alu_op_t         alu_control,
-    output logic [1:0]      alu_src_a,
-    output logic            alu_src,
+    output logic [1:0]      op_a_sel,
+    output logic            op_b_sel,
     output logic            mem_write,
-    output logic [1:0]      mem_to_reg,
+    output logic [1:0]      wb_mux_sel,
     output logic            branch,
     output logic            jump,
     output logic            jalr
@@ -42,10 +42,10 @@ module ControlUnit (
         // --- Default signal values to prevent latches ---
         reg_write   = 1'b0;
         alu_control = ALU_ADD;        
-        alu_src_a   = 2'b00;          
-        alu_src     = 1'b0;          
+        op_a_sel    = 2'b00;          
+        op_b_sel    = 1'b0;          
         mem_write   = 1'b0;           
-        mem_to_reg  = 2'b00;          
+        wb_mux_sel  = 2'b00;          
         branch      = 1'b0;           
         jump        = 1'b0;           
         jalr        = 1'b0;           
@@ -53,8 +53,8 @@ module ControlUnit (
         case (opcode)
             OP_R_TYPE: begin : RegisterArithmetic
                 reg_write  = 1'b1;                                                         // Write result to rd
-                alu_src    = 1'b0;                                                         // ALU input B = rs2 (not immediate)
-                mem_to_reg = 2'b00;                                                        // Write ALU result to rd
+                op_b_sel  = 1'b0;                                                         // ALU input B = rs2 (not immediate)
+                wb_mux_sel = 2'b00;                                                        // Write ALU result to rd
 
                 case (funct3)
                     F3_ADD_SUB: alu_control = alu_op_t'((funct7[5]) ? ALU_SUB : ALU_ADD);  // ADD / SUB (based on funct7[5])
@@ -71,8 +71,8 @@ module ControlUnit (
 
             OP_I_TYPE: begin : ImmediateArithmetic
                 reg_write  = 1'b1;                                                         // Write result to rd
-                alu_src    = 1'b1;                                                         // ALU input B = immediate (not rs2)
-                mem_to_reg = 2'b00;                                                        // Write ALU result to rd
+                op_b_sel  = 1'b1;                                                         // ALU input B = immediate (not rs2)
+                wb_mux_sel = 2'b00;                                                        // Write ALU result to rd
 
                 case (funct3)
                     F3_ADD_SUB: alu_control = ALU_ADD;                                     // ADDI (no SUBI)
@@ -89,21 +89,21 @@ module ControlUnit (
             
             OP_LOAD: begin : LoadFromMemory
                 reg_write   = 1'b1;                             // Write loaded data to rd
-                alu_src     = 1'b1;                             // ALU input B = offset immediate
-                mem_to_reg  = 2'b01;                            // Write memory data to rd (not ALU result)
+                op_b_sel    = 1'b1;                             // ALU input B = offset immediate
+                wb_mux_sel  = 2'b01;                            // Write memory data to rd (not ALU result)
                 alu_control = ALU_ADD;                          // Compute address: rs1 + offset
             end
 
             OP_STORE: begin : StoreToMemory
-                alu_src     = 1'b1;                             // ALU input B = offset immediate
+                op_b_sel    = 1'b1;                             // ALU input B = offset immediate
                 mem_write   = 1'b1;                             // Enable memory write
                 alu_control = ALU_ADD;                          // Compute address: rs1 + offset
             end
 
             OP_BRANCH: begin : ConditionalBranches
                 branch      = 1'b1;                             // Enable branch logic
-                alu_src     = 1'b0;                             // ALU input B = rs2 (compare registers)
-                mem_to_reg  = 2'b00;                            // Branch doesn't write to register
+                op_b_sel    = 1'b0;                             // ALU input B = rs2 (compare registers)
+                wb_mux_sel  = 2'b00;                            // Branch doesn't write to register
                 
                 case (funct3)
                     F3_BEQ, F3_BNE:   alu_control = ALU_SUB;    // Equality check (rs1 - rs2)
@@ -116,31 +116,31 @@ module ControlUnit (
             OP_JAL: begin : UnconditionalJump
                 jump        = 1'b1;                             // Enable unconditional jump
                 reg_write   = 1'b1;                             // Write return address to rd
-                mem_to_reg  = 2'b10;                            // Write PC+4 to rd (return address)
+                wb_mux_sel  = 2'b10;                            // Write PC+4 to rd (return address)
                 alu_control = ALU_ADD;                          // Compute jump target: PC + offset
             end
 
             OP_JALR: begin : JumpAndLinkRegisters
                 jalr        = 1'b1;                             // Enable JALR-specific logic
                 reg_write   = 1'b1;                             // Write return address to rd
-                alu_src     = 1'b1;                             // ALU input B = offset immediate
-                mem_to_reg  = 2'b10;                            // Write PC+4 to rd (return address)
+                op_b_sel    = 1'b1;                             // ALU input B = offset immediate
+                wb_mux_sel  = 2'b10;                            // Write PC+4 to rd (return address)
                 alu_control = ALU_ADD;                          // Compute jump target: rs1 + offset
             end
 
             OP_LUI: begin : LoadUpperImmediate
                 reg_write   = 1'b1;                             // Write result to rd
-                alu_src     = 1'b1;                             // ALU input B = immediate (already shifted by ImmGen)
-                alu_src_a   = 2'b10;                            // ALU input A = 0 (compute 0 + imm)
-                mem_to_reg  = 2'b00;                            // Write ALU result to rd
+                op_b_sel    = 1'b1;                             // ALU input B = immediate (already shifted by ImmGen)
+                op_a_sel    = 2'b10;                            // ALU input A = 0 (compute 0 + imm)
+                wb_mux_sel  = 2'b00;                            // Write ALU result to rd
                 alu_control = ALU_ADD;                          // Simply pass through immediate
             end
 
             OP_AUIPC: begin : AddUpperImmediateToPC
                 reg_write   = 1'b1;                             // Write result to rd
-                alu_src     = 1'b1;                             // ALU input B = immediate
-                alu_src_a   = 2'b01;                            // ALU input A = PC
-                mem_to_reg  = 2'b00;                            // Write ALU result to rd
+                op_b_sel    = 1'b1;                             // ALU input B = immediate
+                op_a_sel    = 2'b01;                            // ALU input A = PC
+                wb_mux_sel  = 2'b00;                            // Write ALU result to rd
                 alu_control = ALU_ADD;                          // Compute PC + immediate
             end
 
