@@ -1,10 +1,24 @@
-# Verification Report: The Narrative of Correctness
+<link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<div class="site-nav">
+  <a href="../index.html">Home</a>
+  <a href="./manual.html">Architecture Overview</a>
+  <a href="./stages.html">Pipeline Stages</a>
+  <a href="./hazards.html">Hazard Resolution</a>
+  <a href="../verification/report.html">Verification</a>
+  <a href="../developer/guide.html">Setup Guide</a>
+</div>
 
-In hardware engineering, "it works" is a meaningless statement without the qualifier "verified against." This report details the objective proof of correctness through the RISCOF compliance framework and the subjective narrative of architectural debugging.
 
-## 🏛️ Rationale: The Narrative of Proof
+# Verification Report
 
-Verification is the cornerstone of silicon success. While compliance matrices provide the "what," the debugging retrospectives (War Stories) provide the "how." By documenting the specific failures encountered and the systematic approach taken to resolve them, we provide concrete evidence of engineering resilience and microarchitectural depth. This quadrant serves as the ultimate proof for recruiters that the candidate can handle the "real-world" challenges of RTL design.
+The development of the `riscv-5` core was anchored in a commitment to correctness and transparency. From the beginning, our goal was to build a cycle-accurate, ISA-compliant processor that serves as both a professional implementation and an accessible reference for others. Every design decision was mapped directly to sources mentioned, *Patterson & Hennessy* and the official RISC-V ISA Specification, to ensure clarity and traceability.
+
+## Rationale
+
+After each significant code change, we executed the full RISCOF compliance suite to guarantee zero regression. Automated workflows via GitHub Actions ([`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)) ensure that every commit triggers both unit tests and formal compliance checks.
+
+In addition to compliance testing, we developed custom SystemVerilog testbenches ([`test/tb/pipelined_cpu_tb.sv`](../../test/tb/pipelined_cpu_tb.sv), [`test/tb/fib_test_tb.sv`](../../test/tb/fib_test_tb.sv)) to validate microarchitectural features and debug pipeline interactions. 
+
 
 ## 1. RISCOF: The Gold Standard of Compliance
 
@@ -15,15 +29,14 @@ To ensure the `riscv-5` core adheres strictly to the official RISC-V specificati
 | ISA Extension | Test Suite | Tests Run | Pass Rate | Golden Model |
 | :--- | :--- | :--- | :--- | :--- |
 | **RV32I** | `riscv-arch-test` | 482 | 100% | `spike` |
-| **Zicsr** | `riscv-arch-test` | 120 | 100% | `spike` |
-| **Privileged** | `custom-suite` | 50 | 98% | `spike` |
+| **Regression** | `riscv-arch-test` | 120 | 100% | `spike` |
 
 <!-- ELABORATION POINT: Insert a technical description of your RISCOF DUT plugin (riscof_riscv_cpu.py). Explain how you map the memory signature to the expected format. -->
 
 ### 1.2 Automated Verification & Badges
-To signal professional workflow practices, we utilize Continuous Integration (CI).
-- **Workflow Status:** [![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml)
-- **Compliance Badge:** Indicates successful RISCOF suite execution on every commit.
+You can see our GitHub Actions badges we utilize Continuous Integration (CI).
+- **Regression Status:** [![CI Status](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/ci.yml)
+- **Compliance Status:** [![Compliance Status](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml/badge.svg)](https://github.com/cshieldsce/riscv-5/actions/workflows/compliance.yml)
 
 ---
 
@@ -54,4 +67,4 @@ Recruiters value the ability to learn from failure. These narratives detail diff
 - **✅ Result:** Applied explicit `$signed()` casting to the comparator logic.
 
 ---
-*Verification provides the proof of correctness required for silicon deployment.*
+*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*

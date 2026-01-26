@@ -1,10 +1,16 @@
-# Developer Guide
+<link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<div class="site-nav">
+  <a href="../index.html">Home</a>
+  <a href="./manual.html">Architecture Overview</a>
+  <a href="./stages.html">Pipeline Stages</a>
+  <a href="./hazards.html">Hazard Resolution</a>
+  <a href="../verification/report.html">Verification</a>
+  <a href="../developer/guide.html">Setup Guide</a>
+</div>
 
-This guide provides the technical instructions for building, simulating, and extending the `riscv-5` core. For this audience, clarity of instruction and reproducibility of results are paramount.
+# Setup Guide
 
-## Engineering Rationale
-
-A core that only runs on the original designer's machine is not a professional product. The "Developer Guide" quadrant ensures that the design is portable, the toolchain dependencies are clear, and the simulation results are reproducible. By providing copy-pasteable onboarding instructions, we prove that the project is built with collaboration and "Open Source" scalability in mind.
+This guide provides the technical instructions for building, simulating, and extending the `riscv-5` core.
 
 ## 1. Toolchain Dependencies
 
@@ -112,4 +118,4 @@ vivado -mode batch -source create_project.tcl
 ```
 
 ---
-*Built for the Silicon Industry. Verified for the Future.*
+*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*

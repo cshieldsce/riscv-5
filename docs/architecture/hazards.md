@@ -5,7 +5,7 @@
   <a href="./stages.html">Pipeline Stages</a>
   <a href="./hazards.html">Hazard Resolution</a>
   <a href="../verification/report.html">Verification</a>
-  <a href="../developer/guide.html">Developer Guide</a>
+  <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
 # 3.0 Hazard Resolution
@@ -179,3 +179,4 @@ Show cycles 1-4 with the branch being resolved, wrong instructions flushed, and 
 </div>
 
 ---
+*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*

@@ -5,7 +5,7 @@
   <a href="./stages.html">Pipeline Stages</a>
   <a href="./hazards.html">Hazard Resolution</a>
   <a href="../verification/report.html">Verification</a>
-  <a href="../developer/guide.html">Developer Guide</a>
+  <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
 # 2. Pipeline Stages & Microarchitectural Logic
@@ -272,3 +272,4 @@ We include <code>rs2</code> in the <code>EX/MEM</code> register to enable store 
 </div>
 
 ---
+*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*

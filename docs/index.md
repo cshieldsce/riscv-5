@@ -30,7 +30,7 @@ Objective evidence of correctness and a narrative account of debugging resilienc
 - **[Hazard Handling](./verification/report.html#load-use-hazard-stall):** Timing diagrams (WaveDrom) of temporal interactions.
 - **[War Stories](./verification/report.html#war-stories):** Retrospectives on solving "The Frozen Pipeline" and "The Bouncing Branch".
 
-### 3. The Developer Guide (How-To)
+### 3. The Setup Guide (How-To)
 Practical instructions for instantiating the core and running simulations.
 - **[Technical Onboarding](./developer/guide.html):** Toolchain setup and simulation workflow.
 - **[FPGA Integration](./developer/guide.html#fpga-deployment):** Deployment on the Xilinx PYNQ-Z2.

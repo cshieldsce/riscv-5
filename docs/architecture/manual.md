@@ -5,7 +5,7 @@
   <a href="./stages.html">Pipeline Stages</a>
   <a href="./hazards.html">Hazard Resolution</a>
   <a href="../verification/report.html">Verification</a>
-  <a href="../developer/guide.html">Developer Guide</a>
+  <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
 # Architecture Manual: The Theoretical Anchor
@@ -88,6 +88,4 @@ Pipeline stage registers are the backbone of the pipeline, they allow us to tran
 3. **RISC-V Software Tools Documentation.** *riscv64-unknown-elf-gcc* and *spike* simulator.
 
 ---
-
-**Last Updated:** January 2026  
-**Author:** Charles Shields
+*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
