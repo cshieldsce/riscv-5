@@ -33,16 +33,12 @@ module RegFile (
     output logic [XLEN-1:0]  read_data1,    
     output logic [XLEN-1:0]  read_data2 
 );
-    logic [XLEN-1:0] register_memory [0:REG_SIZE-1];
-
-    // --- Local Helper Functions ---
-    
     /**
      * @brief Check if write-through forwarding is needed
      * @param rs Source register being read
      * @param rd Destination register being written
      * @param reg_write Write enable signal
-     * @return True if forwarding should occur
+     * @return True if reg_write is enabled and rs matches rd (and rs != x0)
      */
     function automatic logic should_forward(
         input logic [4:0] rs,
@@ -74,6 +70,9 @@ module RegFile (
             return register_memory[rs];
         end
     endfunction
+
+    // --- Register Memory Array ---
+    logic [XLEN-1:0] register_memory [0:REG_SIZE-1];
 
     // --- Asynchronous Read Ports ---
     assign read_data1 = read_register(rs1, rd, RegWrite, write_data);
