@@ -5,7 +5,7 @@
   <a href="./stages.html">Pipeline Stages</a>
   <a href="./hazards.html">Hazard Resolution</a>
   <a href="../verification/report.html">Verification</a>
-  <a href="../developer/guide.html">Setup Guide</a>
+  <a href="../developer/guide.html">Setup</a>
 </div>
 
 # 3.0 Hazard Resolution
