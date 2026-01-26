@@ -19,6 +19,7 @@ module InstructionMemory (
     input  logic [ALEN-1:0] Address,
     output logic [XLEN-1:0] Instruction
 );
+
     logic [ALEN-1:0] word_addr;
     logic [XLEN-1:0] rom_memory [0:RAM_MEMORY_SIZE]; // Size defined in riscv_pkg
 
