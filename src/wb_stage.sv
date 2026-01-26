@@ -12,14 +12,14 @@ import riscv_pkg::*;
  * @param wb_write_data     Final Data to be written to Register File
  */
 module WB_Stage (
-    input  logic [1:0]       mem_wb_mem_to_reg,
+    input  logic [1:0]       mem_wb_wb_mux_sel,
     input  logic [XLEN-1:0]  mem_wb_alu_result,
     input  logic [XLEN-1:0]  mem_wb_pc_plus_4,
     input  logic [XLEN-1:0]  dmem_read_data,   
     output logic [XLEN-1:0]  wb_write_data
 );
     always_comb begin : WriteBackMUX
-        case (mem_wb_mem_to_reg)
+        case (mem_wb_wb_mux_sel)
             2'b00: wb_write_data = mem_wb_alu_result;     // ALU instructions
             2'b01: wb_write_data = dmem_read_data;        // Load instructions (Memory read)
             2'b10: wb_write_data = mem_wb_pc_plus_4;      // JAL/JALR (Return address)

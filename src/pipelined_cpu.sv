@@ -87,9 +87,9 @@ module PipelinedCPU (
     // Control Signals
     logic            id_reg_write, id_mem_write;
     alu_op_t         id_alu_control;
-    logic            id_alu_src;
-    logic [1:0]      id_alu_src_a;
-    logic [1:0]      id_mem_to_reg;
+    logic [1:0]      id_op_a_sel;
+    logic            id_op_b_sel;
+    logic [1:0]      id_wb_mux_sel;
     logic            id_branch, id_jump, id_jalr;
 
     // ID/EX Register Signals
@@ -101,9 +101,9 @@ module PipelinedCPU (
     // ID/EX Control
     logic            id_ex_reg_write, id_ex_mem_write;
     alu_op_t         id_ex_alu_control;
-    logic            id_ex_alu_src;
-    logic [1:0]      id_ex_alu_src_a;
-    logic [1:0]      id_ex_mem_to_reg;
+    logic [1:0]      id_ex_op_a_sel;
+    logic            id_ex_op_b_sel;
+    logic [1:0]      id_ex_wb_mux_sel;
     logic            id_ex_branch, id_ex_jump, id_ex_jalr;
 
     // --- EX Stage Signals ---
@@ -121,7 +121,7 @@ module PipelinedCPU (
 
     // EX/MEM Control
     logic            ex_mem_reg_write, ex_mem_mem_write;
-    logic [1:0]      ex_mem_mem_to_reg;
+    logic [1:0]      ex_mem_wb_mux_sel;
 
     // --- MEM Stage Signals ---
     logic [XLEN-1:0] mem_read_data;
@@ -133,17 +133,17 @@ module PipelinedCPU (
 
     // MEM/WB Control
     logic            mem_wb_reg_write;
-    logic [1:0]      mem_wb_mem_to_reg;
+    logic [1:0]      mem_wb_wb_mux_sel;
 
     // --- WB Stage Signals ---
     logic [XLEN-1:0] wb_write_data; 
 
-    // --- Hazard & Forwarding ---
+    // --- Hazard & Forwarding Signals ---
     logic [1:0]      forward_a, forward_b; 
     logic            stall_if, stall_id, flush_ex, flush_id;
-    logic            pcsrc; 
+    logic            branch_taken_ex; 
 
-    assign pcsrc = branch_taken | id_ex_jalr;
+    assign branch_taken_ex = branch_taken | id_ex_jalr;
 
     // -------------------------------------------------- //
     // ----------- IF: Instruction Fetch Stage ---------- //
@@ -216,9 +216,9 @@ module PipelinedCPU (
         .reg_write(id_reg_write),
         .mem_write(id_mem_write),
         .alu_control(id_alu_control),
-        .alu_src(id_alu_src),
-        .alu_src_a(id_alu_src_a),
-        .mem_to_reg(id_mem_to_reg),
+        .op_a_sel(id_op_a_sel),
+        .op_b_sel(id_op_b_sel),
+        .wb_mux_sel(id_wb_mux_sel),
         .branch(id_branch),
         .jump(id_jump),
         .jalr(id_jalr)
@@ -229,8 +229,8 @@ module PipelinedCPU (
         .id_rs2(id_rs2),
         .id_branch(id_branch),
         .id_ex_rd(id_ex_rd),
-        .id_ex_mem_read(id_ex_mem_to_reg[0]), 
-        .PCSrc(pcsrc),
+        .id_ex_mem_read(id_ex_wb_mux_sel[0]), 
+        .branch_taken_ex(branch_taken_ex),
         .jump_id_stage(id_jump),
         .stall_if(stall_if),
         .stall_id(stall_id),
@@ -251,7 +251,7 @@ module PipelinedCPU (
             id_rs1, id_rs2, id_rd, id_funct3,
             // Control Payload
             id_reg_write, id_mem_write,
-            id_alu_control, id_alu_src, id_alu_src_a, id_mem_to_reg, 
+            id_alu_control, id_op_a_sel, id_op_b_sel, id_wb_mux_sel, 
             id_branch, id_jump, id_jalr
         }),
         .out({
@@ -261,7 +261,7 @@ module PipelinedCPU (
             id_ex_rs1, id_ex_rs2, id_ex_rd, id_ex_funct3,
             // Control Payload
             id_ex_reg_write, id_ex_mem_write,
-            id_ex_alu_control, id_ex_alu_src, id_ex_alu_src_a, id_ex_mem_to_reg, 
+            id_ex_alu_control, id_ex_op_a_sel, id_ex_op_b_sel, id_ex_wb_mux_sel, 
             id_ex_branch, id_ex_jump, id_ex_jalr
         })
     );
@@ -291,8 +291,8 @@ module PipelinedCPU (
         .ex_mem_alu_result(ex_mem_alu_result),
         .wb_write_data(wb_write_data),
         .alu_control(id_ex_alu_control),
-        .alu_src(id_ex_alu_src),
-        .alu_src_a(id_ex_alu_src_a),
+        .op_a_sel(id_ex_op_a_sel),
+        .op_b_sel(id_ex_op_b_sel),
         .branch_en(id_ex_branch),
         .funct3(id_ex_funct3),
         .alu_result(ex_alu_result),
@@ -317,14 +317,14 @@ module PipelinedCPU (
             id_ex_funct3,
             id_ex_rs2,
             // Control Payload
-            id_ex_reg_write, id_ex_mem_write, id_ex_mem_to_reg
+            id_ex_reg_write, id_ex_mem_write, id_ex_wb_mux_sel
         }),
         .out({
             // Data Payload
             ex_mem_alu_result, ex_mem_write_data, ex_mem_rd, ex_mem_pc_plus_4, ex_mem_funct3,
             ex_mem_rs2,         
             // Control Payload
-            ex_mem_reg_write, ex_mem_mem_write, ex_mem_mem_to_reg
+            ex_mem_reg_write, ex_mem_mem_write, ex_mem_wb_mux_sel
         })
     );
 
@@ -335,12 +335,9 @@ module PipelinedCPU (
     MEM_Stage mem_stage_inst (
         .clk(clk),
         .rst(rst),
-        .ex_mem_reg_write(ex_mem_reg_write),
         .ex_mem_mem_write(ex_mem_mem_write),
-        .ex_mem_mem_to_reg(ex_mem_mem_to_reg),
         .ex_mem_alu_result(ex_mem_alu_result),
         .ex_mem_write_data(ex_mem_write_data),
-        .ex_mem_rd(ex_mem_rd),
         .ex_mem_funct3(ex_mem_funct3),
         .ex_mem_rs2(ex_mem_rs2),
         .wb_reg_write(mem_wb_reg_write),
@@ -368,13 +365,13 @@ module PipelinedCPU (
             ex_mem_rd,          
             ex_mem_pc_plus_4,   
             // Control Payload
-            ex_mem_reg_write, ex_mem_mem_to_reg
+            ex_mem_reg_write, ex_mem_wb_mux_sel
         }),
         .out({
             // Data Payload
             mem_wb_read_data, mem_wb_alu_result, mem_wb_rd, mem_wb_pc_plus_4,
             // Control Payload
-            mem_wb_reg_write, mem_wb_mem_to_reg
+            mem_wb_reg_write, mem_wb_wb_mux_sel
         })
     );
 
@@ -383,7 +380,7 @@ module PipelinedCPU (
     // --------------------------------------------------- //
 
     WB_Stage wb_stage_inst (
-        .mem_wb_mem_to_reg(mem_wb_mem_to_reg),
+        .mem_wb_wb_mux_sel(mem_wb_wb_mux_sel),
         .mem_wb_alu_result(mem_wb_alu_result),
         .mem_wb_pc_plus_4(mem_wb_pc_plus_4),
         .dmem_read_data(mem_read_data),

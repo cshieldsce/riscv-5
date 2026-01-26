@@ -9,15 +9,13 @@
   <a href="./developer/guide.html">Setup Guide</a>
 </div>
 
-# Strategic Documentation Engineering: RISC-V Portfolio
+# Documentation
 
 Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation was created to give you background on this project from both a high and low level.
 
 ## Project Development
 
-## Project Development
-
-My introduction to RISC-V happened while I was studying ARM assembly during a semester abroad at the University of Glasgow. Discovering that RISC-V was open source and free to use felt like unlocking a lifelong dream, the chance to design and build my own CPU from scratch. I dove into the RISC-V ISA, starting with a single-cycle CPU to get a feel for the basics. Once that was working, I challenged myself to implement a full 5-stage pipeline, learning a ton about hazards and microarchitecture along the way. The final milestone was getting the design running on an FPGA and watching it pass the Fibonacci test in hardware, a moment that truly made the project feel complete.
+My introduction to RISC-V happened while I was studying ARM assembly during a semester abroad at the University of Glasgow. Discovering that RISC-V was open source and free to use felt like unlocking a lifelong dream, the chance to design and build my own CPU from scratch. I began reading into the RISC-V ISA, starting with a single-cycle CPU to get a feel for the basics. Once that was working, I didn't want to stop, so began implementing a full 5-stage pipeline, learning a ton about hazards and microarchitecture along the way. The final milestone was getting the design running on an FPGA and watching it pass the Fibonacci test in hardware, a moment that truly made the project feel complete.
 
 ## Articles
 

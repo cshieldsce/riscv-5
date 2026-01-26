@@ -29,9 +29,9 @@ import riscv_pkg::*;
  * @param reg_write       Control: Register Write Enable
  * @param mem_write       Control: Memory Write Enable
  * @param alu_control     Control: ALU Operation Selector
- * @param alu_src         Control: ALU Source B Mux Select (0=Reg, 1=Imm)
- * @param alu_src_a       Control: ALU Source A Mux Select (0=rs1, 1=PC, 2=Zero)
- * @param mem_to_reg      Control: Result Mux Select
+ * @param op_a_sel       Control: ALU Source A Mux Select (0=rs1, 1=PC, 2=Zero)
+ * @param op_b_sel       Control: ALU Source B Mux Select (0=Reg, 1=Imm)
+ * @param wb_mux_sel      Control: Result Mux Select
  * @param branch          Control: Branch Enable
  * @param jump            Control: Jump Enable (JAL)
  * @param jalr            Control: Jump Register Enable (JALR)
@@ -56,9 +56,9 @@ module ID_Stage (
     output logic             reg_write,
     output logic             mem_write,
     output alu_op_t          alu_control,
-    output logic             alu_src,      
-    output logic [1:0]       alu_src_a,   
-    output logic [1:0]       mem_to_reg,
+    output logic [1:0]       op_a_sel,  
+    output logic             op_b_sel,       
+    output logic [1:0]       wb_mux_sel,
     output logic             branch,
     output logic             jump,
     output logic             jalr
@@ -77,10 +77,10 @@ module ID_Stage (
         .funct7(funct7),
         .reg_write(reg_write),
         .alu_control(alu_control),
-        .alu_src_a(alu_src_a),
-        .alu_src(alu_src),
+        .op_a_sel(op_a_sel),
+        .op_b_sel(op_b_sel),
         .mem_write(mem_write),
-        .mem_to_reg(mem_to_reg),
+        .wb_mux_sel(wb_mux_sel),
         .branch(branch),
         .jump(jump),
         .jalr(jalr)

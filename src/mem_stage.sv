@@ -9,12 +9,9 @@ import riscv_pkg::*;
  * 
  * @param clk               System Clock
  * @param rst               System Reset (Active High)
- * @param ex_mem_reg_write  Register Write Enable from EX/MEM
  * @param ex_mem_mem_write  Memory Write Enable from EX/MEM
- * @param ex_mem_mem_to_reg Result Mux Select from EX/MEM
  * @param ex_mem_alu_result ALU Result (Memory Address) from EX/MEM
  * @param ex_mem_write_data Data to Store (rs2) from EX/MEM
- * @param ex_mem_rd         Destination Register from EX/MEM
  * @param ex_mem_funct3     Funct3 (Store Type) from EX/MEM
  * @param ex_mem_rs2        Source Register Address for Store Data
  * @param wb_reg_write      Register Write Enable from WB (for Forwarding)
@@ -29,12 +26,9 @@ import riscv_pkg::*;
 module MEM_Stage (
     input  logic             clk,         
     input  logic             rst,
-    input  logic             ex_mem_reg_write,
     input  logic             ex_mem_mem_write,
-    input  logic [1:0]       ex_mem_mem_to_reg,
     input  logic [XLEN-1:0]  ex_mem_alu_result,
     input  logic [XLEN-1:0]  ex_mem_write_data,
-    input  logic [4:0]       ex_mem_rd,
     input  logic [2:0]       ex_mem_funct3,
     input  logic [4:0]       ex_mem_rs2,    
     input  logic             wb_reg_write,

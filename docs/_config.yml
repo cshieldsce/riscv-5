@@ -1,4 +1,5 @@
-title: RISC-V Pipelined Processor
+title: riscv-5: A Pipelined Processor (RV32I)
+author: Charlie Shields
 description: A verified 5-stage pipelined RV32I core implemented in SystemVerilog.
 
 header_pages:
