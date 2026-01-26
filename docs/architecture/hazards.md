@@ -30,226 +30,179 @@ div[id^="WaveDrom_Display_"] {
 
 # 3.0 Hazard Resolution
 
-## The Problem: The Pipeline Illusion
+In a pipelined processor, multiple instructions overlap in execution. Hazards occur when the hardware cannot support the next instruction in the next clock cycle without producing incorrect results. Our CPU handles three types of hazards through a combination of **Forwarding**, **Stalling**, and **Flushing**.
 
-In a standard Single-Cycle processor, the concept of a "Data Hazard" does not exist. The entire instruction completes fetching, calculating, and writing back to the register file before the next instruction even begins. The software written for a single cycle processor assumes: "Instruction A finishes completely before Instruction B starts."
+## 3.1 Hazard Summary Table
 
-However, in our Pipelined design we violate this assumption. We now have up to five instructions executing simultaneously.
-
-<div class="callout warn"><span class="title">The Dependency Paradox</span>
-If Instruction B relies on a value calculated by Instruction A, Instruction B might try to read that value from the Register File <em>before</em> Instruction A has actually written the value to the register. Without intervention, the CPU would process stale data, leading to incorrect results.
-</div>
-
-Without intervention, the CPU would process stale data leading to calculation errors. To maintain the illusion of sequential execution while enjoying the speed of parallel processing, we implemented a sophisticated Hazard Resolution system using **Forwarding** (bypassing storage) and **Stalling** (injecting wait states).
-
-## The Solution Architecture
-
-When a Data Hazard occurs, the hardware must choose between an aggressive optimization (Forwarding) or a defensive pause (Stalling).
-
-<div class="callout tip"><span class="title">Forwarding Strategy</span>
-Forwarding relies on the fact that the calculated data already exists inside the pipeline registers, even though it hasn't been written back to the Register File yet. The Forwarding Unit detects data dependencies and routes the data directly to the ALU inputs via multiplexers. This allows the pipeline to maintain full speed with zero latency penalty for most hazards.
-</div>
-
-<div class="callout tip"><span class="title">Stalling Strategy</span>
-Stalling is the fallback when forwarding is physically impossible (e.g., data is still in RAM). The Hazard Unit freezes the Program Counter and flushes the <code>ID/EX</code> register, injecting a "bubble" (NOP) into the pipeline. This forces dependent instructions to wait exactly one cycle, allowing memory data to arrive.
-</div>
-
-We handle hazards using two dedicated hardware units:
-
-1. **The Forwarding Unit (`src/forwarding_unit.sv`):** A combinational logic block that controls MUXes at the ALU inputs. It "short-circuits" data from later pipeline stages directly to the Execute stage, skipping the Register File entirely.
-2. **The Hazard Unit (`src/hazard_unit.sv`):** The "traffic cop" of the CPU. If forwarding is impossible (e.g., waiting for RAM), it freezes the PC and inserts "bubbles" (NOPs) to pause execution.
-
-### Forwarding Architecture
-
-![Forwarding Paths](../images/forwarding_datapath.svg)
-*Figure 7: Data forwarding paths from EX/MEM and MEM/WB stages back to ALU inputs. Red lines show the bypass routes.*
-
-The diagram above highlights the three forwarding scenarios:
-1. **EX Hazard (Red):** Forward from `EX/MEM` register
-2. **MEM Hazard (Orange):** Forward from `MEM/WB` register  
-3. **Priority Logic (Yellow):** EX/MEM takes precedence over MEM/WB
+| Hazard Type | Scenario | Hardware Action | Penalty (Cycles) |
+|-------------|----------|-----------------|------------------|
+| **Data Hazard** | Register dependency (ALU to ALU) | Forwarding | 0 |
+| **Data Hazard** | Store dependency (WB to MEM) | MEM Forwarding | 0 |
+| **Data Hazard** | Load-Use dependency | Stall + Forwarding | 1 |
+| **Control Hazard** | Conditional Branch (Taken) | Flush IF & ID | 2 |
+| **Control Hazard** | JAL (Unconditional Jump) | Flush IF | 1 |
+| **Control Hazard** | JALR (Indirect Jump) | Flush IF & ID | 2 |
+| **Special Case** | ALU-to-Branch Dependency | Stall + Flush IF/ID | 3 (Total) |
 
 ---
 
-## 3.2 Detailed Case Analysis
+## 3.2 Data Hazards: Forwarding & Bypassing
 
-Below is an analysis of every hazard scenario our architecture handles, including the specific assembly code that triggers it and the hardware's response.
+Data hazards occur when an instruction depends on the result of a previous instruction that hasn't yet been written back to the Register File.
 
-### Case 1: EX-to-EX Forwarding (Immediate Dependency)
+### Case 1: EX-to-EX Forwarding
+This occurs when an instruction needs a result computed by the *immediately* preceding instruction.
+
+```asm
+addi x1, x10, 5  # Result calculated in EX, moves to EX/MEM register
+sub  x2, x1, x3   # Needs x1 NOW in its EX stage
+```
 
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p...." },
-  { "name": "IF",  "wave": "34...", "data": ["ADD x1..", "SUB x5.."] },
-  { "name": "ID",  "wave": ".34..", "data": ["ADD x1..", "SUB x5.."] },
-  { "name": "EX",  "wave": "..34.", "data": ["ADD (Calc x1)", "SUB (Needs x1)"] },
-  { "name": "MEM", "wave": "...34", "data": ["ADD", "SUB"] },
-  { "name": "WB",  "wave": "....3", "data": ["ADD (Write x1)"] },
+  { "name": "CLK", "wave": "p....." },
+  { "name": "IF",  "wave": "345...", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "ID",  "wave": ".345..", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "EX",  "wave": "..345.", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "MEM", "wave": "...345", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "WB",  "wave": "....34", "data": ["ADDI", "SUB"] },
   {},
-  { "name": "Forward A", "wave": "...5.", "data": ["10 (From EX/MEM)"] },
-  { "name": "ALU Input A", "wave": "...4.", "data": ["New x1 Value"] }
+  { "name": "Forward A", "wave": "...5..", "data": ["10 (EX/MEM)"] }
 ],
-  "head": {
-    "text": "EX-to-EX Forwarding (No Stall)",
-    "tick": 0
-  },
-  "config": { "hscale": 2.2 }
+  "head": { "text": "EX-to-EX Forwarding", "tick": 0 },
+  "config": { "hscale": 2 }
 }
 </script>
 
-This is the most common hazard. An instruction needs the result of the *immediately preceding* operation.
-
-```asm
-add x1, x2, x3   # In EX/MEM stage (Result calculated, not written)
-sub x5, x1, x4   # In ID/EX stage  (Needs x1 NOW)
-```
-
-| The Problem | The Fix | Penalty (Cycles) |
-|-------------|---------|-----------------|
-| The result of the add is in the `EX/MEM` pipeline register. The `sub` instruction is about to enter the ALU. | The Forwarding Unit detects `rs1_ex == rd_mem`. It switches the ALU MUX to grab data directly from the `EX/MEM` register. | 0 |
-
----
-
-### Case 2: MEM-to-EX Forwarding (Delayed Dependency)
-
-The dependency is one instruction removed.
-
-```asm
-add x1, x2, x3   # In MEM/WB stage (Waiting to be written)
-nop              # (Or any unrelated instruction)
-sub x5, x1, x4   # In ID/EX stage (Needs x1)
-```
-
-| The Problem | The Fix | Penalty (Cycles) |
-|-------------|---------|-----------------|
-| The result is in the `MEM/WB` register, not yet in the register file. | The Forwarding Unit detects `rs1_ex == rd_wb`. It switches the ALU MUX to grab data from the `MEM/WB` register. | 0 |
-
----
-
-### Case 3: The "Double Hazard" (Priority Logic)
-
-What if both previous instructions write to the same register?
-
-```asm
-addi x1, x0, 10    # Instruction A (In MEM/WB) - Writes 10 to x1
-addi x1, x0, 20    # Instruction B (In EX/MEM) - Writes 20 to x1
-add  x5, x1, x6    # Instruction C (In ID/EX)  - Needs x1
-```
-
-| The Problem | The Fix | Penalty (Cycles) |
-|-------------|---------|-----------------|
-| Both the `EX/MEM` and `MEM/WB` stages contain a value for `x1`. Which one is correct? | The Forwarding Unit checks the `EX/MEM` hazard first. Since *Instruction B* is more recent, its value (20) overrides *Instruction A*'s value (10). | 0 |
-
-Snippet (`src/forwarding_unit.sv`):
+**Implementation (`src/forwarding_unit.sv`):**
+The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
 
 ```verilog
-if (forward_ex_condition) begin
-    // Forward from EX/MEM (Most Recent)
-end else if (forward_mem_condition) begin
-    // Forward from MEM/WB (Older)
+if (ex_mem_reg_write && (ex_mem_rd != 0) && (ex_mem_rd == id_ex_rs1))
+    forward_a = 2'b10; // Select data from EX/MEM register
+```
+
+### Case 2: MEM-to-EX Forwarding
+This occurs when the dependency is two instructions apart. The data is currently sitting in the `MEM/WB` pipeline register.
+
+```asm
+addi x1, x10, 5
+or   x4, x5, x6   # Unrelated
+sub  x2, x1, x3   # Needs x1
+```
+
+**Implementation:** The unit selects `2'b01` to bypass from the Writeback stage.
+
+### Case 3: MEM Store Forwarding (WB-to-MEM)
+A unique case where a `store` instruction needs data that is currently in the Writeback stage.
+
+```asm
+addi x1, x0, 10
+sw   x1, 0(x2)    # sw needs x1, which is in WB stage
+```
+
+**Implementation (`src/mem_stage.sv`):**
+The Memory stage contains its own mini-forwarding logic to ensure the `dmem_wdata` is updated if the `rs2` register is being written to by the instruction currently in the Writeback stage.
+
+---
+
+## 3.3 The Load-Use Hazard
+
+When an instruction depends on a `load` instruction, forwarding alone is insufficient because the data isn't available until the end of the Memory stage.
+
+### Case 4: Load-Use Stall
+The pipeline must "stall" for one cycle to allow the data to be fetched from RAM.
+
+<script type="WaveDrom">
+{ "signal": [
+  { "name": "CLK", "wave": "p......" },
+  { "name": "IF",  "wave": "34.5...", "data": ["LW", "ADD", "OR"] },
+  { "name": "ID",  "wave": ".34.5..", "data": ["LW", "ADD", "OR"] },
+  { "name": "EX",  "wave": "..3x45.", "data": ["LW", "NOP", "ADD", "OR"] },
+  { "name": "MEM", "wave": "...3x45", "data": ["LW", "NOP", "ADD", "OR"] },
+  { "name": "WB",  "wave": "....3x4", "data": ["LW", "NOP", "ADD"] },
+  {},
+  { "name": "Stall Unit", "wave": "..10...", "data": ["STALL"] },
+  { "name": "Forward A", "wave": "....5..", "data": ["01 (WB)"] }
+],
+  "head": { "text": "Load-Use Hazard (1 Cycle Stall)", "tick": 0 },
+  "config": { "hscale": 2 }
+}
+</script>
+
+**Hardware Action:**
+1. **Freeze PC:** The `stall_if` signal is asserted, keeping the Program Counter from advancing.
+2. **Freeze IF/ID:** The `stall_id` signal is asserted, keeping the `ADD` instruction in the Decode stage.
+3. **Inject Bubble:** The `flush_ex` signal clears the `ID/EX` register, effectively inserting a `NOP` into the Execute stage.
+
+---
+
+## 3.4 Control Hazards
+
+Control hazards occur when the CPU fetches the wrong instructions following a branch or jump.
+
+### Case 5: Branch Misprediction (Taken Branch)
+Our CPU predicts "Not-Taken" by default. When a branch is actually taken, the two instructions already in the pipeline (`IF` and `ID`) must be discarded.
+
+<script type="WaveDrom">
+{ "signal": [
+  { "name": "CLK", "wave": "p....." },
+  { "name": "IF",  "wave": "345.6.", "data": ["BEQ", "I+1", "I+2", "Tgt"] },
+  { "name": "ID",  "wave": ".345.6", "data": ["BEQ", "I+1", "I+2", "Tgt"] },
+  { "name": "EX",  "wave": "..3xx.", "data": ["BEQ", "FLUSH", "FLUSH"] },
+  {},
+  { "name": "branch_taken", "wave": "..010." },
+  { "name": "flush_id/ex",  "wave": "..010." }
+],
+  "head": { "text": "Branch Taken Flush (2 Cycle Penalty)", "tick": 0 },
+  "config": { "hscale": 2 }
+}
+</script>
+
+### Case 6: ALU-to-Branch Stall (Specific Implementation)
+In our architecture, if a branch in the Decode stage depends on an ALU result currently in the Execute stage, the `HazardUnit` triggers an additional stall. This is a design choice to simplify the branch comparison timing.
+
+**Example Code:**
+```asm
+addi x1, x0, 10
+beq  x1, x2, label  # Depends on x1 immediately
+```
+
+**Total Penalty:** 1 cycle (stall) + 2 cycles (flush if taken) = **3 cycles**.
+
+---
+
+## 3.5 Implementation Details
+
+### The Hazard Unit (`src/hazard_unit.sv`)
+The "Traffic Cop" of the CPU. It monitors the pipeline and decides when to freeze or flush.
+
+```verilog
+// Load-Use Detection
+if (id_ex_mem_read && ((id_ex_rd == id_rs1) || (id_ex_rd == id_rs2))) begin
+    stall_if = 1'b1;
+    stall_id = 1'b1;
+    flush_ex = 1'b1;
+end
+
+// Branch Flush Detection
+if (branch_taken_ex) begin
+    flush_id = 1'b1;
+    flush_ex = 1'b1;
 end
 ```
 
-<div class="callout note"><span class="title">Priority Resolution</span>
-This is a subtle but critical detail. The forwarding logic must prioritize the most recently computed value. If we forwarded from MEM/WB when EX/MEM had the newer result, we'd compute with stale data. The priority always favors EX/MEM over MEM/WB.
-</div>
+### The Forwarding Unit (`src/forwarding_unit.sv`)
+Handles priority to ensure the *most recent* data is used.
 
----
-
-### Case 4: The Load-Use Hazard (The Physical Limit)
-
-<script type="WaveDrom">
-{ "signal": [
-  { "name": "CLK", "wave": "p....." },
-  { "name": "IF",  "wave": "34.4..", "data": ["LW x1..", "ADD x3..", "ADD x3.."] },
-  { "name": "ID",  "wave": ".3445.", "data": ["LW x1..", "ADD (Stall)", "ADD (Stall)", "ADD (Decoded)"] },
-  { "name": "EX",  "wave": "..3.74", "data": ["LW (Addr)", "NOP (Bubble)", "ADD (Exec)"] },
-  { "name": "MEM", "wave": "...3.7", "data": ["LW (Read)", "NOP"] },
-  { "name": "WB",  "wave": "....3.", "data": ["LW (Write)"] },
-  {},
-  { "name": "Stall ID/IF", "wave": "..1.0." },
-  { "name": "Forward A", "wave": ".....5", "data": ["01 (From WB)"] }
-],
-  "head": {
-    "text": "Load-Use Hazard (1 Cycle Stall)",
-    "tick": 0
-  },
-  "config": { "hscale": 2.2 }
-}
-</script>
-
-*Figure 9: Load-use hazard showing PC stall, bubble insertion, and forwarding after memory access completes.*
-
-This is the only case where forwarding is physically impossible.
-
-```asm
-lw  x1, 0(x2)    # In EX stage (Calculating address, data is still in RAM)
-add x3, x1, x4   # In ID stage (Needs x1 immediately)
-```
-
-| The Problem | The Fix | Penalty (Cycles) |
-|-------------|---------|-----------------|
-| The `lw` instruction is currently calculating the address. The data is still inside the memory chip. We cannot forward data we haven't fetched yet. | The Hazard Unit:<br>**1. Stall:** PC_Write and IF/ID_Write are disabled. The `lw` and `add` stay put for 1 cycle.<br>**2. Bubble:** The `ID/EX` register is flushed (control signals set to 0), sending a `NOP` down the pipeline. | 1 |
-
-<div class="callout warn"><span class="title">Unavoidable Stall</span>
-This is the only data hazard that cannot be resolved by forwarding. Memory latency is physical—the RAM access takes time. We must stall and wait. This is why modern CPUs use caches and prefetching to minimize load-use hazard penalties.
-</div>
-
-**Timing Diagram:**
-
-```
-Cycle 1:  lw  (EX)  │ add (ID)
-Cycle 2:  lw  (MEM) │ BUBBLE (stalled, flushed)
-Cycle 3:  lw  (WB)  │ add (EX) ← x1 available via forwarding
+```verilog
+// Priority: EX/MEM (Most Recent) > MEM/WB (Older)
+if (has_ex_hazard) begin
+    forward_a = 2'b10;
+end else if (has_mem_hazard) begin
+    forward_a = 2'b01;
+end
 ```
 
 ---
-
-### Case 5: Control Hazards (Branch Misprediction)
-
-<script type="WaveDrom">
-{ "signal": [
-  { "name": "CLK", "wave": "p....." },
-  { "name": "IF",  "wave": "345.6.", "data": ["BEQ ...", "Inst A", "Inst B", "Target"] },
-  { "name": "ID",  "wave": ".345x6", "data": ["BEQ ...", "Inst A", "Inst B", "Target"] },
-  { "name": "EX",  "wave": "..345x", "data": ["BEQ (Taken)", "Inst A", "Inst B"] },
-  { "name": "Flush Signals", "wave": "..01.0" },
-  {},
-  { "name": "Pipeline Action", "wave": "...3.4", "data": ["Flush ID & EX", "Resume Correct Path"] }
-],
-  "head": {
-    "text": "Branch Misprediction (2 Cycle Flush)",
-    "tick": 0
-  },
-  "config": { "hscale": 2.2 }
-}
-</script>
-
-*Figure 10: Branch misprediction showing IF and ID stages flushed when branch resolves in EX.*
-
-Because we resolve branches in the **Execute (EX)** stage, we don't know if we need to jump until the instruction is halfway through the pipeline.
-
-```asm
-beq x1, x2, LABEL  # Taken! (In EX Stage)
-addi x5, x0, 1     # (In ID Stage - Wrong path!)
-sub  x6, x0, 2     # (In IF Stage - Wrong path!)
-```
-
-| The Problem | The Fix | Penalty (Cycles) |
-|-------------|---------|-----------------|
-| By the time `beq` decides to take the branch, we have already fetched two instructions we shouldn't have. | The Hazard Unit detects `PCSrc` (Branch Taken) is high. It asserts `Flush_ID` and `Flush_EX`, wiping those two instructions from existence. | 2 |
-
-<div class="callout warn"><span class="title">Branch Penalty Trade-off</span>
-Our <strong>2-Cycle Branch Penalty</strong> seems high compared to some architectures. A common optimization is to move branch comparison from the <strong>Execute (EX)</strong> stage to the <strong>Decode (ID)</strong> stage. This would reduce the penalty to just <strong>1 Cycle</strong> (flushing only IF).
-<br/><br/>
-<strong>Why didn't we do this?</strong><br/>
-If we moved branch logic to ID, we'd need to add significant hardware (comparator, adder for target calculation) into the already-congested ID stage. This would increase the Critical Path of the ID stage, forcing us to slow down our entire clock frequency. We chose to accept the 2-cycle penalty to keep the clock fast. Trade-offs are always about picking which metric matters most.
-</div>
-
-<div class="callout note"><span class="title">Diagram Placeholder</span>
-<strong>[INSERT CONTROL HAZARD TIMING DIAGRAM HERE]</strong><br/>
-Show cycles 1-4 with the branch being resolved, wrong instructions flushed, and correct path resuming.
-</div>
-
----
-*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+*riscv-cpu: a 5-Stage Pipelined RISC-V Processor (RV32I) by Charlie Shields, 2026*
