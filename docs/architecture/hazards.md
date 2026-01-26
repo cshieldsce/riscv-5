@@ -122,13 +122,13 @@ A Load-Use hazard is the only data hazard that **cannot** be solved by forwardin
   { "name": "CLK", "wave": "p......" },
   { "name": "IF (Fetch)",     "wave": "34556..", "data": ["LW", "ADD", "OR", "SUB"] },
   { "name": "ID (Decode)",    "wave": ".34456.", "data": ["LW", "ADD", "OR", "SUB"] },
-  { "name": "EX (Execute)",   "wave": "..3x456", "data": ["LW", "BUBBLE", "ADD", "OR", "SUB"] },
-  { "name": "MEM (Memory)",   "wave": "...3x45", "data": ["LW", "NOP", "ADD", "OR"] },
-  { "name": "WB (Writeback)", "wave": "....3x4", "data": ["LW", "NOP", "ADD"] },
+  { "name": "EX (Execute)",   "wave": "..37456", "data": ["LW", "BUBBLE", "ADD", "OR", "SUB"] },
+  { "name": "MEM (Memory)",   "wave": "...3745", "data": ["LW", "NOP", "ADD", "OR"] },
+  { "name": "WB (Writeback)", "wave": "....374", "data": ["LW", "NOP", "ADD"] },
   {},
   { "name": "PIPELINE STATE", "wave": "...34..", "data": ["STALL", "Resume"] }
 ],
-  "head": { "text": "Load-Use Hazard (Detection at Cycle 3, Stall at Cycle 4)", "tick": 0 },
+  "head": { "text": "Load-Use Hazard (Detection at Cycle 3, Stall at Cycle 4)", "tick": 1 },
   "config": { "hscale": 2.2 }
 }
 </script>
@@ -155,13 +155,13 @@ Our CPU assumes a branch is **Not Taken** by default. If the branch *is* taken, 
 { "signal": [
   { "name": "CLK", "wave": "p......" },
   { "name": "IF (Fetch)",     "wave": "34567..", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Target+4"] },
-  { "name": "ID (Decode)",    "wave": ".34x67.", "data": ["BEQ", "Wrong1", "Bubble", "Target", "Target+4"] },
-  { "name": "EX (Execute)",   "wave": "..3xx6.", "data": ["BEQ", "Flush1", "Flush2", "Target"] },
+  { "name": "ID (Decode)",    "wave": ".34867.", "data": ["BEQ", "Wrong1", "Bubble", "Target", "Target+4"] },
+  { "name": "EX (Execute)",   "wave": "..3996.", "data": ["BEQ", "Flush1", "Flush2", "Target"] },
   {},
   { "name": "Branch Taken",   "wave": "..010.." },
   { "name": "PIPELINE ACTION","wave": "...2.3.", "data": ["FLUSHING", "Resume"] }
 ],
-  "head": { "text": "Branch Taken (Resolves at Cycle 3, Flushes at Cycle 4)", "tick": 0 },
+  "head": { "text": "Branch Taken (Resolves at Cycle 3, Flushes at Cycle 4)", "tick": 1 },
   "config": { "hscale": 2.2 }
 }
 </script>
@@ -169,7 +169,7 @@ Our CPU assumes a branch is **Not Taken** by default. If the branch *is* taken, 
 **Cycle-by-Cycle Breakdown:**
 *   **Cycle 3 (Resolution):** `BEQ` is in **Execute**. The ALU determines the branch is **TAKEN**. The PC is updated to the `Target` address, and the flush signal is asserted.
 *   **Cycle 4 (The Flush):** 
-    *   `Wrong1` (which was in Decode) and `Wrong2` (which was in Fetch) are both discarded (`Flush1` and `Flush2`).
+    *   `Wrong1` (in Decode) is flushed -> becomes a Bubble in EX next cycle? No, it's replaced by a Bubble in the ID stage immediately? Effectively, the pipeline registers are cleared.
     *   The `Target` instruction is fetched from memory.
 *   **Cycle 5:** The pipeline contains bubbles where the wrong instructions were. The `Target` instruction moves to **Decode**.
 *   **Cycle 6:** `Target` reaches **Execute**.
