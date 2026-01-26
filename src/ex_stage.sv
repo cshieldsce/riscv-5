@@ -18,8 +18,8 @@ import riscv_pkg::*;
  * @param ex_mem_alu_result Forwarded ALU result from MEM stage
  * @param wb_write_data     Forwarded write data from WB stage
  * @param alu_control       ALU Operation Control
- * @param alu_src           ALU Source B Select (0=Reg, 1=Imm)
- * @param alu_src_a         ALU Source A Select (0=Reg, 1=PC, 2=Zero)
+ * @param op_a_sel          ALU Source A Select (0=Reg, 1=PC, 2=Zero)
+ * @param op_b_sel          ALU Source B Select (0=Reg, 1=Imm)
  * @param branch_en         Branch Enable
  * @param funct3            Branch Type (BEQ, BNE, etc.)
  * @param alu_result        ALU Calculation Result
@@ -38,11 +38,10 @@ module EX_Stage (
     input  logic [XLEN-1:0] ex_mem_alu_result,
     input  logic [XLEN-1:0] wb_write_data,
     input  alu_op_t         alu_control,
-    input  logic            alu_src, 
-    input  logic [1:0]      alu_src_a,
+    input  logic [1:0]      op_a_sel,
+    input  logic            op_b_sel,
     input  logic            branch_en,
     input  logic [2:0]      funct3,
-
     output logic [XLEN-1:0] alu_result,
     output logic            alu_zero,
     output logic            branch_taken,
@@ -73,7 +72,7 @@ module EX_Stage (
     end
 
     always_comb begin : ALUInputA_MUX
-        case (alu_src_a)
+        case (op_a_sel)
             2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;          // Regular register op
             2'b01:   ex_alu_in_a = pc;                       // AUIPC
             2'b10:   ex_alu_in_a = {XLEN{1'b0}};             // LUI
@@ -81,7 +80,7 @@ module EX_Stage (
         endcase
     end
 
-    assign ex_alu_in_b = alu_src ? imm : rs2_data_forwarded;
+    assign ex_alu_in_b = op_b_sel ? imm : rs2_data_forwarded;
 
     // -- Branch Resolution ---
     ALU alu_inst (
