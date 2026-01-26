@@ -9,23 +9,23 @@ import riscv_pkg::*;
  *          - Branch target calculation (PC + Immediate)
  *          - Branch resolution (Comparator)
  * 
- * @param pc                Program Counter
- * @param imm               Immediate value
- * @param rs1_data          Data from Register File (rs1)
- * @param rs2_data          Data from Register File (rs2)
- * @param forward_a         Forwarding Select A (00=Reg, 01=WB, 10=MEM)
- * @param forward_b         Forwarding Select B (00=Reg, 01=WB, 10=MEM)
- * @param ex_mem_alu_result Forwarded ALU result from MEM stage
- * @param wb_write_data     Forwarded write data from WB stage
- * @param alu_control       ALU Operation Control
- * @param op_a_sel          ALU Source A Select (0=Reg, 1=PC, 2=Zero)
- * @param op_b_sel          ALU Source B Select (0=Reg, 1=Imm)
- * @param branch_en         Branch Enable
- * @param funct3            Branch Type (BEQ, BNE, etc.)
- * @param alu_result        ALU Calculation Result
- * @param alu_zero          Zero Flag (Result == 0)
- * @param branch_taken      Branch Taken Flag
- * @param branch_target     Calculated Branch Target Address
+ * @param pc                 Program Counter
+ * @param imm                Immediate value
+ * @param rs1_data           Data from Register File (rs1)
+ * @param rs2_data           Data from Register File (rs2)
+ * @param forward_a          Forwarding Select A (00=Reg, 01=WB, 10=MEM)
+ * @param forward_b          Forwarding Select B (00=Reg, 01=WB, 10=MEM)
+ * @param ex_mem_alu_result  Forwarded ALU result from MEM stage
+ * @param wb_write_data      Forwarded write data from WB stage
+ * @param alu_control        ALU Operation Control
+ * @param op_a_sel           ALU Source A Select (0=Reg, 1=PC, 2=Zero)
+ * @param op_b_sel           ALU Source B Select (0=Reg, 1=Imm)
+ * @param branch_en          Branch Enable
+ * @param funct3             Branch Type (BEQ, BNE, etc.)
+ * @param alu_result         ALU Calculation Result
+ * @param alu_zero           Zero Flag (Result == 0)
+ * @param branch_taken       Branch Taken Flag
+ * @param branch_target      Calculated Branch Target Address
  * @param rs2_data_forwarded Forwarded rs2 data (for Store operations)
  */
 module EX_Stage (

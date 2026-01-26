@@ -29,8 +29,8 @@ import riscv_pkg::*;
  * @param reg_write       Control: Register Write Enable
  * @param mem_write       Control: Memory Write Enable
  * @param alu_control     Control: ALU Operation Selector
- * @param op_a_sel       Control: ALU Source A Mux Select (0=rs1, 1=PC, 2=Zero)
- * @param op_b_sel       Control: ALU Source B Mux Select (0=Reg, 1=Imm)
+ * @param op_a_sel        Control: ALU Source A Mux Select (0=rs1, 1=PC, 2=Zero)
+ * @param op_b_sel        Control: ALU Source B Mux Select (0=Reg, 1=Imm)
  * @param wb_mux_sel      Control: Result Mux Select
  * @param branch          Control: Branch Enable
  * @param jump            Control: Jump Enable (JAL)

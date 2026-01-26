@@ -16,8 +16,8 @@ import riscv_pkg::*;
  * @param funct7      7-bit function field [31:25] (distinguishes ADD/SUB, SRL/SRA in R-type)
  * @param reg_write   Output: Enable register file write
  * @param alu_control Output: ALU operation selector (from alu_op_t enum)
- * @param op_a_sel   Output: ALU input A mux: 00=rs1, 01=PC, 10=zero
- * @param op_b_sel   Output: ALU input B mux: 0=rs2, 1=immediate
+ * @param op_a_sel    Output: ALU input A mux: 00=rs1, 01=PC, 10=zero
+ * @param op_b_sel    Output: ALU input B mux: 0=rs2, 1=immediate
  * @param mem_write   Output: Enable data memory write
  * @param wb_mux_sel  Output: Result mux: 00=ALU, 01=Memory, 10=PC+4
  * @param branch      Output: Enable conditional branch logic
@@ -53,7 +53,7 @@ module ControlUnit (
         case (opcode)
             OP_R_TYPE: begin : RegisterArithmetic
                 reg_write  = 1'b1;                                                         // Write result to rd
-                op_b_sel  = 1'b0;                                                         // ALU input B = rs2 (not immediate)
+                op_b_sel   = 1'b0;                                                         // ALU input B = rs2 (not immediate)
                 wb_mux_sel = 2'b00;                                                        // Write ALU result to rd
 
                 case (funct3)
@@ -71,7 +71,7 @@ module ControlUnit (
 
             OP_I_TYPE: begin : ImmediateArithmetic
                 reg_write  = 1'b1;                                                         // Write result to rd
-                op_b_sel  = 1'b1;                                                         // ALU input B = immediate (not rs2)
+                op_b_sel   = 1'b1;                                                         // ALU input B = immediate (not rs2)
                 wb_mux_sel = 2'b00;                                                        // Write ALU result to rd
 
                 case (funct3)
