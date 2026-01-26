@@ -36,7 +36,7 @@ module ForwardingUnit (
      * @param rd Destination register from EX/MEM stage
      * @param rs Source register in ID/EX stage
      * @param reg_write Write enable from EX/MEM stage
-     * @return True if hazard exists
+     * @return True if reg_write is enabled and rd matches rs (and rd != x0)
      */
     function automatic logic has_ex_hazard(
         input logic [4:0] rd,
@@ -53,7 +53,7 @@ module ForwardingUnit (
      * @param rs Source register in ID/EX stage
      * @param mem_reg_write Write enable from MEM/WB stage
      * @param ex_reg_write Write enable from EX/MEM stage
-     * @return True if hazard exists (and EX hazard does NOT take precedence)
+     * @return True if MEM Hazard exists and no EX hazard (to prevent double hazard)
      */
     function automatic logic has_mem_hazard(
         input logic [4:0] mem_rd,
@@ -64,7 +64,7 @@ module ForwardingUnit (
     );
         logic mem_match, ex_match;
         mem_match = mem_reg_write && (mem_rd != 5'b0) && (mem_rd == rs);
-        ex_match  = ex_reg_write && (ex_rd != 5'b0) && (ex_rd == rs);
+        ex_match = has_ex_hazard(ex_rd, rs, ex_reg_write);
         
         // Forward from MEM/WB only if no EX hazard (double hazard prevention)
         return mem_match && !ex_match;
