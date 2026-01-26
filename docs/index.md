@@ -14,7 +14,9 @@ Welcome to the technical deep-dive and user manual for the `riscv-5` processor. 
 
 ## Project Development
 
-I first learned about RISC-V when studying ARM assembly during a course I was taking at the Universiy of Glasgow while abroad. Upon learning of it's open source and free use nature I finally found the answer to a lifelong pursuit of mine. I can make my own CPU? I began my journey learning the riscv isa and starting off by building a single cycle cpu. Once done with that I moved on to the 5 stage, and then the FPGA. After running the fib test on the FPGA i finally said this project is complete.  
+## Project Development
+
+My introduction to RISC-V happened while I was studying ARM assembly during a semester abroad at the University of Glasgow. Discovering that RISC-V was open source and free to use felt like unlocking a lifelong dream, the chance to design and build my own CPU from scratch. I dove into the RISC-V ISA, starting with a single-cycle CPU to get a feel for the basics. Once that was working, I challenged myself to implement a full 5-stage pipeline, learning a ton about hazards and microarchitecture along the way. The final milestone was getting the design running on an FPGA and watching it pass the Fibonacci test in hardware, a moment that truly made the project feel complete.
 
 ## Articles
 
