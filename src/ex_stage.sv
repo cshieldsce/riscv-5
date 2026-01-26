@@ -49,7 +49,7 @@ module EX_Stage (
     output logic [XLEN-1:0] branch_target,
     output logic [XLEN-1:0] rs2_data_forwarded
 );
-    // --- ALU Operand MUXing with Forwarding ---
+    // --- ALU Operand MUXing with Forwarding (A and B) ---
     logic [XLEN-1:0] ex_alu_in_a_fwd;
     logic [XLEN-1:0] ex_alu_in_a;
     logic [XLEN-1:0] ex_alu_in_b;
@@ -81,9 +81,9 @@ module EX_Stage (
         endcase
     end
 
-    // --- ALU Input B MUX ---
     assign ex_alu_in_b = alu_src ? imm : rs2_data_forwarded;
 
+    // -- Branch Resolution ---
     ALU alu_inst (
         .A(ex_alu_in_a),
         .B(ex_alu_in_b),
@@ -95,20 +95,19 @@ module EX_Stage (
     always_comb begin : BranchResolution
         if (branch_en) begin : BranchEnabled
             case (funct3)
-                F3_BEQ:  branch_taken = alu_zero;          // A == B
-                F3_BNE:  branch_taken = ~alu_zero;         // A != B 
-                F3_BLT:  branch_taken = alu_result[0];     // A < B (signed) 
-                F3_BGE:  branch_taken = ~alu_result[0];    // A >= B (signed) 
-                F3_BLTU: branch_taken = alu_result[0];     // A < B (unsigned) 
-                F3_BGEU: branch_taken = ~alu_result[0];    // A >= B (unsigned)
-                default: branch_taken = 1'b0;              // Branch not taken
+                F3_BEQ:  branch_taken = alu_zero;            // A == B
+                F3_BNE:  branch_taken = ~alu_zero;           // A != B 
+                F3_BLT:  branch_taken = alu_result[0];       // A < B (signed) 
+                F3_BGE:  branch_taken = ~alu_result[0];      // A >= B (signed) 
+                F3_BLTU: branch_taken = alu_result[0];       // A < B (unsigned) 
+                F3_BGEU: branch_taken = ~alu_result[0];      // A >= B (unsigned)
+                default: branch_taken = 1'b0;                // Branch not taken
             endcase
         end else begin : BranchDisabled
             branch_taken = 1'b0;
         end
     end
-
-    // --- Branch Target Calculation ---
+    
     assign branch_target = pc + imm;
 
 endmodule
