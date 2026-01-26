@@ -84,7 +84,7 @@ The PC selection multiplexer determines the next instruction address based on co
 
 ### Design Rationale
 
-By detecting `JAL` early in the ID stage (since the target is just `PC + Immediate`), we reduce the control hazard penalty from 2 cycles to 1 cycle. However, `JALR` and conditional branches still incur a 2-cycle penalty because they require ALU computation. See **Case 5** below.
+By detecting `JAL` early in the ID stage (since the target is just `PC + Immediate`), we reduce the control hazard penalty from 2 cycles to 1 cycle. However, `JALR` and conditional branches still incur a 2-cycle penalty because they require ALU computation. (described in <a href="./hazards.html#case-5-control-hazards-branch-misprediction-">Hazard Resolution, Case 5</a>).
 
 <div class="callout note"><span class="title">Design Decision</span>
 JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect—the target depends on register content—so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.

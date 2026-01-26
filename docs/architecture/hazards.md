@@ -10,6 +10,17 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/skins/default.js" type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.1.0/wavedrom.min.js" type="text/javascript"></script>
+<style>
+/* Adapt WaveDrom to Dark Theme (Midnight) */
+div[id^="WaveDrom_Display_"] svg {
+  filter: invert(1) hue-rotate(180deg) contrast(1.2);
+  background-color: transparent !important;
+}
+div[id^="WaveDrom_Display_"] {
+  margin: 20px 0;
+  overflow-x: auto;
+}
+</style>
 <body onload="WaveDrom.ProcessAll()">
 
 # 3.0 Hazard Resolution
@@ -76,7 +87,8 @@ Below is an analysis of every hazard scenario our architecture handles, includin
   "head": {
     "text": "EX-to-EX Forwarding (No Stall)",
     "tick": 0
-  }
+  },
+  "config": { "hscale": 1.6 }
 }
 </script>
 
@@ -156,7 +168,8 @@ This is a subtle but critical detail. The forwarding logic must prioritize the m
   "head": {
     "text": "Load-Use Hazard (1 Cycle Stall)",
     "tick": 0
-  }
+  },
+  "config": { "hscale": 1.6 }
 }
 </script>
 
@@ -202,7 +215,8 @@ Cycle 3:  lw  (WB)  │ add (EX) ← x1 available via forwarding
   "head": {
     "text": "Branch Misprediction (2 Cycle Flush)",
     "tick": 0
-  }
+  },
+  "config": { "hscale": 1.6 }
 }
 </script>
 
