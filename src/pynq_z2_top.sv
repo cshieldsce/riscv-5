@@ -98,7 +98,7 @@ module pynq_z2_top (
     (* mark_debug = "true" *) logic            ila_branch_taken;
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_branch_target;
     (* mark_debug = "true" *) logic            ila_alu_zero;
-    (* mark_debug = "true" *) logic [2:0]      ila_mem_wb_controls; // ex_mem_reg_write, mem_wb_reg_write, mem_wb_mem_to_reg[0]
+    (* mark_debug = "true" *) logic [2:0]      ila_mem_wb_controls; // ex_mem_reg_write, mem_wb_reg_write, mem_wb_wb_mux_sel[0]
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_rs1_data;
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_rs2_data;
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_alu_result;
@@ -126,8 +126,8 @@ module pynq_z2_top (
     // Memory/Writeback Control Signals (Combined into 3-bit probe)
     // [2] = ex_mem_reg_write (RegWrite signal entering MEM)
     // [1] = mem_wb_reg_write (RegWrite signal entering WB)
-    // [0] = mem_wb_mem_to_reg[0] (MemRead signal in WB)
-    assign ila_mem_wb_controls = {cpu_inst.ex_mem_reg_write, cpu_inst.mem_wb_reg_write, cpu_inst.mem_wb_mem_to_reg[0]};
+    // [0] = mem_wb_wb_mux_sel[0] (MemRead signal in WB)
+    assign ila_mem_wb_controls = {cpu_inst.ex_mem_reg_write, cpu_inst.mem_wb_reg_write, cpu_inst.mem_wb_wb_mux_sel[0]};
 
     assign ila_rs1_data = cpu_inst.id_ex_read_data1;
     assign ila_rs2_data = cpu_inst.id_ex_read_data2;
