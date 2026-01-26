@@ -37,69 +37,27 @@ module IF_Stage (
     output logic [XLEN-1:0]  pc_plus_4,        
     output logic [XLEN-1:0]  instruction_out 
 );
-    /**
-     * @brief Calculate PC + 4 (next sequential instruction)
-     * @param pc Current program counter
-     * @return PC incremented by 4
-     */
-    function automatic logic [XLEN-1:0] calc_pc_plus_4(logic [XLEN-1:0] pc);
-        return pc + 4;
-    endfunction
-
-    /**
-     * @brief Select next PC based on control flow
-     * @param stall Stall signal (hold current PC)
-     * @param jalr_taken JALR taken flag
-     * @param branch_taken Branch taken flag
-     * @param jal_taken JAL taken flag
-     * @param jalr_target JALR target address
-     * @param branch_target Branch target address
-     * @param jal_target JAL target address
-     * @param pc_plus_4 Sequential next address
-     * @param current_pc Current PC (for stall)
-     * @return Next PC value
-     */
-    function automatic logic [XLEN-1:0] select_next_pc(
-        input logic             stall,
-        input logic             jalr_taken,
-        input logic             branch_taken,
-        input logic             jal_taken,
-        input logic [XLEN-1:0]  jalr_target,
-        input logic [XLEN-1:0]  branch_target,
-        input logic [XLEN-1:0]  jal_target,
-        input logic [XLEN-1:0]  pc_plus_4,
-        input logic [XLEN-1:0]  current_pc
-    );
-        if (stall) begin : PC_Stall
-            return current_pc;        
-        end else if (jalr_taken) begin : JALR_Taken
-            return jalr_target;          
-        end else if (branch_taken) begin : Branch_Taken
-            return branch_target;       
-        end else if (jal_taken) begin : JAL_Taken
-            return jal_target;          
-        end else begin : Sequential_Execution
-            return pc_plus_4;         
-        end
-    endfunction
 
     // --- Next PC Logic ---
     logic [XLEN-1:0] if_pc_reg;
     logic [XLEN-1:0] if_next_pc;
     logic [XLEN-1:0] if_pc_plus_4_calc;
 
-    assign if_pc_plus_4_calc = calc_pc_plus_4(if_pc_reg);
-    assign if_next_pc = select_next_pc(
-        stall,
-        jalr_taken,
-        branch_taken,
-        jal_taken,
-        jalr_target,
-        branch_target,
-        jal_target,
-        if_pc_plus_4_calc,
-        if_pc_reg
-    );
+    assign if_pc_plus_4_calc = if_pc_reg + 4;
+
+    always_comb begin: SelectNextPC
+        if (stall) begin : Stalled
+            if_next_pc = if_pc_reg;        
+        end else if (jalr_taken) begin : JALRTaken
+            if_next_pc = jalr_target;          
+        end else if (branch_taken) begin : BranchTaken
+            if_next_pc = branch_target;       
+        end else if (jal_taken) begin : JALTaken
+            if_next_pc = jal_target;         
+        end else begin : IncrementPC
+            if_next_pc = if_pc_plus_4_calc;
+        end 
+    end
 
     always_ff @(posedge clk) begin : PC_Register
         if (rst) begin : ResetPC
