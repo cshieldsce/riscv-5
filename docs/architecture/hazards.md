@@ -93,7 +93,7 @@ Below is an analysis of every hazard scenario our architecture handles, includin
     "text": "EX-to-EX Forwarding (No Stall)",
     "tick": 0
   },
-  "config": { "hscale": 2.0 }
+  "config": { "hscale": 2.2 }
 }
 </script>
 
@@ -174,7 +174,7 @@ This is a subtle but critical detail. The forwarding logic must prioritize the m
     "text": "Load-Use Hazard (1 Cycle Stall)",
     "tick": 0
   },
-  "config": { "hscale": 2.0 }
+  "config": { "hscale": 2.2 }
 }
 </script>
 
@@ -221,7 +221,7 @@ Cycle 3:  lw  (WB)  │ add (EX) ← x1 available via forwarding
     "text": "Branch Misprediction (2 Cycle Flush)",
     "tick": 0
   },
-  "config": { "hscale": 2.0 }
+  "config": { "hscale": 2.2 }
 }
 </script>
 
