@@ -121,16 +121,23 @@ When an instruction depends on a `load` instruction, forwarding alone is insuffi
 
 A Load-Use hazard is the only data hazard that **cannot** be solved by forwarding alone. The data is still in RAM while the next instruction is already trying to use it.
 
+```asm
+lw   x1, 0(x10)   # Load into x1
+add  x2, x1, x3   # Uses x1 immediately (Stall needed)
+or   x4, x5, x6   # Unrelated instruction
+sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
+```
+
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p......" },
-  { "name": "IF (Fetch)",     "wave": "34556..", "data": ["LW", "ADD", "OR", "SUB"] },
-  { "name": "ID (Decode)",    "wave": ".34456.", "data": ["LW", "ADD", "OR", "SUB"] },
-  { "name": "EX (Execute)",   "wave": "..37456", "data": ["LW", "BUBBLE", "ADD", "OR", "SUB"] },
-  { "name": "MEM (Memory)",   "wave": "...3745", "data": ["LW", "NOP", "ADD", "OR"] },
-  { "name": "WB (Writeback)", "wave": "....374", "data": ["LW", "NOP", "ADD"] },
+  { "name": "CLK", "wave": "p......." },
+  { "name": "IF (Fetch)",     "wave": "34556...", "data": ["LW", "ADD", "OR", "SUB"] },
+  { "name": "ID (Decode)",    "wave": ".34456..", "data": ["LW", "ADD", "OR", "SUB"] },
+  { "name": "EX (Execute)",   "wave": "..37456.", "data": ["LW", "NOP", "ADD", "OR", "SUB"] },
+  { "name": "MEM (Memory)",   "wave": "...37456", "data": ["LW", "NOP", "ADD", "OR"] },
+  { "name": "WB (Writeback)", "wave": "....3745", "data": ["LW", "NOP", "ADD"] },
   {},
-  { "name": "PIPELINE STATE", "wave": "...34..", "data": ["STALL", "Resume"] }
+  { "name": "PIPELINE STATE", "wave": "...34...", "data": ["STALL", "Resume"] }
 ],
   "head": { "text": "Load-Use Hazard (Detection at Cycle 3, Stall at Cycle 4)", "tick": 1 },
   "config": { "hscale": 2.2 }
@@ -138,12 +145,12 @@ A Load-Use hazard is the only data hazard that **cannot** be solved by forwardin
 </script>
 
 **Cycle-by-Cycle Breakdown:**
-*   **Cycle 3 (Detection):** `LW` is in **Execute** (calculating the RAM address). `ADD` is in **Decode**. The Hazard Unit realizes `ADD` depends on `LW` and triggers a stall.
+*   **Cycle 3 (Detection):** `LW` is in **Execute**. `ADD` is in **Decode**. The Hazard Unit detects that `ADD` needs `x1`, which `LW` is currently reading.
 *   **Cycle 4 (The Stall):** 
     *   **IF & ID are Frozen:** `ADD` stays in Decode, and `OR` stays in Fetch.
-    *   **EX is Flushed:** A `BUBBLE` (NOP) is sent to Execute so that no "bad" math happens with the old register value.
-    *   `LW` is in **Memory** actually reading the data from RAM.
-*   **Cycle 5 (Resume):** `LW` is in **Writeback**. `ADD` finally moves to **Execute**, receiving its data via forwarding from the WB stage.
+    *   **EX is Flushed:** A `NOP` bubble is inserted into Execute.
+    *   `LW` proceeds to **Memory**.
+*   **Cycle 5 (Resume):** `LW` is in **Writeback**. `ADD` finally moves to **Execute** (forwarding will occur here).
 
 ---
 
@@ -155,15 +162,24 @@ Control hazards occur when the CPU fetches instructions from the wrong path (e.g
 
 Our CPU assumes a branch is **Not Taken** by default. If the branch *is* taken, we must "kill" the instructions already behind it in the pipeline.
 
+```asm
+beq  x1, x2, target  # Taken
+addi x3, x0, 1       # Wrong1 (Flushed)
+addi x4, x0, 2       # Wrong2 (Flushed)
+...
+target:
+sub  x5, x5, x6      # Target
+```
+
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p......" },
-  { "name": "IF (Fetch)",     "wave": "34567..", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Target+4"] },
-  { "name": "ID (Decode)",    "wave": ".34867.", "data": ["BEQ", "Wrong1", "Bubble", "Target", "Target+4"] },
-  { "name": "EX (Execute)",   "wave": "..3996.", "data": ["BEQ", "Flush1", "Flush2", "Target"] },
+  { "name": "CLK", "wave": "p......." },
+  { "name": "IF (Fetch)",     "wave": "34567...", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Next"] },
+  { "name": "ID (Decode)",    "wave": ".34867..", "data": ["BEQ", "Wrong1", "NOP", "Target", "Next"] },
+  { "name": "EX (Execute)",   "wave": "..38867.", "data": ["BEQ", "NOP", "Target", "Next"] },
   {},
-  { "name": "Branch Taken",   "wave": "..010.." },
-  { "name": "PIPELINE ACTION","wave": "...2.3.", "data": ["FLUSHING", "Resume"] }
+  { "name": "Branch Taken",   "wave": "..010..." },
+  { "name": "PIPELINE ACTION","wave": "...2.3..", "data": ["FLUSH", "Resume"] }
 ],
   "head": { "text": "Branch Taken (Resolves at Cycle 3, Flushes at Cycle 4)", "tick": 1 },
   "config": { "hscale": 2.2 }
@@ -171,12 +187,12 @@ Our CPU assumes a branch is **Not Taken** by default. If the branch *is* taken, 
 </script>
 
 **Cycle-by-Cycle Breakdown:**
-*   **Cycle 3 (Resolution):** `BEQ` is in **Execute**. The ALU determines the branch is **TAKEN**. The PC is updated to the `Target` address, and the flush signal is asserted.
+*   **Cycle 3 (Resolution):** `BEQ` is in **Execute**. The ALU calculates the branch condition is **TAKEN**.
 *   **Cycle 4 (The Flush):** 
-    *   `Wrong1` (in Decode) is flushed -> becomes a Bubble in EX next cycle? No, it's replaced by a Bubble in the ID stage immediately? Effectively, the pipeline registers are cleared.
-    *   The `Target` instruction is fetched from memory.
-*   **Cycle 5:** The pipeline contains bubbles where the wrong instructions were. The `Target` instruction moves to **Decode**.
-*   **Cycle 6:** `Target` reaches **Execute**.
+    *   The PC is updated to `Target`.
+    *   `Wrong1` (in ID) and `Wrong2` (in IF) are flushed and replaced with `NOP` bubbles.
+*   **Cycle 5:** The `Target` instruction reaches **Decode**.
+*   **Cycle 6:** The `Target` instruction reaches **Execute**.
 
 
 

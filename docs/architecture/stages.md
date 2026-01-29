@@ -147,9 +147,9 @@ The forwarding unit provides two 2-bit control signals (`forward_a`, `forward_b`
 ```verilog
 always_comb begin : ForwardA_MUX
     case (forward_a)
-        2'b00:   ex_alu_in_a_fwd = rs1_data;            // No hazard (Register)
-        2'b01:   ex_alu_in_a_fwd = wb_write_data;       // Forward from WB
-        2'b10:   ex_alu_in_a_fwd = ex_mem_alu_result;   // Forward from MEM
+        2'b00:   ex_alu_in_a_fwd = rs1_data;           // No hazard (Register)
+        2'b01:   ex_alu_in_a_fwd = wb_write_data;      // Forward from WB
+        2'b10:   ex_alu_in_a_fwd = ex_mem_alu_result;  // Forward from MEM
         default: ex_alu_in_a_fwd = rs1_data;
     endcase
 end
@@ -162,9 +162,9 @@ The `op_a_sel` signal handles special cases like `LUI` (Load Upper Immediate) an
 ```verilog
 always_comb begin : ALUInputA_MUX
     case (op_a_sel)
-        2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;          // Regular register op
-        2'b01:   ex_alu_in_a = pc;                       // AUIPC: PC
-        2'b10:   ex_alu_in_a = {XLEN{1'b0}};             // LUI: Zero
+        2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;  // Regular register op
+        2'b01:   ex_alu_in_a = pc;               // AUIPC: PC
+        2'b10:   ex_alu_in_a = {XLEN{1'b0}};     // LUI: Zero
         default: ex_alu_in_a = ex_alu_in_a_fwd;
     endcase
 end
@@ -182,12 +182,12 @@ LUI (Load Upper Immediate) loads a 20-bit immediate into bits [31:12]. The RISC-
 always_comb begin
     if (branch_en) begin
         case (funct3)
-            F3_BEQ:  branch_taken = alu_zero;          // A == B
-            F3_BNE:  branch_taken = ~alu_zero;         // A != B
-            F3_BLT:  branch_taken = alu_result[0];     // A < B (signed)
-            F3_BGE:  branch_taken = ~alu_result[0];    // A >= B (signed)
-            F3_BLTU: branch_taken = alu_result[0];     // A < B (unsigned)
-            F3_BGEU: branch_taken = ~alu_result[0];    // A >= B (unsigned)
+            F3_BEQ:  branch_taken = alu_zero;        // A == B
+            F3_BNE:  branch_taken = ~alu_zero;       // A != B
+            F3_BLT:  branch_taken = alu_result[0];   // A < B (signed)
+            F3_BGE:  branch_taken = ~alu_result[0];  // A >= B (signed)
+            F3_BLTU: branch_taken = alu_result[0];   // A < B (unsigned)
+            F3_BGEU: branch_taken = ~alu_result[0];  // A >= B (unsigned)
             default: branch_taken = 1'b0;
         endcase
     end else begin
@@ -249,10 +249,10 @@ The `WB` stage resolves the final value for the destination register using the `
 ```verilog
 always_comb begin : WriteBackMUX
     case (mem_wb_wb_mux_sel)
-        2'b00: wb_write_data = mem_wb_alu_result;     // ALU instructions
-        2'b01: wb_write_data = dmem_read_data;        // Load instructions
-        2'b10: wb_write_data = mem_wb_pc_plus_4;      // JAL/JALR (Return address)
-        default: wb_write_data = {XLEN{1'b0}};        // Safety default
+        2'b00: wb_write_data = mem_wb_alu_result;  // ALU instructions
+        2'b01: wb_write_data = dmem_read_data;     // Load instructions
+        2'b10: wb_write_data = mem_wb_pc_plus_4;   // JAL/JALR (Return address)
+        default: wb_write_data = {XLEN{1'b0}};     // Safety default
     endcase
 end
 ```
