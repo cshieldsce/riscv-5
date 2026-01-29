@@ -81,10 +81,9 @@ sub  x2, x1, x3   # Needs x1 NOW in its EX stage
 </script>
 </div>
 
-**Cycle-by-Cycle Breakdown:**
+**Breakdown:**
 <div class="callout note">
 <ul>
-  <li><strong>Cycle 2:</strong> <code>ADDI</code> is in <strong>Execute</strong> calculating its result. <code>SUB</code> is in <strong>Decode</strong>.</li>
   <li><strong>Cycle 3 (Forwarding!):</strong> <code>ADDI</code> moves to <strong>Memory</strong>. <code>SUB</code> moves to <strong>Execute</strong>. The Forwarding Unit detects the hazard and tells the ALU to grab the result from the <code>EX/MEM</code> register instead of the Register File.</li>
 </ul>
 </div>
@@ -174,7 +173,7 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
       <li><code>LW</code> proceeds to <strong>Memory</strong>.</li>
     </ul>
   </li>
-  <li><strong>Cycle 4 (Resume):</strong> <code>LW</code> is in <strong>Writeback</strong>. <code>ADD</code> finally moves to <strong>Execute</strong> (forwarding will occur here).</li>
+  <li><strong>Cycle 4 (Resume):</strong> <code>LW</code> is in <strong>Writeback</strong>. <code>ADD</code> finally moves to <strong>Execute</strong></li>
 </ul>
 </div>
 
@@ -206,7 +205,7 @@ sub  x5, x5, x6      # Target
   { "name": "EX (Execute)",   "wave": "xx3556", "data": ["BEQ", "NOP", "NOP", "Target"] },
   { "name": "MEM (Memory)",   "wave": "xxx355", "data": ["BEQ", "NOP", "NOP"] },
   {},
-  { "name": "Branch Taken",   "wave": "000100" },
+  { "name": "Branch Taken",   "wave": "xx10xx" },
   { "name": "Pipeline Action","wave": "xx35xx", "data": ["RESOLVE", "FLUSH", "Resume"] }
 ],
   "node": "b..",
@@ -225,15 +224,12 @@ sub  x5, x5, x6      # Target
 **Cycle-by-Cycle Breakdown:**
 <div class="callout note">
 <ul>
-  <li><strong>Cycle 2 (Resolution):</strong> <code>BEQ</code> is in <strong>Execute</strong>. The ALU calculates the branch condition is <strong>TAKEN</strong>.</li>
-  <li><strong>Cycle 3 (The Flush):</strong> 
+  <strong>Cycle 2 (Resolution):</strong> <code>BEQ</code> is in <strong>Execute</strong>. The ALU calculates the branch condition is <strong>TAKEN</strong>.<br>
+  <strong>Cycle 3 (The Flush):</strong> 
     <ul>
       <li>The PC is updated to <code>Target</code>.</li>
       <li><code>Wrong1</code> (in ID) and <code>Wrong2</code> (in IF) are flushed and replaced with <code>NOP</code> bubbles.</li>
     </ul>
-  </li>
-  <li><strong>Cycle 4:</strong> The <code>Target</code> instruction reaches <strong>Decode</strong>.</li>
-  <li><strong>Cycle 5:</strong> The <code>Target</code> instruction reaches <strong>Execute</strong>.</li>
 </ul>
 </div>
 
