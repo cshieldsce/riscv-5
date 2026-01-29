@@ -9,15 +9,11 @@
   <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
-# Architecture Manual
+## 1. Introduction
 
 The architecture of the `riscv-5` core is anchored to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
 
----
-
-## Introduction
-
-### The Single-Cycle Problem
+### 1.1 The Single-Cycle Problem
 
 To understand why we build pipelined processors, we first have to look at the limitations of a **Single Cycle CPU**. In a single-cycle implementation, the entire execution of an instruction—fetching from memory, decoding, calculating in the ALU, accessing data memory, and finally writing back to registers must happen in exactly one clock tick.
 
@@ -27,11 +23,11 @@ You can think of a Single Cycle CPU as one giant combinational circuit, and the 
 If you have used Xilinx Vivado to synthesize a core, you likely encountered <strong>Total Negative Slack (TNS)</strong>. In a Single Cycle CPU, the "Critical Path" (the longest path between two registers) is effectively the entire length of the CPU. Vivado will report timing violations because the signal physically cannot travel to the logic gates fast enough.
 </div>
 
-## The Solution: Pipelining
+## 1.2 The Solution: Pipelining
 
 <div class="img-wrapper diagram">
   <img src="../images/pipeline_stages_clean.svg" alt="Simplified pipelined datapath">
-  <span class="caption">Figure 2: The theoretical 5-stage RISC-V datapath as described in Patterson & Hennessy.</span>
+  <span class="caption">Figure 1: The theoretical 5-stage RISC-V datapath as described in Patterson & Hennessy.</span>
 </div>
 
 ### The Pipelined Datapath
@@ -54,7 +50,7 @@ It is a common misconception that pipelining reduces the execution time of a sin
 
 ---
 
-## Building the Core
+## 1.3 Building the Core
 
 ### Motivations
 
