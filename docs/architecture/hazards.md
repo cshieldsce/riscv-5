@@ -23,8 +23,7 @@ div[id^="WaveDrom_Display_"] svg {
   background-color: transparent !important;
 }
 div[id^="WaveDrom_Display_"] {
-  display: table; /* Use table display to allow margin:auto centering */
-  margin: 20px auto;
+  /* Centering is now handled by a wrapper div */
   overflow-x: auto;
 }
 </style>
@@ -33,8 +32,11 @@ div[id^="WaveDrom_Display_"] {
 
 In a pipelined processor, multiple instructions overlap in execution. Hazards occur when the hardware cannot support the next instruction in the next clock cycle without producing incorrect results. Our CPU handles three types of hazards through a combination of **Forwarding**, **Stalling**, and **Flushing**.
 
-## 3.1 Hazard Summary Table
+<div class="callout note"><span class="title">A Note on Cycle Timing</span>
+The following diagrams use a <strong>0-indexed</strong> cycle count, which is standard in hardware design. <strong>Cycle 0</strong> is the first clock cycle where the first instruction is fetched. An instruction fetched in Cycle <code>N</code> will be in the Decode stage in Cycle <code>N+1</code> and the Execute stage in Cycle <code>N+2</code>.
+</div>
 
+## 3.1 Hazard Summary Table
 | Hazard Type | Scenario | Hardware Action | Penalty (Cycles) |
 |-------------|----------|-----------------|------------------|
 | **Data Hazard** | Register dependency (ALU to ALU) | Forwarding | 0 |
@@ -49,7 +51,7 @@ In a pipelined processor, multiple instructions overlap in execution. Hazards oc
 
 ## 3.2 Data Hazards: Forwarding & Bypassing
 
-Data hazards occur when an instruction depends on the result of a previous instruction that hasn't yet been written back to the Register File.
+Data hazards occur when an instruction depends on the result of a a previous instruction that hasn't yet been written back to the Register File.
 
 ### Case 1: EX-to-EX Forwarding
 This occurs when an instruction needs a result computed by the *immediately* preceding instruction.
@@ -58,6 +60,7 @@ This occurs when an instruction needs a result computed by the *immediately* pre
 addi x1, x10, 5  # Result calculated in EX, moves to EX/MEM register
 sub  x2, x1, x3   # Needs x1 NOW in its EX stage
 ```
+<div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
   { "name": "CLK", "wave": "p....." },
@@ -69,16 +72,17 @@ sub  x2, x1, x3   # Needs x1 NOW in its EX stage
   {},
   { "name": "Forward A Select", "wave": "...2..", "data": ["10 (EX/MEM)"] }
 ],
-  "head": { "text": "EX-to-EX Forwarding (Bypassing at Cycle 4)", "tick": 1 },
+  "head": { "text": "EX-to-EX Forwarding (Bypassing at Cycle 3)", "tick": 0 },
   "config": { "hscale": 2.2 }
 }
 </script>
+</div>
 
 **Cycle-by-Cycle Breakdown:**
 <div class="callout note">
 <ul>
-  <li><strong>Cycle 3:</strong> <code>ADDI</code> is in <strong>Execute</strong> calculating its result. <code>SUB</code> is in <strong>Decode</strong>.</li>
-  <li><strong>Cycle 4 (Forwarding!):</strong> <code>ADDI</code> moves to <strong>Memory</strong> (result is now in the <code>EX/MEM</code> register). <code>SUB</code> moves to <strong>Execute</strong>. The Forwarding Unit detects the hazard and tells the ALU to grab the result from the <code>EX/MEM</code> register instead of the Register File.</li>
+  <li><strong>Cycle 2:</strong> <code>ADDI</code> is in <strong>Execute</strong> calculating its result. <code>SUB</code> is in <strong>Decode</strong>.</li>
+  <li><strong>Cycle 3 (Forwarding!):</strong> <code>ADDI</code> moves to <strong>Memory</strong>. <code>SUB</code> moves to <strong>Execute</strong>. The Forwarding Unit detects the hazard and tells the ALU to grab the result from the <code>EX/MEM</code> register instead of the Register File.</li>
 </ul>
 </div>
 
@@ -132,6 +136,7 @@ or   x4, x5, x6   # Unrelated instruction
 sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
 ```
 
+<div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
   { "name": "CLK", "wave": "p......." },
@@ -141,25 +146,26 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
   { "name": "MEM (Memory)",   "wave": "...37456", "data": ["LW", "NOP", "ADD", "OR"] },
   { "name": "WB (Writeback)", "wave": "....3745", "data": ["LW", "NOP", "ADD"] },
   {},
-  { "name": "PIPELINE STATE", "wave": "...34...", "data": ["STALL", "Resume"] }
+  { "name": "PIPELINE STATE", "wave": "..34....", "data": ["STALL", "Resume"] }
 ],
-  "head": { "text": "Load-Use Hazard (Detection at Cycle 3, Stall at Cycle 4)", "tick": 1 },
+  "head": { "text": "Load-Use Hazard (Detection at Cycle 2, Stall at Cycle 3)", "tick": 0 },
   "config": { "hscale": 2.2 }
 }
 </script>
+</div>
 
 **Cycle-by-Cycle Breakdown:**
 <div class="callout note">
 <ul>
-  <li><strong>Cycle 3 (Detection):</strong> <code>LW</code> is in <strong>Execute</strong>. <code>ADD</code> is in <strong>Decode</strong>. The Hazard Unit detects that <code>ADD</code> needs <code>x1</code>, which <code>LW</code> is currently reading.</li>
-  <li><strong>Cycle 4 (The Stall):</strong> 
+  <li><strong>Cycle 2 (Detection):</strong> <code>LW</code> is in <strong>Execute</strong>. <code>ADD</code> is in <strong>Decode</strong>. The Hazard Unit detects that <code>ADD</code> needs <code>x1</code>, which <code>LW</code> is currently reading.</li>
+  <li><strong>Cycle 3 (The Stall):</strong> 
     <ul>
       <li><strong>IF &amp; ID are Frozen:</strong> <code>ADD</code> stays in Decode, and <code>OR</code> stays in Fetch.</li>
       <li><strong>EX is Flushed:</strong> A <code>NOP</code> bubble is inserted into Execute.</li>
       <li><code>LW</code> proceeds to <strong>Memory</strong>.</li>
     </ul>
   </li>
-  <li><strong>Cycle 5 (Resume):</strong> <code>LW</code> is in <strong>Writeback</strong>. <code>ADD</code> finally moves to <strong>Execute</strong> (forwarding will occur here).</li>
+  <li><strong>Cycle 4 (Resume):</strong> <code>LW</code> is in <strong>Writeback</strong>. <code>ADD</code> finally moves to <strong>Execute</strong> (forwarding will occur here).</li>
 </ul>
 </div>
 
@@ -182,6 +188,7 @@ target:
 sub  x5, x5, x6      # Target
 ```
 
+<div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
   { "name": "CLK", "wave": "p......." },
@@ -190,25 +197,26 @@ sub  x5, x5, x6      # Target
   { "name": "EX (Execute)",   "wave": "..38867.", "data": ["BEQ", "NOP", "Target", "Next"] },
   {},
   { "name": "Branch Taken",   "wave": "..010..." },
-  { "name": "PIPELINE ACTION","wave": "...2.3..", "data": ["FLUSH", "Resume"] }
+  { "name": "PIPELINE ACTION","wave": "..2.3...", "data": ["FLUSH", "Resume"] }
 ],
-  "head": { "text": "Branch Taken (Resolves at Cycle 3, Flushes at Cycle 4)", "tick": 1 },
+  "head": { "text": "Branch Taken (Resolves at Cycle 2, Flushes at Cycle 3)", "tick": 0 },
   "config": { "hscale": 2.2 }
 }
 </script>
+</div>
 
 **Cycle-by-Cycle Breakdown:**
 <div class="callout note">
 <ul>
-  <li><strong>Cycle 3 (Resolution):</strong> <code>BEQ</code> is in <strong>Execute</strong>. The ALU calculates the branch condition is <strong>TAKEN</strong>.</li>
-  <li><strong>Cycle 4 (The Flush):</strong> 
+  <li><strong>Cycle 2 (Resolution):</strong> <code>BEQ</code> is in <strong>Execute</strong>. The ALU calculates the branch condition is <strong>TAKEN</strong>.</li>
+  <li><strong>Cycle 3 (The Flush):</strong> 
     <ul>
       <li>The PC is updated to <code>Target</code>.</li>
       <li><code>Wrong1</code> (in ID) and <code>Wrong2</code> (in IF) are flushed and replaced with <code>NOP</code> bubbles.</li>
     </ul>
   </li>
-  <li><strong>Cycle 5:</strong> The <code>Target</code> instruction reaches <strong>Decode</strong>.</li>
-  <li><strong>Cycle 6:</strong> The <code>Target</code> instruction reaches <strong>Execute</strong>.</li>
+  <li><strong>Cycle 4:</strong> The <code>Target</code> instruction reaches <strong>Decode</strong>.</li>
+  <li><strong>Cycle 5:</strong> The <code>Target</code> instruction reaches <strong>Execute</strong>.</li>
 </ul>
 </div>
 
