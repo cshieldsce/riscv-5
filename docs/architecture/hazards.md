@@ -58,7 +58,7 @@ This occurs when an instruction needs a result computed by the *immediately* pre
 
 ```asm
 addi x1, x10, 5  # Result calculated in EX, moves to EX/MEM register
-sub  x2, x1, x3   # Needs x1 NOW in its EX stage
+sub  x2, x1, x3  # Needs x1 NOW in its EX stage
 ```
 <div style="text-align: center;">
 <script type="WaveDrom">
@@ -200,7 +200,7 @@ sub  x5, x5, x6      # Target
 <script type="WaveDrom">
 { "signal": [
   { "name": "CLK", "wave": "p....." },
-  { "name": "IF (Fetch)",     "wave": "34567x", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Next"] },
+  { "name": "IF (Fetch)",     "wave": "34867x", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Next"] },
   { "name": "ID (Decode)",    "wave": "x34567", "data": ["BEQ", "Wrong1", "NOP", "Target", "Next"] },
   { "name": "EX (Execute)",   "wave": "xx3556", "data": ["BEQ", "NOP", "NOP", "Target"] },
   { "name": "MEM (Memory)",   "wave": "xxx355", "data": ["BEQ", "NOP", "NOP"] },
