@@ -132,10 +132,10 @@ The LEDs subsequently displayed `0010` (2), confirming the processor successfull
 ## 6. Hardware Demo
 
 ### Fibonacci & Branch Test Results
-In the FPGA top level file `pynq_z2_top.sv` we load our test program `test/mem/fib_test.mem`. We then output the ALU result, which holds the next value in the Fibonacci sequence, counting up from 0 to 55 encoded in binary on our FPGAs LEDs. 
+In the FPGA top level file `pynq_z2_top.sv` we load our test program `fib_test.mem`. We then output the ALU result, which holds the next value in the Fibonacci sequence, counting up from 0 to 55 encoded in binary on our FPGAs LEDs. 
 
 <video controls src="../images/fpga-fib-test-demo.mp4" width="480"></video>
-*(A video demonstration of the Fibonacci sequence calculation)*
+*(A video demonstration of the Fibonacci sequence calculation on the PYNQ-Z2)*
 
 ---
 
