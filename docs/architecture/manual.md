@@ -9,7 +9,7 @@
   <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
-# Architecture Manual: The Theoretical Anchor
+# Architecture Manual
 
 This document proves to anchor every design decision in the `riscv-5` core to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
 

@@ -14,13 +14,13 @@ body {
 
 /* 1. Link Styling */
 a, .site-nav a {
-  color: #8ab4f8; /* A pleasant, readable light blue */
+  color: #e0ac77; /* Reverted to amber/gold color */
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 a:hover, .site-nav a:hover {
-  color: #c4daff; /* Slightly brighter on hover */
+  color: #f0c080; /* Slightly brighter amber on hover */
   text-decoration: underline;
 }
 
@@ -33,13 +33,13 @@ hr {
 }
 
 /* --- Header Anchor Styling --- */
-h2, h3, h4 {
+h1, h2, h3, h4, h5, h6 {
   position: relative;
   scroll-margin-top: 2rem; /* Offset for when jumping to an anchor */
 }
 
 /* Create the '#' symbol and hide it by default */
-h2 .anchor-link::before,
+h1 .anchor-link::before,
 h3 .anchor-link::before,
 h4 .anchor-link::before {
   content: '#';
@@ -47,13 +47,13 @@ h4 .anchor-link::before {
   left: -1.2em;
   top: 0;
   font-weight: 700;
-  color: #8ab4f8;
+  color: #e0ac77; /* Use the new link color */
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
 
 /* Show the '#' on hover of the header */
-h2:hover .anchor-link::before,
+h1:hover .anchor-link::before,
 h3:hover .anchor-link::before,
 h4:hover .anchor-link::before {
   opacity: 1;
@@ -66,6 +66,11 @@ h4:hover .anchor-link::before {
   border-top: 1px solid #333;
   border-bottom: 1px solid #333;
   font-weight: 600;
+}
+
+.site-nav a {
+  margin-right: 1.2rem;
+  position: relative;
 }
 
 .site-nav a:not(:last-child)::after {
