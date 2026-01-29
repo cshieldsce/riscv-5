@@ -81,8 +81,9 @@ sub  x2, x1, x3 # Needs x1 NOW in its EX stage
 }
 </script>
 </div>
-
+<br>
 **Implementation (`src/forwarding_unit.sv`):**
+
 The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
 
 ```verilog
@@ -100,6 +101,7 @@ sub  x2, x1, x3   # Needs x1
 ```
 
 **Implementation (`src/forwarding_unit.sv`):**
+
 The forwarding unit selects forward control `1'b01` to bypass data from the MEM/WB pipeline register directly to the execute stage.
 
 ```verilog
@@ -124,6 +126,7 @@ sw   x1, 0(x2)    # sw needs x1, which is in WB stage
 ```
 
 **Implementation (`src/mem_stage.sv`):**
+
 The Memory stage contains its own mini-forwarding logic to ensure the <code>dmem_wdata</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
 
 ```verilog
