@@ -130,15 +130,7 @@ sw   x1, 0(x2)    # sw needs x1, which is in WB stage
 The Memory stage contains its own mini-forwarding logic to ensure the <code>dmem_wdata</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
 
 ```verilog
-function automatic logic should_forward_store_data(
-  input logic       wb_reg_write,
-  input logic [4:0] wb_rd,
-  input logic [4:0] mem_rs2
-);
-  return wb_reg_write && (wb_rd != 5'b0) && (wb_rd == mem_rs2);
-endfunction
-
-if (should_forward_store_data(wb_reg_write, wb_rd, mem_rs2)) begin
+if (wb_reg_write && (wb_rd != 5'b0) && (wb_rd == mem_rs2)) begin
   return wb_data;
 end else begin
   return mem_data;
