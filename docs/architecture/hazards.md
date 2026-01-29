@@ -37,6 +37,10 @@ The following diagrams use a <strong>0-indexed</strong> cycle count, which is st
 </div>
 
 ## 3.1 Hazard Summary Table
+
+hi
+
+
 | Hazard Type | Scenario | Hardware Action | Penalty (Cycles) |
 |-------------|----------|-----------------|------------------|
 | **Data Hazard** | Register dependency (ALU to ALU) | Forwarding | 0 |
@@ -47,6 +51,9 @@ The following diagrams use a <strong>0-indexed</strong> cycle count, which is st
 | **Control Hazard** | JALR (Indirect Jump) | Flush IF & ID | 2 |
 | **Special Case** | ALU-to-Branch Dependency | Stall + Flush IF/ID | 3 (Total) |
 
+
+
+hi
 ---
 
 ## 3.2 Data Hazards: Forwarding & Bypassing
@@ -57,8 +64,8 @@ Data hazards occur when an instruction depends on the result of a a previous ins
 This occurs when an instruction needs a result computed by the *immediately* preceding instruction.
 
 ```asm
-addi x1, x10, 5  # Result calculated in EX, moves to EX/MEM register
-sub  x2, x1, x3  # Needs x1 NOW in its EX stage
+addi x1, x10, 5 # Result calculated in EX, moves to EX/MEM register
+sub  x2, x1, x3 # Needs x1 NOW in its EX stage
 ```
 <div style="text-align: center;">
 <script type="WaveDrom">
