@@ -11,7 +11,7 @@
 
 # Setup Guide
 
-This guide provides the technical instructions for building, simulating, and extending the `riscv-5` core.
+This guide provides the technical instructions for building and simulating the `riscv-5` core.
 
 ## 1. Toolchain Dependencies
 
