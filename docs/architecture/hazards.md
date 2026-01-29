@@ -126,7 +126,7 @@ end else begin
   return mem_data;
 end
 ```
-The Memory stage contains its own mini-forwarding logic to ensure the <code>dmem_wdata</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
+The Memory stage contains its own mini-forwarding logic to ensure the <code>mem_data</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
 
 ---
 

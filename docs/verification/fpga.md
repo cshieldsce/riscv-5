@@ -132,13 +132,10 @@ The LEDs subsequently displayed `0010` (2), confirming the processor successfull
 ## 6. Hardware Demo
 
 ### Fibonacci & Branch Test Results
-With the timing issues resolved, the `riscv-5` core successfully runs the test suite in hardware. The result of the branch test is displayed on the PYNQ-Z2 LEDs.
+In the FPGA top level file `pynq_z2_top.sv` we load our test program `test/mem/fib_test.mem`. We then output the ALU result, which holds the next value in the Fibonacci sequence, counting up from 0 to 55 encoded in binary on our FPGAs LEDs. 
 
-- **Expected Result:** `0010` (Binary 2)
-- **Actual Hardware Output:** Success. The LEDs correctly display the jump target result, skipping the failure path.
-
-<video controls src="path/to/your/video.mp4" width="480"></video>
-*(A video demonstration of the Fibonacci sequence calculation will be uploaded here)*
+<video controls src="../images/fpga-fib-test-demo.mp4" width="480"></video>
+*(A video demonstration of the Fibonacci sequence calculation)*
 
 ---
 
