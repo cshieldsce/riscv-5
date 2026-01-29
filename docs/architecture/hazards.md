@@ -32,10 +32,6 @@ div[id^="WaveDrom_Display_"] {
 
 In a pipelined processor, multiple instructions overlap in execution. Hazards occur when the hardware cannot support the next instruction in the next clock cycle without producing incorrect results. Our CPU handles three types of hazards through a combination of **Forwarding**, **Stalling**, and **Flushing**.
 
-<div class="callout note"><span class="title">A Note on Cycle Timing</span>
-The following diagrams use a <strong>0-indexed</strong> cycle count, which is standard in hardware design. <strong>Cycle 0</strong> is the first clock cycle where the first instruction is fetched. An instruction fetched in Cycle <code>N</code> will be in the Decode stage in Cycle <code>N+1</code> and the Execute stage in Cycle <code>N+2</code>.
-</div>
-
 ## 3.1 Hazard Summary Table
 
 | Hazard Type | Scenario | Hardware Action | Penalty (Cycles) |
@@ -265,4 +261,11 @@ end
 ```
 
 ---
+
+<div class="callout note"><span class="title">A Note on Cycle Timing</span>
+The following diagrams use a <strong>0-indexed</strong> cycle count, which is standard in hardware design. <strong>Cycle 0</strong> is the first clock cycle where the first instruction is fetched. An instruction fetched in Cycle <code>N</code> will be in the Decode stage in Cycle <code>N+1</code> and the Execute stage in Cycle <code>N+2</code>.
+</div>
+
+---
+
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
