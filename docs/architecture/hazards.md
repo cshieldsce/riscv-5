@@ -168,6 +168,7 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
 }
 </script>
 </div>
+<br>
 
 ---
 
@@ -212,6 +213,7 @@ sub  x5, x5, x6      # Target
 }
 </script>
 </div>
+<br>
 
 ### Case 6: ALU-to-Branch Stall (Specific Implementation)
 <div class="callout warn"><span class="title">Design Choice</span>
