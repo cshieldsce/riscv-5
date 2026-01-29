@@ -39,9 +39,14 @@ cd riscv-5
 # Fetch external dependencies (RISC-V Architecture Test Suite)
 ./setup_project.sh
 ```
-The `setup_project.sh` script will:
-- Clone the [RISC-V Architecture Test Suite](https://github.com/riscv-non-isa/riscv-arch-test) into `test/verification/riscv-arch-test/`
-- Verify that `riscv64-unknown-elf-gcc` is available in your PATH
+
+<div class="callout tip"><span class="title">Setup Script</span>
+The <code>setup_project.sh</code> script automates the following:
+<ul>
+  <li>Clones the <a href="https://github.com/riscv-non-isa/riscv-arch-test">RISC-V Architecture Test Suite</a> into <code>test/verification/riscv-arch-test/</code></li>
+  <li>Verifies that <code>riscv64-unknown-elf-gcc</code> is available in your PATH</li>
+</ul>
+</div>
 
 ### 1.4 Verify Installation
 ```bash

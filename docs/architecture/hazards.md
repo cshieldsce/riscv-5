@@ -74,8 +74,12 @@ sub  x2, x1, x3   # Needs x1 NOW in its EX stage
 </script>
 
 **Cycle-by-Cycle Breakdown:**
-*   **Cycle 3:** `ADDI` is in **Execute** calculating its result. `SUB` is in **Decode**.
-*   **Cycle 4 (Forwarding!):** `ADDI` moves to **Memory** (result is now in the `EX/MEM` register). `SUB` moves to **Execute**. The Forwarding Unit detects the hazard and tells the ALU to grab the result from the `EX/MEM` register instead of the Register File.
+<div class="callout note">
+<ul>
+  <li><strong>Cycle 3:</strong> <code>ADDI</code> is in <strong>Execute</strong> calculating its result. <code>SUB</code> is in <strong>Decode</strong>.</li>
+  <li><strong>Cycle 4 (Forwarding!):</strong> <code>ADDI</code> moves to <strong>Memory</strong> (result is now in the <code>EX/MEM</code> register). <code>SUB</code> moves to <strong>Execute</strong>. The Forwarding Unit detects the hazard and tells the ALU to grab the result from the <code>EX/MEM</code> register instead of the Register File.</li>
+</ul>
+</div>
 
 **Implementation (`src/forwarding_unit.sv`):**
 The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).

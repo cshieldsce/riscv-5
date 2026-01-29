@@ -55,23 +55,11 @@ It is a common misconception that pipelining reduces the execution time of a sin
 
 ### Motivations
 
-Motivations: SystemVerilog and functional programming
+This project began with a desire to explore **SystemVerilog** through the lens of functional hardware design. The goal was to build a core that is not only functional but also clean, readable, and strictly typed.
 
-Found the Hennessy book, everybody said it was the best, started reading in conjunction with the ISA spec, went from there.
-
----
-
-## 1. Mapping the Textbook to the RTL
-
-The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
-
-![Simplified pipelined datapath](../images/pipeline_stages_clean.svg "Figure 4.31 - Patterson & Hennessy")
-
-**Figure 1** illustrates the theoretical 5-stage RISC-V datapath as described in *Patterson & Hennessy*. Ideally, one instruction completes every cycle.
-
-### 1.1 The Pipelined Datapath (Section 4.6)
-
-Pipeline stage registers are the backbone of the pipeline, they allow us to transfer data freely between stages with blocking the flow of instructions. In the RTL, these registers carry data and control signals forward, ensuring that signals are synchronized with the instruction they control. This allows us to effectively synchronized the data and control signals required for instruction.
+<div class="callout tip"><span class="title">Personal Note</span>
+I found the Hennessy & Patterson book to be the "gold standard" resource. Reading it in conjunction with the official ISA spec provided the perfect balance of theory and practical specification.
+</div>
 
 ---
 

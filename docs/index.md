@@ -11,12 +11,11 @@
 
 # Documentation
 
-Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation was created to give you background on this project and it's design.
+Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation provides a comprehensive background on the project's design, verification, and implementation.
 
 ## Project Development
 
-////
-
+The `riscv-5` core is an educational yet rigorously verified implementation of the RISC-V RV32I Base Integer Instruction Set. It was designed with a focus on clean, synthesizable SystemVerilog code and strict adherence to the official ISA specifications.
 
 ## Articles
 
@@ -30,7 +29,6 @@ A deep dive into the microarchitecture of the core.
 Objective evidence of correctness and a narrative account of debugging resilience.
 - **[Compliance Matrix](./verification/report.html):** Formal RISCOF results for RV32I.
 - **[Hazard Handling](./verification/report.html#load-use-hazard-stall):** Timing diagrams (WaveDrom) of temporal interactions.
-- **[War Stories](./verification/report.html#war-stories):** Retrospectives on solving "The Frozen Pipeline" and "The Bouncing Branch".
 
 ### 3. The Setup Guide (How-To)
 Practical instructions for instantiating the core and running simulations.
@@ -41,7 +39,9 @@ Practical instructions for instantiating the core and running simulations.
 
 ## Key References
 
-Every design decision in this core is anchored in the official **RISC-V Instruction Set Manual (Volume I)** and the seminal textbook **Computer Organization and Design: The Hardware/Software Interface** by Patterson and Hennessy.
+<div class="callout note"><span class="title">Standard Compliance</span>
+Every design decision in this core is anchored in the official <strong>RISC-V Instruction Set Manual (Volume I)</strong> and the seminal textbook <strong>Computer Organization and Design: The Hardware/Software Interface</strong> by Patterson and Hennessy.
+</div>
 
 ---
 *Verified RTL. Rigorous Documentation. Silicon-Ready Design.*
