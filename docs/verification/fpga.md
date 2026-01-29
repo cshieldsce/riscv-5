@@ -151,3 +151,5 @@ With the timing issues resolved, the `riscv-5` core successfully runs the test s
 ---
 
 *For questions or contributions, see the [GitHub repository](https://github.com/cshieldsce/riscv-5).*
+
+<script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

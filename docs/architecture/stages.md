@@ -284,3 +284,5 @@ We include <code>rs2</code> in the <code>EX/MEM</code> register to enable store 
 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+<script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
