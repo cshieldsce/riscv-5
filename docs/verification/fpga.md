@@ -90,7 +90,7 @@ The issue stemmed from the original implementation of the `InstructionMemory` mo
 We modified `src/instruction_memory.sv` to use Distributed RAM (LUTRAM) semantics, making the read operation asynchronous. This ensures the instruction is valid on the `Instruction` bus within the same cycle the address is presented.
 
 **Problematic Code (Synchronous Read):**
-```systemverilog
+```verilog
 // OLD: Data ready on next clock edge (Too late for IF/ID)
 always_ff @(posedge clk) begin
     if (en) begin
@@ -100,7 +100,7 @@ end
 ```
 
 **Fixed Code (Asynchronous Read):**
-```systemverilog
+```verilog
 // NEW: Data ready immediately (Combinational)
 // Source: src/instruction_memory.sv
 assign word_addr = Address >> 2;
