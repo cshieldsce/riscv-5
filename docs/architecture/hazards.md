@@ -83,7 +83,10 @@ sub  x2, x1, x3 # Needs x1 NOW in its EX stage
 </div>
 
 <div class="callout note"><span class="title">Breakdown</span>
-<strong>Cycle 3 (Forwarding!):</strong> <code>ADDI</code> moves to <strong>Memory</strong>. <code>SUB</code> moves to <strong>Execute</strong>. The Forwarding Unit detects the hazard and tells the ALU to grab the result from the <code>EX/MEM</code> register instead of the Register File.
+<strong>Cycle 3 (Forwarding):</strong>
+  <ul>
+    <li>The Forwarding Unit detects the hazard and tells the ALU to grab the result from the <code>EX/MEM</code> register instead of the Register File.</li>
+  </ul>
 </div>
 
 **Implementation (`src/forwarding_unit.sv`):**
@@ -161,14 +164,16 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
 </div>
 
 <div class="callout note"><span class="title">Breakdown</span>
-<strong>Cycle 2 (Detection):</strong> <code>LW</code> is in <strong>Execute</strong>. <code>ADD</code> is in <strong>Decode</strong>. The Hazard Unit detects that <code>ADD</code> needs <code>x1</code>, which <code>LW</code> is currently reading. <br>
+<strong>Cycle 2 (Detection):</strong>
+  <ul>
+    <li>The Hazard Unit detects that <code>ADD</code> needs <code>x1</code>, which <code>LW</code> is currently reading.</li>
+  </ul>
 <strong>Cycle 3 (The Stall):</strong> 
   <ul>
     <li><strong>IF &amp; ID are Frozen:</strong> <code>ADD</code> stays in Decode, and <code>OR</code> stays in Fetch.</li>
     <li><strong>EX is Flushed:</strong> A <code>NOP</code> bubble is inserted into Execute.</li>
     <li><code>LW</code> proceeds to <strong>Memory</strong>.</li>
   </ul>
-<br>
 <strong>Cycle 4 (Resume):</strong> <code>LW</code> is in <strong>Writeback</strong>. <code>ADD</code> finally moves to <strong>Execute</strong>
 </div>
 
@@ -217,7 +222,10 @@ sub  x5, x5, x6      # Target
 </div>
 
 <div class="callout note"><span class="title">Breakdown</span>
-<strong>Cycle 2 (Resolution):</strong> <code>BEQ</code> is in <strong>Execute</strong>. The ALU calculates the branch condition is <strong>TAKEN</strong>.<br>
+<strong>Cycle 2 (Resolution):</strong>
+  <ul>
+    <li>The ALU calculates the branch condition is <strong>TAKEN</strong></li>
+  </ul>
 <strong>Cycle 3 (The Flush):</strong> 
   <ul>
     <li>The PC is updated to <code>Target</code>.</li>
