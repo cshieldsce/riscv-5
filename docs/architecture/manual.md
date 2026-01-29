@@ -27,10 +27,7 @@ You can think of a Single Cycle CPU as one giant combinational circuit, and the 
 If you have used Xilinx Vivado to synthesize a core, you likely encountered <strong>Total Negative Slack (TNS)</strong>. In a Single Cycle CPU, the "Critical Path" (the longest path between two registers) is effectively the entire length of the CPU. Vivado will report timing violations because the signal physically cannot travel to the logic gates fast enough.
 </div>
 
-### The Solution: Pipelining
-
-The diagram below shows the clean separation of stages that pipelining enables:
-## 1. Mapping the Textbook to the RTL
+## The Solution: Pipelining
 
 The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
 
@@ -39,7 +36,7 @@ The 5-stage pipeline is a faithful instantiation of the classic microarchitectur
   <span class="caption">Figure 2: The theoretical 5-stage RISC-V datapath as described in Patterson & Hennessy.</span>
 </div>
 
-### 1.1 The Pipelined Datapath (Section 4.6)
+### The Pipelined Datapath
 
 
 Pipelining solves this by breaking that "one long wire" into smaller, independent segments separated by Pipeline Registers. Instead of one cycle needing to cover the Fetch to Writeback distance, the clock cycle only needs to be long enough for the longest individual stage (e.g., just the Execute stage).
