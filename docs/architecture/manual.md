@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 <div class="site-nav">
   <a href="../index.html">Home</a>
   <a href="./manual.html">Architecture Overview</a>
@@ -64,7 +65,7 @@ Found the Hennessy book, everybody said it was the best, started reading in conj
 
 The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
 
-![Simplified pipelined datapath](../images/pipeline_basic.svg "Figure 4.31 - Patterson & Hennessy")
+![Simplified pipelined datapath](../images/pipeline_stages_clean.svg "Figure 4.31 - Patterson & Hennessy")
 
 **Figure 1** illustrates the theoretical 5-stage RISC-V datapath as described in *Patterson & Hennessy*. Ideally, one instruction completes every cycle.
 

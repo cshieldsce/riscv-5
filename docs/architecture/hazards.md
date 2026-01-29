@@ -222,4 +222,4 @@ end
 ```
 
 ---
-*riscv-cpu: a 5-Stage Pipelined RISC-V Processor (RV32I) by Charlie Shields, 2026*
+*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*

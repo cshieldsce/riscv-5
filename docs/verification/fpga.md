@@ -1,11 +1,11 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 <div class="site-nav">
   <a href="../index.html">Home</a>
-  <a href="../architecture//manual.html">Architecture Overview</a>
-  <a href="../architecture//stages.html">Pipeline Stages</a>
-  <a href="../architecture//hazards.html">Hazard Resolution</a>
+  <a href="../architecture/manual.html">Architecture Overview</a>
+  <a href="../architecture/stages.html">Pipeline Stages</a>
+  <a href="../architecture/hazards.html">Hazard Resolution</a>
   <a href="./report.html">Design Verification</a>
-  <a href= ./fpga.html>FPGA Implementation</a>
+  <a href="./fpga.html">FPGA Implementation</a>
   <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
@@ -23,50 +23,110 @@ This page documents the process and results of deploying the `riscv-5` core on r
 
 ### Synthesis Summary
 
-| Resource      | Used | Available | Utilization |
-|---------------|------|-----------|-------------|
-| LUTs          |      |           |             |
-| Flip-Flops    |      |           |             |
-| BRAMs         |      |           |             |
-| DSP Slices    |      |           |             |
+![Vivado Utilization Table](../images/vivado-utilization-table.png)
 
-*(Insert Vivado synthesis report table or screenshot here)*
+![Vivado Utilization Graph](../images/vivado-utilization-graph.png)
+
+The core was synthesized for the Zynq-7000 SoC on the PYNQ-Z2 board. Resource utilization is minimal, leaving significant headroom for future extensions such as caches or more complex peripherals.
 
 ---
 
 ## 2. Timing Report
 
-- **Target Clock Frequency:** XX MHz
-- **Achieved Clock Period:** XX ns
-- **Slack:** XX ns
+The design was constrained to a 10 MHz clock (100 ns period). The following timing summary from Vivado confirms that the design meets all setup and hold requirements with positive slack.
 
-*(Insert screenshot or summary of timing closure from Vivado)*
+![Vivado Timing Summary](../images/vivado-design-timing-summary.png)
 
 ---
 
-## 3. Block Diagram
+## 3. Implementation Layout
 
-*(Insert exported block diagram image from Vivado here)*
+The image below shows the physical implementation of the `riscv-5` core on the Zynq-7000 fabric.
+
+![Vivado Implementation Device](../images/vivado-implementation-device.png)
 
 ---
 
-## 4. Hardware Demo
+## 4. Hardware Debugging & ILA Analysis
 
-### Fibonacci Test on FPGA
+During initial hardware testing, we encountered a critical timing misalignment that caused branch instructions to fail. To diagnose this, we integrated the **Integrated Logic Analyzer (ILA)** IP core to monitor the program counter (PC), instruction word, and control signals in real-time.
 
-Below is a demonstration of the `riscv-5` core running the Fibonacci test in hardware. The result is displayed in binary via the onboard LEDs.
+### 4.1 The "Bouncing Branch" Issue
+
+The core was tested with a program designed to branch over a "failure" instruction. The expected behavior was for the LEDs to display `0010` (decimal 2).
+- **Observed Behavior:** LEDs displayed `0101` (decimal 5).
+- **Analysis:** This output corresponded to the initial state of the registers before the branch. The processor was effectively executing `NOP`s instead of the branch instruction, failing to update the state.
+
+The ILA capture below reveals the root cause: a misalignment between the **Fetch Address (PC)** and the **Returned Instruction**.
+
+![FPGA Problem 1](../images/fpga_problem1.png)
+*Figure: ILA capture showing PC=30 but Instruction=NOP. The memory read latency caused the instruction to arrive one cycle late.*
+
+### 4.2 Root Cause: Synchronous vs. Asynchronous Read
+
+The issue stemmed from the original implementation of the `InstructionMemory` module. It was designed as a synchronous block RAM (BRAM) with a 1-cycle read latency. However, our 5-stage pipeline's Fetch stage assumes data is available in the same cycle (combinational read) to be latched into the `IF/ID` register.
+
+**The Mismatch:**
+1.  **Cycle A:** PC sends Address `0x30`.
+2.  **Cycle B:** Synchronous Memory provides data for `0x30`.
+3.  **The Bug:** The `IF/ID` pipeline register latches data at the *start* of Cycle B. It captures the data from Cycle A (the previous instruction), effectively feeding the pipeline with stale instructions.
+
+### 4.3 The Fix: Combinational Read
+
+We modified `src/instruction_memory.sv` to use Distributed RAM (LUTRAM) semantics, making the read operation asynchronous. This ensures the instruction is valid on the `Instruction` bus within the same cycle the address is presented.
+
+**Problematic Code (Synchronous Read):**
+```systemverilog
+// OLD: Data ready on next clock edge (Too late for IF/ID)
+always_ff @(posedge clk) begin
+    if (en) begin
+        Instruction <= (word_addr < 4096) ? rom_memory[word_addr] : 32'h00000013;
+    end
+end
+```
+
+**Fixed Code (Asynchronous Read):**
+```systemverilog
+// NEW: Data ready immediately (Combinational)
+// Source: src/instruction_memory.sv
+assign word_addr = Address >> 2;
+
+// Fetch instruction immediately when address changes
+assign Instruction = (word_addr < RAM_MEMORY_SIZE) ? rom_memory[word_addr] : NOP_A;
+```
+
+### 4.4 Verification
+
+After applying the fix, the ILA confirmed that `pcsrc` (the signal to take a branch) was asserted correctly, and the PC updated to the target address `0x40` immediately.
+
+![FPGA Problem 1 Solved](../images/fpga_problem1_solved.png)
+*Figure: Correct behavior. `branch_taken` is high, and the PC jumps to 0x40.*
+
+The LEDs subsequently displayed `0010` (2), confirming the processor successfully executed the branch and wrote the correct value to the memory-mapped IO.
+
+---
+
+## 5. Lessons Learned
+
+1. **Clocking Integrity:** Using a logic-based clock divider led to instability with the JTAG debug hub. Switching to the **Xilinx Clocking Wizard** IP ensured a stable clock tree and reliable ILA communication.
+2. **Memory Timing:** In a single-cycle fetch pipeline, the timing relationship between the PC and the Instruction Memory is critical. Synchronous BRAM requires careful stall logic or a dedicated fetch stage; for this implementation, asynchronous Distributed RAM was the appropriate choice for simplicity and performance at 10 MHz.
+
+---
+
+## 6. Hardware Demo
+
+### Fibonacci & Branch Test Results
+With the timing issues resolved, the `riscv-5` core successfully runs the test suite in hardware. The result of the branch test is displayed on the PYNQ-Z2 LEDs.
+
+- **Expected Result:** `0010` (Binary 2)
+- **Actual Hardware Output:** Success. The LEDs correctly display the jump target result, skipping the failure path.
 
 <video controls src="path/to/your/video.mp4" width="480"></video>
-<!-- Replace with your video link and thumbnail -->
-
-*(Optionally, embed the video directly if your documentation host supports it)*
-
+*(A video demonstration of the Fibonacci sequence calculation will be uploaded here)*
 
 ---
 
----
-
-## 6. Additional Notes
+## 7. Additional Notes
 
 - **Bitstream:** [Download link or instructions]
 - **Test Program:** [`fib_test.mem`](../../test/mem/fib_test.mem)

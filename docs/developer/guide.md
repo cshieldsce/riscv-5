@@ -118,5 +118,7 @@ cd fpga
 vivado -mode batch -source create_project.tcl
 ```
 
+For detailed implementation results, synthesis reports, and hardware verification demos, see the **[FPGA Implementation](../verification/fpga.html)** report.
+
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*

@@ -1,0 +1,109 @@
+- shitty clock divider (bad practice). install clocking wizard ip
+- trying to debug jalr issues with leds (installed ILA)
+
+program:
+
+rom_memory[0]  = 32'h800000b7;  // lui x1, 0x80000
+        rom_memory[1]  = 32'h00000013;  // nop
+        rom_memory[2]  = 32'h00000013;  // nop
+        rom_memory[3]  = 32'h00000013;  // nop
+        rom_memory[4]  = 32'h00500113;  // addi x2, x0, 5     ; x2 = 5
+        rom_memory[5]  = 32'h00000013;  // nop
+        rom_memory[6]  = 32'h00000013;  // nop
+        rom_memory[7]  = 32'h00000013;  // nop
+        rom_memory[8]  = 32'h00500193;  // addi x3, x0, 5     ; x3 = 5
+        rom_memory[9]  = 32'h00000013;  // nop
+        rom_memory[10] = 32'h00000013;  // nop
+        rom_memory[11] = 32'h00000013;  // nop
+        rom_memory[12] = 32'h00310863;  // beq x2, x3, 16     ; if x2==x3, jump +16 bytes to [16]
+        rom_memory[13] = 32'h00700113;  // addi x2, x0, 7     ; x2 = 7 (SKIPPED if branch taken)
+        rom_memory[14] = 32'h00000013;  // nop (SKIPPED)
+        rom_memory[15] = 32'h00000013;  // nop (SKIPPED)
+        rom_memory[16] = 32'h00200113;  // addi x2, x0, 2     ; x2 = 2 (branch target)
+        rom_memory[17] = 32'h00000013;  // nop
+        rom_memory[18] = 32'h00000013;  // nop
+        rom_memory[19] = 32'h00000013;  // nop
+        rom_memory[20] = 32'h0020a023;  // sw x2, 0(x1)       ; store to LEDs
+        rom_memory[21] = 32'h0000006f;  // jal x0, 0          ; infinite loop
+        
+        // Expected: LEDs = 0010 (2) if branch taken
+        // If LEDs = 0111 (7), branch not taken
+        // If LEDs = 0101 (5), branch target instruction not executed
+        
+
+problem #1 (this is the jump issue!!!) WE ARE STUCK SEEING LED 0101 (decimal 5)
+
+The capture shows PC = 30 but Instruction = 13 (NOP).
+This misalignment happens because your Instruction Memory is Synchronous (1 cycle delay), but your CPU Pipeline expects Asynchronous Memory (0 cycle delay).
+
+1. Cycle A: CPU sends Address 30.
+2. Cycle B: rom_memory provides the Data for 30.
+However, IF/ID register latches data at the start of Cycle B, capturing the OLD data (from Cycle A's address, which was 2C -> NOP).
+So, the PC (30) and the Instruction (NOP) enter the pipeline mismatched. The Control Unit sees NOP, so it never branches.
+
+The Fix: Make Memory Asynchronous
+For a simple 5-stage pipeline like this (without complex fetch stalling), you should use Distributed RAM (LUTRAM) behavior, which reads immediately.
+
+code:
+
+from: 
+    /* REMOVED: Synchronous Block
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            Instruction <= 32'h00000013;
+        end else if (en) begin
+            Instruction <= (word_addr < 4096) ? rom_memory[word_addr] : 32'h00000013;
+        end
+    end
+    */
+
+to:
+    // --- CHANGED: Read is now COMBINATIONAL (Async) ---
+    // This ensures Instruction is ready in the SAME cycle as Address
+    assign Instruction = (word_addr < 4096) ? rom_memory[word_addr] : 32'h00000013;
+
+
+SOLVED:
+
+
+Your ILA capture confirms that the hardware is now correctly identifying and taking the branch. Here is the proof in your data:
+
+1. branch_en: 1: The Control Unit correctly decoded the BEQ instruction.
+2. branch_taken: 1: The logic (Branch and Zero) resolved to true.
+3. branch_target: 40: The ALU correctly calculated the jump address (0x30 + offset = 0x40).
+4. pcsrc: 1: This is the "Golden Signal". It tells the PC Multiplexer to Load the Branch Target (0x40) instead of the next instruction.
+
+"Why is instruction showing 00700113?"
+You might wonder why ila_instruction shows addi x2, x0, 7 (which is 0x00700113) instead of the Branch instruction.
+
+This is normal pipeline behavior:
+
+The signals branch_taken, pc, and target in your trace come from the Execute Stage (where the Branch lives).
+The ila_instruction probe comes from the Decode Stage (the next instruction coming down the pipe).
+What you see is the "Fallthrough Instruction" (addi x2, x0, 7) sitting in the Decode slot.
+Crucially, because pcsrc is 1, the hardware will Flush (kill) this addi instruction in the very next cycle and jump to 40. This is exactly what you wanted (skipping the instruction that sets LEDs to 7).
+
+
+LEDS NOW SHOW 0010
+Your CPU data output (LEDs 1 & 0) shows Binary 10, which is Decimal 2.
+
+The standard RISC-V "Branch Test" program typically follows this logic:
+
+Initialize: Write 5 to LEDs. (You were stuck here earlier, seeing 01).
+Branch: BEQ x2, x3, target (Check if 5 == 5).
+If Broken (Fall through): Execute ADDI x2, x0, 7. LEDs would show 11 (binary for 3, bottom bits of 7).
+If Fixed (Jump Taken): Jump to 0x40, execute ADDI x2, x0, 2. LEDs show 10 (binary for 2).
+
+Your ILA traces proved the Branch Logic works (taken = 1, pcsrc = 1).
+Your LEDs prove the Program Flow worked (Jumped over the failure code and wrote "2").
+
+
+
+
+
+
+Summary:
+o
+Clocking: Switched from a logic divider to the Clocking Wizard to keep ILA alive during reset.
+JTAG Communication: Forced the Debug Hub to 125 MHz to talk to Vivado reliably.
+Instruction Memory: Changed from always_ff (Synchronous) to assign (Asynchronous) to fix the pipeline timing mismatch that was feeding NOPs instead of Branches.

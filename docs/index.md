@@ -11,11 +11,12 @@
 
 # Documentation
 
-Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation was created to give you background on this project from both a high and low level.
+Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation was created to give you background on this project and it's design.
 
 ## Project Development
 
-My introduction to RISC-V happened while I was studying ARM assembly during a semester abroad at the University of Glasgow. Discovering that RISC-V was open source and free to use felt like unlocking a lifelong dream, the chance to design and build my own CPU from scratch. I began reading into the RISC-V ISA, starting with a single-cycle CPU to get a feel for the basics. Once that was working, I didn't want to stop, so began implementing a full 5-stage pipeline, learning a ton about hazards and microarchitecture along the way. The final milestone was getting the design running on an FPGA and watching it pass the Fibonacci test in hardware, a moment that truly made the project feel complete.
+////
+
 
 ## Articles
 
@@ -34,13 +35,13 @@ Objective evidence of correctness and a narrative account of debugging resilienc
 ### 3. The Setup Guide (How-To)
 Practical instructions for instantiating the core and running simulations.
 - **[Technical Onboarding](./developer/guide.html):** Toolchain setup and simulation workflow.
-- **[FPGA Integration](./developer/guide.html#fpga-deployment):** Deployment on the Xilinx PYNQ-Z2.
+- **[FPGA Integration](./verification/fpga.html):** Deployment on the Xilinx PYNQ-Z2.
 
 ---
 
-## 🏛️ Theoretical Anchor
+## Key References
 
-Every design decision in this core is anchored in the official **RISC-V Instruction Set Manual (Volume I)** and the seminal textbook **Computer Organization and Design: The Hardware/Software Interface** by Patterson and Hennessy. This documentation explicitly maps code to these authoritative texts to prove engineering competence.
+Every design decision in this core is anchored in the official **RISC-V Instruction Set Manual (Volume I)** and the seminal textbook **Computer Organization and Design: The Hardware/Software Interface** by Patterson and Hennessy.
 
 ---
 *Verified RTL. Rigorous Documentation. Silicon-Ready Design.*
