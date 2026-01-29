@@ -83,13 +83,12 @@ sub  x2, x1, x3 # Needs x1 NOW in its EX stage
 </div>
 <br>
 **Implementation (`src/forwarding_unit.sv`):**
-
-The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
-
 ```verilog
 if (ex_mem_reg_write && (ex_mem_rd != 0) && (ex_mem_rd == id_ex_rs1))
     forward_a = 2'b10; // Select data from EX/MEM register
 ```
+The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
+
 
 ### Case 2: MEM-to-EX Forwarding
 This occurs when the dependency is two instructions apart. The data is currently sitting in the `MEM/WB` pipeline register.
@@ -101,9 +100,6 @@ sub  x2, x1, x3   # Needs x1
 ```
 
 **Implementation (`src/forwarding_unit.sv`):**
-
-The forwarding unit selects forward control `1'b01` to bypass data from the MEM/WB pipeline register directly to the execute stage.
-
 ```verilog
 logic mem_match, ex_match;
 
@@ -116,6 +112,7 @@ end else begin : NoMEMHazard
   return 1'b0;
 end
 ```
+The forwarding unit selects forward control `1'b01` to bypass data from the MEM/WB pipeline register directly to the execute stage.
 
 ### Case 3: MEM Store Forwarding (WB-to-MEM)
 A unique case where a `store` instruction needs data that is currently in the Writeback stage.
@@ -126,9 +123,6 @@ sw   x1, 0(x2)    # sw needs x1, which is in WB stage
 ```
 
 **Implementation (`src/mem_stage.sv`):**
-
-The Memory stage contains its own mini-forwarding logic to ensure the <code>dmem_wdata</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
-
 ```verilog
 if (wb_reg_write && (wb_rd != 5'b0) && (wb_rd == mem_rs2)) begin
   return wb_data;
@@ -136,7 +130,7 @@ end else begin
   return mem_data;
 end
 ```
-
+The Memory stage contains its own mini-forwarding logic to ensure the <code>dmem_wdata</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
 
 ---
 
