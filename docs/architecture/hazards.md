@@ -38,9 +38,6 @@ The following diagrams use a <strong>0-indexed</strong> cycle count, which is st
 
 ## 3.1 Hazard Summary Table
 
-hi
-
-
 | Hazard Type | Scenario | Hardware Action | Penalty (Cycles) |
 |-------------|----------|-----------------|------------------|
 | **Data Hazard** | Register dependency (ALU to ALU) | Forwarding | 0 |
@@ -51,9 +48,6 @@ hi
 | **Control Hazard** | JALR (Indirect Jump) | Flush IF & ID | 2 |
 | **Special Case** | ALU-to-Branch Dependency | Stall + Flush IF/ID | 3 (Total) |
 
-
-
-hi
 ---
 
 ## 3.2 Data Hazards: Forwarding & Bypassing
