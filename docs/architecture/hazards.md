@@ -23,8 +23,9 @@ div[id^="WaveDrom_Display_"] svg {
   background-color: transparent !important;
 }
 div[id^="WaveDrom_Display_"] {
-  margin: 20px 0;
-  overflow-x: auto;]==]
+  margin: 20px auto;
+  overflow-x: auto;
+  text-align: center;
 }
 </style>
 
@@ -145,12 +146,19 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
 </script>
 
 **Cycle-by-Cycle Breakdown:**
-*   **Cycle 3 (Detection):** `LW` is in **Execute**. `ADD` is in **Decode**. The Hazard Unit detects that `ADD` needs `x1`, which `LW` is currently reading.
-*   **Cycle 4 (The Stall):** 
-    *   **IF & ID are Frozen:** `ADD` stays in Decode, and `OR` stays in Fetch.
-    *   **EX is Flushed:** A `NOP` bubble is inserted into Execute.
-    *   `LW` proceeds to **Memory**.
-*   **Cycle 5 (Resume):** `LW` is in **Writeback**. `ADD` finally moves to **Execute** (forwarding will occur here).
+<div class="callout note">
+<ul>
+  <li><strong>Cycle 3 (Detection):</strong> <code>LW</code> is in <strong>Execute</strong>. <code>ADD</code> is in <strong>Decode</strong>. The Hazard Unit detects that <code>ADD</code> needs <code>x1</code>, which <code>LW</code> is currently reading.</li>
+  <li><strong>Cycle 4 (The Stall):</strong> 
+    <ul>
+      <li><strong>IF &amp; ID are Frozen:</strong> <code>ADD</code> stays in Decode, and <code>OR</code> stays in Fetch.</li>
+      <li><strong>EX is Flushed:</strong> A <code>NOP</code> bubble is inserted into Execute.</li>
+      <li><code>LW</code> proceeds to <strong>Memory</strong>.</li>
+    </ul>
+  </li>
+  <li><strong>Cycle 5 (Resume):</strong> <code>LW</code> is in <strong>Writeback</strong>. <code>ADD</code> finally moves to <strong>Execute</strong> (forwarding will occur here).</li>
+</ul>
+</div>
 
 ---
 
@@ -187,12 +195,19 @@ sub  x5, x5, x6      # Target
 </script>
 
 **Cycle-by-Cycle Breakdown:**
-*   **Cycle 3 (Resolution):** `BEQ` is in **Execute**. The ALU calculates the branch condition is **TAKEN**.
-*   **Cycle 4 (The Flush):** 
-    *   The PC is updated to `Target`.
-    *   `Wrong1` (in ID) and `Wrong2` (in IF) are flushed and replaced with `NOP` bubbles.
-*   **Cycle 5:** The `Target` instruction reaches **Decode**.
-*   **Cycle 6:** The `Target` instruction reaches **Execute**.
+<div class="callout note">
+<ul>
+  <li><strong>Cycle 3 (Resolution):</strong> <code>BEQ</code> is in <strong>Execute</strong>. The ALU calculates the branch condition is <strong>TAKEN</strong>.</li>
+  <li><strong>Cycle 4 (The Flush):</strong> 
+    <ul>
+      <li>The PC is updated to <code>Target</code>.</li>
+      <li><code>Wrong1</code> (in ID) and <code>Wrong2</code> (in IF) are flushed and replaced with <code>NOP</code> bubbles.</li>
+    </ul>
+  </li>
+  <li><strong>Cycle 5:</strong> The <code>Target</code> instruction reaches <strong>Decode</strong>.</li>
+  <li><strong>Cycle 6:</strong> The <code>Target</code> instruction reaches <strong>Execute</strong>.</li>
+</ul>
+</div>
 
 
 
