@@ -23,9 +23,9 @@ div[id^="WaveDrom_Display_"] svg {
   background-color: transparent !important;
 }
 div[id^="WaveDrom_Display_"] {
+  display: table; /* Use table display to allow margin:auto centering */
   margin: 20px auto;
   overflow-x: auto;
-  text-align: center;
 }
 </style>
 
@@ -69,7 +69,7 @@ sub  x2, x1, x3   # Needs x1 NOW in its EX stage
   {},
   { "name": "Forward A Select", "wave": "...2..", "data": ["10 (EX/MEM)"] }
 ],
-  "head": { "text": "EX-to-EX Forwarding (Bypassing at Cycle 4)", "tick": 0 },
+  "head": { "text": "EX-to-EX Forwarding (Bypassing at Cycle 4)", "tick": 1 },
   "config": { "hscale": 2.2 }
 }
 </script>
@@ -99,7 +99,9 @@ or   x4, x5, x6   # Unrelated
 sub  x2, x1, x3   # Needs x1
 ```
 
-**Implementation:** The unit selects `2'b01` to bypass from the Writeback stage.
+<div class="callout note"><span class="title">Implementation</span>
+The unit selects forward control <code>2'b01</code> to bypass data from the MEM/WB pipeline register directly to the Execute stage.
+</div>
 
 ### Case 3: MEM Store Forwarding (WB-to-MEM)
 A unique case where a `store` instruction needs data that is currently in the Writeback stage.
@@ -109,8 +111,9 @@ addi x1, x0, 10
 sw   x1, 0(x2)    # sw needs x1, which is in WB stage
 ```
 
-**Implementation (`src/mem_stage.sv`):**
-The Memory stage contains its own mini-forwarding logic to ensure the `dmem_wdata` is updated if the `rs2` register is being written to by the instruction currently in the Writeback stage.
+<div class="callout note"><span class="title">Implementation (mem_stage.sv)</span>
+The Memory stage contains its own mini-forwarding logic to ensure the <code>dmem_wdata</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
+</div>
 
 ---
 
@@ -212,7 +215,9 @@ sub  x5, x5, x6      # Target
 
 
 ### Case 6: ALU-to-Branch Stall (Specific Implementation)
-In our architecture, if a branch in the Decode stage depends on an ALU result currently in the Execute stage, the `HazardUnit` triggers an additional stall. This is a design choice to simplify the branch comparison timing.
+<div class="callout warn"><span class="title">Design Choice</span>
+In our architecture, if a branch in the Decode stage depends on an ALU result currently in the Execute stage, the <code>HazardUnit</code> triggers an additional stall. This simplifies branch comparison timing at the cost of one extra cycle penalty.
+</div>
 
 **Example Code:**
 ```asm
