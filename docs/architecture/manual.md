@@ -49,7 +49,7 @@ It is a common misconception that pipelining reduces the execution time of a sin
 
 ---
 
-## 1.3 Building the Core
+## 1.2 Building the Core
 
 ### Motivations
 
@@ -61,7 +61,8 @@ I found the Hennessy & Patterson book to be what many referred to as the "gold s
 
 ---
 
-## References
+## 1.3 References
+The following references, particularly the highlighted chapters and sections, directly informed the design and implementation of this core’s pipelined architecture and instruction set support. They served as both theoretical foundation and practical guide throughout development.
 
 1. **Patterson, D. A., & Hennessy, J. L.** (2017). *Computer Organization and Design: The Hardware/Software Interface (RISC-V Edition).* Morgan Kaufmann.
    - Chapter 4: The Processor: 5 stage pipeline architecture
