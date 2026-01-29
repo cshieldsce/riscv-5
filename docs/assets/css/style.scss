@@ -1,9 +1,65 @@
 ---
 ---
+/* --- Font Imports --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap');
 
 @import "{{ site.theme }}";
 
-/* Minimal top nav */
+/* --- General Polish & Overrides --- */
+
+/* 4. Custom Typography */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* 1. Link Styling */
+a, .site-nav a {
+  color: #8ab4f8; /* A pleasant, readable light blue */
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover, .site-nav a:hover {
+  color: #c4daff; /* Slightly brighter on hover */
+  text-decoration: underline;
+}
+
+/* 2. Horizontal Rule Styling */
+hr {
+  height: 1px;
+  border: 0;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  margin: 3rem 1rem;
+}
+
+/* --- Header Anchor Styling --- */
+h2, h3, h4 {
+  position: relative;
+  scroll-margin-top: 2rem; /* Offset for when jumping to an anchor */
+}
+
+/* Create the '#' symbol and hide it by default */
+h2 .anchor-link::before,
+h3 .anchor-link::before,
+h4 .anchor-link::before {
+  content: '#';
+  position: absolute;
+  left: -1.2em;
+  top: 0;
+  font-weight: 700;
+  color: #8ab4f8;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Show the '#' on hover of the header */
+h2:hover .anchor-link::before,
+h3:hover .anchor-link::before,
+h4:hover .anchor-link::before {
+  opacity: 1;
+}
+
+/* --- Navigation Bar --- */
 .site-nav {
   margin: 0 0 1.5rem 0;
   padding: 0.6rem 0;
@@ -11,22 +67,13 @@
   border-bottom: 1px solid #333;
   font-weight: 600;
 }
-.site-nav a { 
-  margin-right: 1.2rem;
-  text-decoration: none;
-  position: relative;
-}
 
 .site-nav a:not(:last-child)::after {
   content: "|";
-  color: #888;
+  color: #666;
   margin-left: 1.2rem;
   position: absolute;
   right: -1.2rem;
-}
-
-.site-nav a:hover {
-  text-decoration: underline;
 }
 
 /* Callouts with color-coded left borders */
@@ -56,6 +103,11 @@
 /* --- Code Block & Inline Code Styling --- */
 
 /* Block styling */
+.highlight pre, pre code,
+:not(pre) > code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .highlight pre, pre code {
   font-size: 0.95rem;
   line-height: 1.35;
@@ -111,14 +163,24 @@ div[id^="WaveDrom_Display_"] {
 table {
   margin: 1rem 0;
   border-collapse: collapse;
+  width: 100%; /* Ensure table takes full width for consistent styling */
 }
 table th, table td {
-  padding: 0.5rem 0.8rem;
+  padding: 0.6rem 0.9rem;
   border: 1px solid #444;
 }
 table th {
   background: rgba(255,255,255,0.08);
   font-weight: 700;
+}
+
+/* 2. Table Zebra-Striping & Hover */
+table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+table tbody tr:hover {
+  background-color: rgba(138, 180, 248, 0.1);
 }
 
 /* --- Image Styling Improvements --- */
