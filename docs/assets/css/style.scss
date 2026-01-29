@@ -53,12 +53,26 @@
 .callout.note { border-left: 5px solid var(--callout-note); }
 .callout.warn { border-left: 5px solid var(--callout-warn); }
 
-/* Make code blocks crisper on Midnight */
+/* --- Code Block & Inline Code Styling --- */
+
+/* Block styling */
 .highlight pre, pre code {
   font-size: 0.95rem;
   line-height: 1.35;
   background-color: #1e1e1e; /* Ensure dark background */
 }
+
+/* Inline code snippet styling */
+:not(pre) > code {
+  background-color: #383838;
+  color: #e0ac77; /* Amber/Orange text */
+  padding: 0.2em 0.4em;
+  margin: 0 0.1em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  border: 1px solid #4a4a4a;
+}
+
 
 /* --- Scrollbar Styling for Code Blocks & WaveDrom --- */
 /* Target WebKit browsers (Chrome, Safari, Edge) */
