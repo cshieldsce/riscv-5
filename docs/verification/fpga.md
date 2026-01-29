@@ -132,7 +132,20 @@ The LEDs subsequently displayed `0010` (2), confirming the processor successfull
 ## 6. Hardware Demo
 
 ### Fibonacci & Branch Test Results
-In the FPGA top level file `pynq_z2_top.sv` we load our test program `fib_test.mem`. We then output the ALU result, which holds the next value in the Fibonacci sequence, counting up from 0 to 55 encoded in binary on our FPGAs LEDs. 
+In `src/pynq_z2_top.sv`, the board's LEDs are connected to the lower 4 bits of the memory-mapped LED register (`led = dmem_leds`). Since the PYNQ-Z2 only has 4 LEDs, we can only display values from 0 to 15 (0000 to 1111 in binary). Any number larger than 15 "overflows" the display, effectively showing the value modulo 16.
+
+```bash
+Sequence Displayed on LEDs:
+  * 1  -> 0001 (1)
+  * 2  -> 0010 (2)
+  * 3  -> 0011 (3)
+  * 5  -> 0101 (5)
+  * 8  -> 1000 (8)
+  * 13 -> 1101 (13)
+  * 21 -> 0101 (5) (21 is `10101` binary; bottom 4 bits are `0101`)
+  * 34 -> 0010 (2) (34 is `100010` binary; bottom 4 bits are `0010`)
+```
+
 
 <video controls src="../images/fpga-fib-test-demo.mp4" width="480"></video>
 *(A video demonstration of the Fibonacci sequence calculation on the PYNQ-Z2)*
