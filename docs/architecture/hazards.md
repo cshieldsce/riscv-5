@@ -139,14 +139,14 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
 <div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p......." },
-  { "name": "IF (Fetch)",     "wave": "34556...", "data": ["LW", "ADD", "OR", "SUB"] },
-  { "name": "ID (Decode)",    "wave": ".34456..", "data": ["LW", "ADD", "OR", "SUB"] },
-  { "name": "EX (Execute)",   "wave": "..37456.", "data": ["LW", "NOP", "ADD", "OR", "SUB"] },
-  { "name": "MEM (Memory)",   "wave": "...37456", "data": ["LW", "NOP", "ADD", "OR"] },
-  { "name": "WB (Writeback)", "wave": "....3745", "data": ["LW", "NOP", "ADD"] },
+  { "name": "CLK", "wave": "p....." },
+  { "name": "IF (Fetch)",     "wave": "34697x", "data": ["LW", "ADD", "OR", "OR", "SUB"] },
+  { "name": "ID (Decode)",    "wave": "x34967", "data": ["LW", "ADD", "ADD", "OR", "SUB"] },
+  { "name": "EX (Execute)",   "wave": "xx3546", "data": ["LW", "NOP", "AND", "OR" ] },
+  { "name": "MEM (Memory)",   "wave": "xxx354", "data": ["LW", "NOP", "AND"] },
+  { "name": "WB (Writeback)", "wave": "xxxx35", "data": ["LW", "NOP"] },
   {},
-  { "name": "PIPELINE STATE", "wave": "..34....", "data": ["STALL", "Resume"] }
+  { "name": "PIPELINE STATE", "wave": "xx345x", "data": ["DETECT", "STALL", "RESUME"] }
 ],
   "head": { "text": "Load-Use Hazard (Detection at Cycle 2, Stall at Cycle 3)", "tick": 0 },
   "config": { "hscale": 2.2 }
@@ -191,13 +191,14 @@ sub  x5, x5, x6      # Target
 <div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p......." },
-  { "name": "IF (Fetch)",     "wave": "34567...", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Next"] },
-  { "name": "ID (Decode)",    "wave": ".34867..", "data": ["BEQ", "Wrong1", "NOP", "Target", "Next"] },
-  { "name": "EX (Execute)",   "wave": "..38867.", "data": ["BEQ", "NOP", "Target", "Next"] },
+  { "name": "CLK", "wave": "p....." },
+  { "name": "IF (Fetch)",     "wave": "34567x", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Next"] },
+  { "name": "ID (Decode)",    "wave": "x34567", "data": ["BEQ", "Wrong1", "NOP", "Target", "Next"] },
+  { "name": "EX (Execute)",   "wave": "xx3556", "data": ["BEQ", "NOP", "NOP", "Target"] },
+  { "name": "MEM (Memory)",   "wave": "xxx355", "data": ["BEQ", "NOP", "NOP"] },
   {},
-  { "name": "Branch Taken",   "wave": "..010..." },
-  { "name": "PIPELINE ACTION","wave": "..2.3...", "data": ["FLUSH", "Resume"] }
+  { "name": "Branch Taken",   "wave": "xx010x" },
+  { "name": "PIPELINE ACTION","wave": "xx35xx", "data": ["RESOLVE", "FLUSH", "Resume"] }
 ],
   "head": { "text": "Branch Taken (Resolves at Cycle 2, Flushes at Cycle 3)", "tick": 0 },
   "config": { "hscale": 2.2 }
