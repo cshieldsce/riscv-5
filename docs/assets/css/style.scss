@@ -7,6 +7,12 @@
 
 /* --- General Polish & Overrides --- */
 
+/* Reduce main header padding */
+.page-header {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
 /* 4. Custom Typography */
 body {
   font-family: 'Inter', sans-serif;
