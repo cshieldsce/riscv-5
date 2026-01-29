@@ -18,7 +18,7 @@ Before diving into individual stages, here's the full pipeline with all major si
 
 <div class="img-wrapper diagram">
   <img src="../images/pipeline_complete.svg" alt="Complete Pipelined Datapath">
-  <span class="caption">Figure 3: Complete datapath showing pipeline registers, forwarding paths, and hazard detection units. Based on Patterson & Hennessy Figure 4.51.</span>
+  <span class="caption">Figure 2: Complete datapath showing pipeline registers, forwarding paths, and hazard detection units. Based on Patterson & Hennessy Figure 4.51.</span>
 </div>
 
 This diagram maps directly to our SystemVerilog implementation in [`src/pipelined_cpu.sv`](../../src/pipelined_cpu.sv).
@@ -28,7 +28,7 @@ This diagram maps directly to our SystemVerilog implementation in [`src/pipeline
 
 <div class="img-wrapper diagram">
   <img src="../images/stage_if.svg" alt="IF Stage Detail">
-  <span class="caption">Figure 4: IF stage showing PC selection multiplexer and instruction memory interface.</span>
+  <span class="caption">Figure 3: IF stage showing PC selection multiplexer and instruction memory interface.</span>
 </div>
 
 **Implementation:** `if_stage.sv`  
@@ -100,7 +100,7 @@ JAL is a direct jump, so the target address is known immediately from the instru
 
 <div class="img-wrapper diagram">
   <img src="../images/stage_id.svg" alt="ID Stage Detail">
-  <span class="caption">Figure 5: ID stage with control unit, register file, and immediate generator.</span>
+  <span class="caption">Figure 4: ID stage with control unit, register file, and immediate generator.</span>
 </div>
 
 **Implementation:** `id_stage.sv`  
@@ -133,7 +133,7 @@ See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I 
 
 <div class="img-wrapper diagram">
   <img src="../images/stage_ex.svg" alt="EX Stage Detail">
-  <span class="caption">Figure 6: EX stage showing forwarding multiplexers and branch resolution logic.</span>
+  <span class="caption">Figure 5: EX stage showing forwarding multiplexers and branch resolution logic.</span>
 </div>
 
 **Implementation:** `ex_stage.sv`  

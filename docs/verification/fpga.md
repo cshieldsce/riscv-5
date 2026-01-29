@@ -73,7 +73,7 @@ The ILA capture below reveals the root cause: a misalignment between the **Fetch
 
 <div class="img-wrapper screenshot">
   <img src="../images/fpga_problem1.png" alt="FPGA Problem 1">
-  <span class="caption">Figure: ILA capture showing PC=30 but Instruction=NOP. The memory read latency caused the instruction to arrive one cycle late.</span>
+  <span class="caption">Figure 6: ILA capture showing PC=30 but Instruction=NOP. The memory read latency caused the instruction to arrive one cycle late.</span>
 </div>
 
 ### 4.2 Root Cause: Synchronous vs. Asynchronous Read
@@ -115,7 +115,7 @@ After applying the fix, the ILA confirmed that `pcsrc` (the signal to take a bra
 
 <div class="img-wrapper screenshot">
   <img src="../images/fpga_problem1_solved.png" alt="FPGA Problem 1 Solved">
-  <span class="caption">Figure: Correct behavior. branch_taken is high, and the PC jumps to 0x40.</span>
+  <span class="caption">Figure 7: Correct behavior. branch_taken is high, and the PC jumps to 0x40.</span>
 </div>
 
 The LEDs subsequently displayed `0010` (2), confirming the processor successfully executed the branch and wrote the correct value to the memory-mapped IO.

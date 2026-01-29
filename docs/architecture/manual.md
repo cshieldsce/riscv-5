@@ -13,7 +13,7 @@
 
 The architecture of the `riscv-5` core is anchored to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
 
-### 1.1 The Single-Cycle Problem
+### The Single-Cycle Problem
 
 To understand why we build pipelined processors, we first have to look at the limitations of a **Single Cycle CPU**. In a single-cycle implementation, the entire execution of an instruction—fetching from memory, decoding, calculating in the ALU, accessing data memory, and finally writing back to registers must happen in exactly one clock tick.
 
@@ -23,7 +23,7 @@ You can think of a Single Cycle CPU as one giant combinational circuit, and the 
 If you have used Xilinx Vivado to synthesize a core, you likely encountered <strong>Total Negative Slack (TNS)</strong>. In a Single Cycle CPU, the "Critical Path" (the longest path between two registers) is effectively the entire length of the CPU. Vivado will report timing violations because the signal physically cannot travel to the logic gates fast enough.
 </div>
 
-## 1.2 The Solution: Pipelining
+## 1.1 The Pipelining Solution
 
 <div class="img-wrapper diagram">
   <img src="../images/pipeline_stages_clean.svg" alt="Simplified pipelined datapath">
@@ -31,7 +31,6 @@ If you have used Xilinx Vivado to synthesize a core, you likely encountered <str
 </div>
 
 ### The Pipelined Datapath
-
 
 Pipelining solves this by breaking that "one long wire" into smaller, independent segments separated by Pipeline Registers. Instead of one cycle needing to cover the Fetch to Writeback distance, the clock cycle only needs to be long enough for the longest individual stage (e.g., just the Execute stage).
 
@@ -57,7 +56,7 @@ It is a common misconception that pipelining reduces the execution time of a sin
 This project began with a desire to explore **SystemVerilog** through the lens of functional hardware design. The goal was to build a core that is not only functional but also clean, readable, and strictly typed.
 
 <div class="callout tip"><span class="title">Personal Note</span>
-I found the Hennessy & Patterson book to be the "gold standard" resource. Reading it in conjunction with the official ISA spec provided the perfect balance of theory and practical specification.
+I found the Hennessy & Patterson book to be what many referred to as the "gold standard" reference for RISC-V. Reading it in conjunction with the official ISA spec provided the perfect balance of theory and practical specification.
 </div>
 
 ---
