@@ -30,8 +30,16 @@ If you have used Xilinx Vivado to synthesize a core, you likely encountered <str
 ### The Solution: Pipelining
 
 The diagram below shows the clean separation of stages that pipelining enables:
-![5-Stage Pipeline Overview](../images/pipeline_stages_clean.svg)
-*Figure 1: The 5-stage RISC-V pipeline. Each stage operates independently on different instructions.*
+## 1. Mapping the Textbook to the RTL
+
+The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
+
+<div class="img-wrapper diagram">
+  <img src="../images/pipeline_stages_clean.svg" alt="Simplified pipelined datapath">
+  <span class="caption">Figure 2: The theoretical 5-stage RISC-V datapath as described in Patterson & Hennessy.</span>
+</div>
+
+### 1.1 The Pipelined Datapath (Section 4.6)
 
 
 Pipelining solves this by breaking that "one long wire" into smaller, independent segments separated by Pipeline Registers. Instead of one cycle needing to cover the Fetch to Writeback distance, the clock cycle only needs to be long enough for the longest individual stage (e.g., just the Execute stage).

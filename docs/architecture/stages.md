@@ -16,16 +16,20 @@ This section maps the theoretical pipeline stages from *Patterson & Hennessy* to
 ## Complete Datapath
 Before diving into individual stages, here's the full pipeline with all major signals labeled:
 
-![Complete Pipelined Datapath](../images/pipeline_complete.svg)
-*Figure 3: Complete datapath showing pipeline registers, forwarding paths, and hazard detection units. Based on Patterson & Hennessy Figure 4.51.*
+<div class="img-wrapper diagram">
+  <img src="../images/pipeline_complete.svg" alt="Complete Pipelined Datapath">
+  <span class="caption">Figure 3: Complete datapath showing pipeline registers, forwarding paths, and hazard detection units. Based on Patterson & Hennessy Figure 4.51.</span>
+</div>
 
 This diagram maps directly to our SystemVerilog implementation in [`src/pipelined_cpu.sv`](../../src/pipelined_cpu.sv).
 
 
 ## 2.1 Instruction Fetch (IF)
 
-![IF Stage Detail](../images/stage_if.svg)
-*Figure 4: IF stage showing PC selection multiplexer and instruction memory interface.*
+<div class="img-wrapper diagram">
+  <img src="../images/stage_if.svg" alt="IF Stage Detail">
+  <span class="caption">Figure 4: IF stage showing PC selection multiplexer and instruction memory interface.</span>
+</div>
 
 **Implementation:** `if_stage.sv`  
 **Objective:** Fetch the next instruction from memory and calculate `PC+4`.
@@ -87,15 +91,17 @@ The PC selection multiplexer determines the next instruction address based on co
 By detecting `JAL` early in the ID stage (since the target is just `PC + Immediate`), we reduce the control hazard penalty from 2 cycles to 1 cycle. However, `JALR` and conditional branches still incur a 2-cycle penalty because they require ALU computation. (described in <a href="./hazards.html#case-5-control-hazards-branch-misprediction-">Hazard Resolution, Case 5</a>).
 
 <div class="callout note"><span class="title">Design Decision</span>
-JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect—the target depends on register content—so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.
+JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect, the target depends on register content, so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.
 </div>
 
 ---
 
 ## 2.2 Instruction Decode (ID)
 
-![ID Stage Detail](../images/stage_id.svg)
-*Figure 5: ID stage with control unit, register file, and immediate generator.*
+<div class="img-wrapper diagram">
+  <img src="../images/stage_id.svg" alt="ID Stage Detail">
+  <span class="caption">Figure 5: ID stage with control unit, register file, and immediate generator.</span>
+</div>
 
 **Implementation:** `id_stage.sv`  
 **Objective:** Decode the instruction, generate control signals, read registers, and produce the immediate value.
@@ -125,8 +131,10 @@ See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I 
 
 ## 2.3 Execute (EX)
 
-![EX Stage Detail](../images/stage_ex.svg)
-*Figure 6: EX stage showing forwarding multiplexers and branch resolution logic.*
+<div class="img-wrapper diagram">
+  <img src="../images/stage_ex.svg" alt="EX Stage Detail">
+  <span class="caption">Figure 6: EX stage showing forwarding multiplexers and branch resolution logic.</span>
+</div>
 
 **Implementation:** `ex_stage.sv`  
 

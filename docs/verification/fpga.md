@@ -23,9 +23,15 @@ This page documents the process and results of deploying the `riscv-5` core on r
 
 ### Synthesis Summary
 
-![Vivado Utilization Table](../images/vivado-utilization-table.png)
+<div class="img-wrapper screenshot">
+  <img src="../images/vivado-utilization-table.png" alt="Vivado Utilization Table">
+  <span class="caption">Table: Resource utilization on Zynq-7000.</span>
+</div>
 
-![Vivado Utilization Graph](../images/vivado-utilization-graph.png)
+<div class="img-wrapper screenshot">
+  <img src="../images/vivado-utilization-graph.png" alt="Vivado Utilization Graph">
+  <span class="caption">Graph: Utilization by hierarchy.</span>
+</div>
 
 The core was synthesized for the Zynq-7000 SoC on the PYNQ-Z2 board. Resource utilization is minimal, leaving significant headroom for future extensions such as caches or more complex peripherals.
 
@@ -35,7 +41,10 @@ The core was synthesized for the Zynq-7000 SoC on the PYNQ-Z2 board. Resource ut
 
 The design was constrained to a 10 MHz clock (100 ns period). The following timing summary from Vivado confirms that the design meets all setup and hold requirements with positive slack.
 
-![Vivado Timing Summary](../images/vivado-design-timing-summary.png)
+<div class="img-wrapper screenshot">
+  <img src="../images/vivado-design-timing-summary.png" alt="Vivado Timing Summary">
+  <span class="caption">Timing closure report showing positive slack.</span>
+</div>
 
 ---
 
@@ -43,7 +52,10 @@ The design was constrained to a 10 MHz clock (100 ns period). The following timi
 
 The image below shows the physical implementation of the `riscv-5` core on the Zynq-7000 fabric.
 
-![Vivado Implementation Device](../images/vivado-implementation-device.png)
+<div class="img-wrapper screenshot">
+  <img src="../images/vivado-implementation-device.png" alt="Vivado Implementation Device">
+  <span class="caption">Physical layout on the Zynq-7000 fabric.</span>
+</div>
 
 ---
 
@@ -59,8 +71,10 @@ The core was tested with a program designed to branch over a "failure" instructi
 
 The ILA capture below reveals the root cause: a misalignment between the **Fetch Address (PC)** and the **Returned Instruction**.
 
-![FPGA Problem 1](../images/fpga_problem1.png)
-*Figure: ILA capture showing PC=30 but Instruction=NOP. The memory read latency caused the instruction to arrive one cycle late.*
+<div class="img-wrapper screenshot">
+  <img src="../images/fpga_problem1.png" alt="FPGA Problem 1">
+  <span class="caption">Figure: ILA capture showing PC=30 but Instruction=NOP. The memory read latency caused the instruction to arrive one cycle late.</span>
+</div>
 
 ### 4.2 Root Cause: Synchronous vs. Asynchronous Read
 
@@ -99,8 +113,10 @@ assign Instruction = (word_addr < RAM_MEMORY_SIZE) ? rom_memory[word_addr] : NOP
 
 After applying the fix, the ILA confirmed that `pcsrc` (the signal to take a branch) was asserted correctly, and the PC updated to the target address `0x40` immediately.
 
-![FPGA Problem 1 Solved](../images/fpga_problem1_solved.png)
-*Figure: Correct behavior. `branch_taken` is high, and the PC jumps to 0x40.*
+<div class="img-wrapper screenshot">
+  <img src="../images/fpga_problem1_solved.png" alt="FPGA Problem 1 Solved">
+  <span class="caption">Figure: Correct behavior. branch_taken is high, and the PC jumps to 0x40.</span>
+</div>
 
 The LEDs subsequently displayed `0010` (2), confirming the processor successfully executed the branch and wrote the correct value to the memory-mapped IO.
 
