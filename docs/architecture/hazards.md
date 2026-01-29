@@ -82,13 +82,6 @@ sub  x2, x1, x3 # Needs x1 NOW in its EX stage
 </script>
 </div>
 
-<div class="callout note"><span class="title">Breakdown</span>
-<strong>Cycle 3 (Forwarding):</strong>
-  <ul>
-    <li>The Forwarding Unit detects the hazard and tells the ALU to grab the result from the <code>EX/MEM</code> register instead of the Register File.</li>
-  </ul>
-</div>
-
 **Implementation (`src/forwarding_unit.sv`):**
 The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
 
@@ -106,9 +99,21 @@ or   x4, x5, x6   # Unrelated
 sub  x2, x1, x3   # Needs x1
 ```
 
-<div class="callout note"><span class="title">Implementation</span>
-The unit selects forward control <code>2'b01</code> to bypass data from the MEM/WB pipeline register directly to the Execute stage.
-</div>
+**Implementation (`src/forwarding_unit.sv`):**
+The forwarding unit selects forward control `1'b01` to bypass data from the MEM/WB pipeline register directly to the execute stage.
+
+```verilog
+logic mem_match, ex_match;
+
+mem_match = mem_reg_write && (mem_rd != 5'b0) && (mem_rd == rs);
+ex_match = reg_write && (mem_rd != 5'b0) && (mem_rd == rs);;
+
+if (mem_match && !ex_match) begin : MEMHazard
+  return 1'b1;
+end else begin : NoMEMHazard
+  return 1'b0;
+end
+```
 
 ### Case 3: MEM Store Forwarding (WB-to-MEM)
 A unique case where a `store` instruction needs data that is currently in the Writeback stage.
@@ -118,9 +123,25 @@ addi x1, x0, 10
 sw   x1, 0(x2)    # sw needs x1, which is in WB stage
 ```
 
-<div class="callout note"><span class="title">Implementation (mem_stage.sv)</span>
+**Implementation (`src/mem_stage.sv`):**
 The Memory stage contains its own mini-forwarding logic to ensure the <code>dmem_wdata</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
-</div>
+
+```verilog
+function automatic logic should_forward_store_data(
+  input logic       wb_reg_write,
+  input logic [4:0] wb_rd,
+  input logic [4:0] mem_rs2
+);
+  return wb_reg_write && (wb_rd != 5'b0) && (wb_rd == mem_rs2);
+endfunction
+
+if (should_forward_store_data(wb_reg_write, wb_rd, mem_rs2)) begin
+  return wb_data;
+end else begin
+  return mem_data;
+end
+```
+
 
 ---
 
@@ -161,20 +182,6 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
   }
 }
 </script>
-</div>
-
-<div class="callout note"><span class="title">Breakdown</span>
-<strong>Cycle 2 (Detection):</strong>
-  <ul>
-    <li>The Hazard Unit detects that <code>ADD</code> needs <code>x1</code>, which <code>LW</code> is currently reading.</li>
-  </ul>
-<strong>Cycle 3 (The Stall):</strong> 
-  <ul>
-    <li><strong>IF &amp; ID are Frozen:</strong> <code>ADD</code> stays in Decode, and <code>OR</code> stays in Fetch.</li>
-    <li><strong>EX is Flushed:</strong> A <code>NOP</code> bubble is inserted into Execute.</li>
-    <li><code>LW</code> proceeds to <strong>Memory</strong>.</li>
-  </ul>
-<strong>Cycle 4 (Resume):</strong> <code>LW</code> is in <strong>Writeback</strong>. <code>ADD</code> finally moves to <strong>Execute</strong>
 </div>
 
 ---
@@ -220,20 +227,6 @@ sub  x5, x5, x6      # Target
 }
 </script>
 </div>
-
-<div class="callout note"><span class="title">Breakdown</span>
-<strong>Cycle 2 (Resolution):</strong>
-  <ul>
-    <li>The ALU calculates the branch condition is <strong>TAKEN</strong></li>
-  </ul>
-<strong>Cycle 3 (The Flush):</strong> 
-  <ul>
-    <li>The PC is updated to <code>Target</code>.</li>
-    <li><code>Wrong1</code> (in ID) and <code>Wrong2</code> (in IF) are flushed and replaced with <code>NOP</code> bubbles.</li>
-  </ul>
-</div>
-
-
 
 ### Case 6: ALU-to-Branch Stall (Specific Implementation)
 <div class="callout warn"><span class="title">Design Choice</span>
