@@ -11,7 +11,7 @@
 
 # Architecture Manual
 
-This document proves to anchor every design decision in the `riscv-5` core to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
+The architecture of the `riscv-5` core is anchored to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
 
 ---
 
@@ -28,8 +28,6 @@ If you have used Xilinx Vivado to synthesize a core, you likely encountered <str
 </div>
 
 ## The Solution: Pipelining
-
-The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
 
 <div class="img-wrapper diagram">
   <img src="../images/pipeline_stages_clean.svg" alt="Simplified pipelined datapath">
