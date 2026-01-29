@@ -63,17 +63,20 @@ sub  x2, x1, x3   # Needs x1 NOW in its EX stage
 <div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p....." },
-  { "name": "IF (Fetch)",     "wave": "345...", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "ID (Decode)",    "wave": ".345..", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "EX (Execute)",   "wave": "..345.", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "MEM (Memory)",   "wave": "...345", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "WB (Writeback)", "wave": "....34", "data": ["ADDI", "SUB"] },
+  { "name": "CLK", "wave": "p...." },
+  { "name": "IF (Fetch)",     "wave": "345xx", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "ID (Decode)",    "wave": "x345x", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "EX (Execute)",   "wave": "xx375", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "MEM (Memory)",   "wave": "xxx34", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "WB (Writeback)", "wave": "xxxx3", "data": ["ADDI", "SUB"] },
   {},
-  { "name": "Forward A Select", "wave": "...2..", "data": ["10 (EX/MEM)"] }
+  { "name": "Forward A Select", "wave": "xxx4x", "data": ["FORWARD"] }
 ],
   "head": { "text": "EX-to-EX Forwarding (Bypassing at Cycle 3)", "tick": 0 },
-  "config": { "hscale": 2.2 }
+  "config": { "hscale": 2.2 },
+  "style": {
+    "4": "fill:#f0f; stroke:#f0f; stroke-width:2;"
+  }
 }
 </script>
 </div>
@@ -148,8 +151,14 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
   {},
   { "name": "PIPELINE STATE", "wave": "xx345x", "data": ["DETECT", "STALL", "RESUME"] }
 ],
-  "head": { "text": "Load-Use Hazard (Detection at Cycle 2, Stall at Cycle 3)", "tick": 0 },
-  "config": { "hscale": 2.2 }
+  "node": "b....",
+  "edge": [ "a~>b Stall Active" ],
+  "head": { "text": "Load-Use Hazard (1-Cycle Stall)", "tick": 0 },
+  "config": { "hscale": 2.2 },
+  "style": {
+    "4": "fill:#0dd; stroke:#0dd; stroke-width:2;",
+    "7": "fill:#f90; stroke:#f90; stroke-width:2;"
+  }
 }
 </script>
 </div>
@@ -197,11 +206,18 @@ sub  x5, x5, x6      # Target
   { "name": "EX (Execute)",   "wave": "xx3556", "data": ["BEQ", "NOP", "NOP", "Target"] },
   { "name": "MEM (Memory)",   "wave": "xxx355", "data": ["BEQ", "NOP", "NOP"] },
   {},
-  { "name": "Branch Taken",   "wave": "xx010x" },
-  { "name": "PIPELINE ACTION","wave": "xx35xx", "data": ["RESOLVE", "FLUSH", "Resume"] }
+  { "name": "Branch Taken",   "wave": "000100" },
+  { "name": "Pipeline Action","wave": "xx35xx", "data": ["RESOLVE", "FLUSH", "Resume"] }
 ],
-  "head": { "text": "Branch Taken (Resolves at Cycle 2, Flushes at Cycle 3)", "tick": 0 },
-  "config": { "hscale": 2.2 }
+  "node": "b..",
+  "edge": [ "a~>b Flush Active" ],
+  "head": { "text": "Branch Taken (2-Cycle Flush)", "tick": 0 },
+  "config": { "hscale": 2.2 },
+  "style": {
+    "4": "fill:#0dd; stroke:#0dd; stroke-width:2;",
+    "5": "fill:#0dd; stroke:#0dd; stroke-width:2;",
+    "8": "fill:#f90; stroke:#f90; stroke-width:2;"
+  }
 }
 </script>
 </div>
