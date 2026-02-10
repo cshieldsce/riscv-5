@@ -16,3 +16,4 @@ vivado_project/
 
 # Local workflow
 .gemini/
+.vscode/
