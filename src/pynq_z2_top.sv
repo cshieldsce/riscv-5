@@ -9,7 +9,7 @@ import riscv_pkg::*;
  *          - Includes ILA (Integrated Logic Analyzer) for hardware debugging
  * 
  * @param sysclk    125MHz System Clock
- * @param reset_btn Reset Button (Active High)
+ * @param reset_btn Reset Button (Active Low)
  * @param led       4-bit LED Output
  * @param uart_tx   UART Transmit (Not currently implemented)
  */
@@ -34,7 +34,7 @@ module pynq_z2_top (
 
     // Combine external reset with the clock stability flag
     // The CPU is held in reset if the button is pressed OR the clock isn't ready.
-    assign cpu_reset = reset_btn || !clk_locked;
+    assign cpu_reset = ~reset_btn || !clk_locked;
 
     // --- CPU Signals ---
     logic [ALEN-1:0] imem_addr;
@@ -64,10 +64,12 @@ module pynq_z2_top (
     );
 
     // Instruction Memory
-    InstructionMemory imem_inst (
+    InstructionMemory #(
+        .MEM_INIT_FILE("led_blink.mem")
+    ) imem (
         .clk(cpu_clk),
         .rst(cpu_reset),
-        .en(imem_en),
+        .en(1'b1),
         .Address(imem_addr),
         .Instruction(imem_data)
     );
@@ -93,7 +95,7 @@ module pynq_z2_top (
     // --- ILA Debug ---
     // ILA Probe Signals with mark_debug attribute
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_pc;
-    (* mark_debug = "true" *) logic [31:0]     ila_instruction;
+    (* mark_debug = "true" *) logic [XLEN-1:0] ila_instruction;
     (* mark_debug = "true" *) logic [2:0]      ila_hazard_signals;  // stall_id, flush_ex, id_branch
     (* mark_debug = "true" *) logic            ila_branch_taken;
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_branch_target;
@@ -104,6 +106,9 @@ module pynq_z2_top (
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_alu_result;
     (* mark_debug = "true" *) logic [4:0]      ila_mem_wb_rd;       // Register being written in WB
     (* mark_debug = "true" *) logic [XLEN-1:0] ila_wb_data;         // Data being written in WB
+    (* mark_debug = "true" *) logic [ALEN-1:0] ila_dmem_addr;
+    (* mark_debug = "true" *) logic            ila_dmem_we;
+    (* mark_debug = "true" *) logic [XLEN-1:0] ila_dmem_wdata;
 
     // Tap into CPU internals
     // NOTE: Pipeline Stage Mismatch in Debug Signals
@@ -135,6 +140,9 @@ module pynq_z2_top (
     
     assign ila_mem_wb_rd = cpu_inst.mem_wb_rd;
     assign ila_wb_data = cpu_inst.wb_write_data;
+    assign ila_dmem_addr = cpu_inst.dmem_addr;
+    assign ila_dmem_we = cpu_inst.dmem_we;
+    assign ila_dmem_wdata = cpu_inst.dmem_wdata;
 
     // ILA Instance
     ila_0 my_ila (
@@ -150,7 +158,10 @@ module pynq_z2_top (
         .probe8(ila_rs2_data),          // 32-bit
         .probe9(ila_alu_result),        // 32-bit
         .probe10(ila_mem_wb_rd),        // 5-bit
-        .probe11(ila_wb_data)           // 32-bit
+        .probe11(ila_wb_data),          // 32-bit
+        .probe12(ila_dmem_addr),
+        .probe13(ila_dmem_we),
+        .probe14(ila_dmem_wdata)
     );
 
 endmodule
