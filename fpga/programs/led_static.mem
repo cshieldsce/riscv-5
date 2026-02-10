@@ -1,0 +1,5 @@
+// Shows static pattern 1010 (0xA)
+00a00093  // addi x1, x0, 10      // x1 = 10 (binary 1010)
+80000137  // lui  x2, 0x80000     // x2 = 0x80000000
+00112023  // sw   x1, 0(x2)       // LEDs = 1010
+0000006f  // jal  x0, 0           // infinite loop
