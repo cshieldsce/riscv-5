@@ -84,28 +84,6 @@ module DataMemory (
         endcase
     endfunction
 
-    /**
-     * @brief Write to RAM with byte-enable masking
-     * @param word_addr    Word-aligned address in RAM
-     * @param data         32-bit data to write
-     * @param byte_enables 4-bit byte enable mask
-     * @param byte_offset  Byte offset within the word (0-3)
-     */
-    task automatic write_ram_with_byte_enable(
-        input logic [ALEN-1:0]  word_addr,
-        input logic [XLEN-1:0]  data,
-        input logic [3:0]       byte_enables,
-        input logic [1:0]       byte_offset
-    );
-        logic [XLEN-1:0] shifted_data;
-        shifted_data = data << (byte_offset * 8);
-        
-        for (int i = 0; i < (XLEN/8); i++) begin
-            if (byte_enables[i])
-                ram_memory[word_addr][(i*8)+:8] <= shifted_data[(i*8)+:8];
-        end
-    endtask
-
 `ifndef SYNTHESIS
     /**
      * @brief Handle tohost register write (compliance tests)
@@ -126,7 +104,7 @@ module DataMemory (
     task dump_signature;
         integer f, i;
         f = $fopen("signature.txt", "w");
-        for (i = 524288; i < 524288 + 2048; i = i + 1)
+        for (i = (524288/4); i < (524288/4) + 2048; i = i + 1)
             $fwrite(f, "%h\n", ram_memory[i]);
         $fclose(f);
         $display("Signature dumped to signature.txt");
@@ -134,84 +112,85 @@ module DataMemory (
 `endif
 
     // --- Memory and Registers ---
-    logic [XLEN-1:0]       ram_memory [0:RAM_MEMORY_SIZE]; 
-    logic [LED_WIDTH-1:0]  mem_led_reg;                   
-    logic [ALEN-1:0]       mem_word_addr;                   
-    logic [1:0]            mem_byte_offset;                   
-    logic [XLEN-1:0]       mem_rdata_reg;                   // Full 32-bit word from RAM
-    logic [2:0]            mem_funct3_reg;                  // Registered load type (LB/LH/LW/LBU/LHU)
-    logic [1:0]            mem_byte_offset_reg;             // Registered byte offset for extraction
-    logic [ALEN-1:0]       mem_addr_reg;                    // Registered address for MMIO detection
-    logic [XLEN-1:0]       mem_wdata_shifted;               // Write data shifted to align with byte offset
+    localparam int RAM_ADDR_BITS = $clog2(RAM_MEMORY_SIZE);
 
-    // --- Synchronous Memory Access ---
-    assign mem_word_addr    = Address >> 2;                 // Get word address by shifting right 2
-    assign mem_byte_offset  = Address[1:0];                 // Extract lower 2 bits for byte position
-    assign leds_out         = mem_led_reg;                  // Connect LED register to output pins
+    // Word-addressed RAM for BRAM inference
+    (* ram_style = "block" *) logic [XLEN-1:0] ram_memory [0:RAM_MEMORY_SIZE-1];
+    logic [LED_WIDTH-1:0]  mem_led_reg;
+    logic [RAM_ADDR_BITS-1:0] mem_word_addr;
+    logic [1:0]            mem_byte_offset;
+    logic [XLEN-1:0]       mem_rdata_word;
+    logic [2:0]            mem_funct3_reg;
+    logic [1:0]            mem_byte_offset_reg;
+    logic [ALEN-1:0]       mem_addr_reg;
 
-    always_ff @(posedge clk) begin : MemoryAccess
-        if (rst) begin : ResetMemory
-            mem_led_reg       <= {LED_WIDTH{1'b0}};
-            mem_rdata_reg     <= {XLEN{1'b0}};
-        end else begin : NormalOperation
-
-            if (mem_word_addr < RAM_MEMORY_SIZE) begin : ReadOperation
-                mem_rdata_reg <= ram_memory[mem_word_addr];         
-            end else begin : OutOfBoundsRead
-                mem_rdata_reg <= {XLEN{1'b0}};                      
-            end
-
-            // --- Register Data for Next Cycle ---
-            mem_funct3_reg      <= funct3;                          
-            mem_byte_offset_reg <= mem_byte_offset;                 
-            mem_addr_reg        <= Address;                         
-
-            if (MemWrite) begin : WriteOperation                  
-                if (Address == MMIO_LED_ADDR) begin : WriteLED
-                    mem_led_reg <= WriteData[LED_WIDTH-1:0];                
-                end
-
-                `ifndef SYNTHESIS
-                // --- RISC-V Compliance Test ToHost Register Write ---
-                else if (Address == MMIO_TOHOST_ADDR) begin : WriteToHost
-                    handle_tohost_write(WriteData);
-                end
-                `endif
-                
-                else if (mem_word_addr < RAM_MEMORY_SIZE) begin : WriteRAM
-                    write_ram_with_byte_enable(mem_word_addr, WriteData, be, mem_byte_offset);
-                end
-            end
-        end 
+    // --- Address Decode (Combinational) ---
+    always_comb begin : AddressDecode
+        mem_word_addr   = Address[RAM_ADDR_BITS+1:2];
+        mem_byte_offset = Address[1:0];
     end
 
-    // --- Read Data Formatting ---
+    // --- Write Logic (Combinational) ---
+    logic [3:0] mem_wren;
+
+    always_comb begin : WriteEnableGen
+        mem_wren = MemWrite ? be : 4'b0;
+    end
+
+    // --- Combined Read/Write Logic (Synchronous) ---
+    always_ff @(posedge clk) begin : RAM_Access_Logic
+        // --- Write Port ---
+        if (mem_wren[0]) ram_memory[mem_word_addr][7:0]   <= WriteData[7:0];
+        if (mem_wren[1]) ram_memory[mem_word_addr][15:8]  <= WriteData[15:8];
+        if (mem_wren[2]) ram_memory[mem_word_addr][23:16] <= WriteData[23:16];
+        if (mem_wren[3]) ram_memory[mem_word_addr][31:24] <= WriteData[31:24];
+
+        // --- Read Port ---
+        if (mem_word_addr < RAM_MEMORY_SIZE) begin : ReadOperation
+            mem_rdata_word <= ram_memory[mem_word_addr];
+        end else begin : OutOfBoundsRead
+            mem_rdata_word <= {XLEN{1'b0}};
+        end
+
+        // --- MMIO LED Register Write ---
+        if (rst) begin
+             mem_led_reg <= {LED_WIDTH{1'b0}};
+        end else if (MemWrite && (Address == MMIO_LED_ADDR)) begin
+            mem_led_reg <= WriteData[LED_WIDTH-1:0];                
+        end
+
+        mem_funct3_reg      <= funct3;
+        mem_byte_offset_reg <= Address[1:0];
+        mem_addr_reg        <= Address;
+    end
+
+    // --- Read Data Formatting (Combinational) ---
     logic [XLEN-1:0] mem_formatted_rdata;
 
     always_comb begin : ReadDataFormatting
         case (mem_funct3_reg)
             F3_BYTE: begin : LoadByte
-                mem_formatted_rdata = extend_value(get_slice(mem_rdata_reg, mem_byte_offset_reg, 1), 8, 1'b1);
+                mem_formatted_rdata = extend_value(get_slice(mem_rdata_word, mem_byte_offset_reg, 1), 8, 1'b1);
             end
 
             F3_HALF: begin : LoadHalfword
-                mem_formatted_rdata = extend_value(get_slice(mem_rdata_reg, mem_byte_offset_reg, 2), 16, 1'b1);
+                mem_formatted_rdata = extend_value(get_slice(mem_rdata_word, mem_byte_offset_reg, 2), 16, 1'b1);
             end
 
             F3_WORD: begin : LoadWord
-                mem_formatted_rdata = mem_rdata_reg;
+                mem_formatted_rdata = mem_rdata_word;
             end
 
             F3_LBU: begin : LoadByteUnsigned
-                mem_formatted_rdata = extend_value(get_slice(mem_rdata_reg, mem_byte_offset_reg, 1), 8, 1'b0);
+                mem_formatted_rdata = extend_value(get_slice(mem_rdata_word, mem_byte_offset_reg, 1), 8, 1'b0);
             end
 
             F3_LHU: begin : LoadHalfwordUnsigned
-                mem_formatted_rdata = extend_value(get_slice(mem_rdata_reg, mem_byte_offset_reg, 2), 16, 1'b0);
+                mem_formatted_rdata = extend_value(get_slice(mem_rdata_word, mem_byte_offset_reg, 2), 16, 1'b0);
             end
 
             default: begin : DefaultCase
-                mem_formatted_rdata = mem_rdata_reg;   
+                mem_formatted_rdata = mem_rdata_word;   
             end
         endcase
     end
@@ -223,5 +202,8 @@ module DataMemory (
             ReadData = mem_formatted_rdata;                      // Return RAM data with formatted data
         end
     end
+
+    // --- LED Output (driven from MMIO register) ---
+    assign leds_out = mem_led_reg;
 
 endmodule
