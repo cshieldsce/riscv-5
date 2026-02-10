@@ -1,18 +1,8 @@
 import riscv_pkg::*;
 
-/**
- * @brief Instruction Memory (Read-Only)
- * @details Stores the program code to be executed.
- *          Implemented as a ROM (Read-Only Memory) with asynchronous read access.
- *          Note: Asynchronous reads simplify the single-cycle IF stage timing.
- * 
- * @param clk         System clock (unused for async read)
- * @param rst         System reset (unused for ROM)
- * @param en          Enable signal (unused, assumes always enabled)
- * @param Address     Byte address of the instruction
- * @param Instruction 32-bit fetched instruction
- */
-module InstructionMemory (
+module InstructionMemory #(
+    parameter MEM_INIT_FILE = ""
+)(
     input  logic            clk, 
     input  logic            rst, 
     input  logic            en,
@@ -21,16 +11,14 @@ module InstructionMemory (
 );
 
     logic [ALEN-1:0] word_addr;
-    logic [XLEN-1:0] rom_memory [0:RAM_MEMORY_SIZE];
+    
+    // Force Block RAM synthesis
+    (* rom_style = "block" *) logic [XLEN-1:0] rom_memory [0:RAM_MEMORY_SIZE];
 
-    initial begin : InitROM
-        for (int i = 0; i < RAM_MEMORY_SIZE; i++) rom_memory[i] = NOP_A;
+    initial begin
+        $readmemh(MEM_INIT_FILE, rom_memory);
     end
 
-    // --- Note: RISC-V instructions are 4-byte aligned --- 
     assign word_addr = Address >> 2;
-    
-    // --- Asynchronous Read ---
-    // Fetch instruction immediately when address changes.
     assign Instruction = (word_addr < RAM_MEMORY_SIZE) ? rom_memory[word_addr] : NOP_A;
 endmodule
