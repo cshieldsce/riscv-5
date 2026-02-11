@@ -7,27 +7,32 @@
 
 /* --- Layout Improvements --- */
 
-/* Allow the theme's header and footer to occupy the full width of the centered wrapper */
 .wrapper {
-  max-width: 1200px !important;
+  max-width: 1250px !important;
   margin: 0 auto !important;
-  position: relative;
+  display: flex !important;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 30px;
+  padding: 0 20px;
 }
 
 header {
-  width: 270px;
-  float: left;
-  position: fixed;
+  width: 260px !important;
+  flex: 0 0 260px !important;
+  position: sticky !important;
   top: 2rem;
-  padding-right: 20px;
+  float: none !important;
+  padding-right: 0 !important;
   -webkit-font-smoothing: subpixel-antialiased;
 }
 
 section {
-  width: 880px;
-  float: right;
-  padding-bottom: 50px;
-  margin-top: 1rem;
+  flex: 1 !important;
+  width: auto !important;
+  float: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
   display: block !important; 
 }
 
@@ -46,6 +51,7 @@ section {
   flex: 1;
   min-width: 0;
   padding-left: 30px;
+  padding-top: 1rem;
 }
 
 /* Custom Typography */
@@ -96,7 +102,8 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  margin-bottom: 3rem !important;
+  margin-bottom: 2rem !important;
+  margin-top: 1rem;
 }
 
 .site-nav a {
@@ -122,17 +129,18 @@ h1, h2, h3, h4, h5, h6 {
 /* Side Navigation (Stages, Hazards, FPGA) */
 .side-nav {
   position: sticky;
-  top: 5rem;
-  width: 200px;
-  min-width: 200px;
+  top: 2rem;
+  width: 190px;
+  min-width: 190px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 10px 20px 10px 0;
+  padding: 10px 15px 10px 0;
   background: transparent;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   border-left: none;
-  margin-top: 0;
+  margin-top: 1rem;
+  height: fit-content;
 }
 
 .side-nav .nav-label {
@@ -169,10 +177,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Hide side-nav on small screens */
-@media (max-width: 900px) {
-  section {
+@media (max-width: 1000px) {
+  .wrapper {
     flex-direction: column;
-    padding: 2rem !important;
+    align-items: center;
+  }
+  header {
+    width: 100% !important;
+    position: static !important;
+    text-align: center;
+    padding-bottom: 2rem;
+  }
+  section {
+    width: 100% !important;
   }
   .side-nav {
     display: none;
