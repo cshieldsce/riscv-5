@@ -23,8 +23,8 @@ div[id^="WaveDrom_Display_"] svg {
   background-color: transparent !important;
 }
 div[id^="WaveDrom_Display_"] {
-  margin: 20px 0;
-  overflow-x: auto;]==]
+  /* Centering is now handled by a wrapper div */
+  overflow-x: auto;
 }
 </style>
 
@@ -48,42 +48,43 @@ In a pipelined processor, multiple instructions overlap in execution. Hazards oc
 
 ## 3.2 Data Hazards: Forwarding & Bypassing
 
-Data hazards occur when an instruction depends on the result of a previous instruction that hasn't yet been written back to the Register File.
+Data hazards occur when an instruction depends on the result of a a previous instruction that hasn't yet been written back to the Register File.
 
 ### Case 1: EX-to-EX Forwarding
 This occurs when an instruction needs a result computed by the *immediately* preceding instruction.
 
 ```asm
-addi x1, x10, 5  # Result calculated in EX, moves to EX/MEM register
-sub  x2, x1, x3   # Needs x1 NOW in its EX stage
+addi x1, x10, 5 # Result calculated in EX, moves to EX/MEM register
+sub  x2, x1, x3 # Needs x1 NOW in its EX stage
 ```
+<div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p....." },
-  { "name": "IF (Fetch)",     "wave": "345...", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "ID (Decode)",    "wave": ".345..", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "EX (Execute)",   "wave": "..345.", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "MEM (Memory)",   "wave": "...345", "data": ["ADDI", "SUB", "OR"] },
-  { "name": "WB (Writeback)", "wave": "....34", "data": ["ADDI", "SUB"] },
+  { "name": "CLK", "wave": "p...." },
+  { "name": "IF (Fetch)",     "wave": "345xx", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "ID (Decode)",    "wave": "x345x", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "EX (Execute)",   "wave": "xx375", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "MEM (Memory)",   "wave": "xxx34", "data": ["ADDI", "SUB", "OR"] },
+  { "name": "WB (Writeback)", "wave": "xxxx3", "data": ["ADDI", "SUB"] },
   {},
-  { "name": "Forward A Select", "wave": "...2..", "data": ["10 (EX/MEM)"] }
+  { "name": "Forward A Select", "wave": "xxx4x", "data": ["FORWARD"] }
 ],
-  "head": { "text": "EX-to-EX Forwarding (Bypassing at Cycle 4)", "tick": 0 },
-  "config": { "hscale": 2.2 }
+  "head": { "text": "EX-to-EX Forwarding (Bypassing at Cycle 3)", "tick": 0 },
+  "config": { "hscale": 2.2 },
+  "style": {
+    "4": "fill:#f0f; stroke:#f0f; stroke-width:2;"
+  }
 }
 </script>
-
-**Cycle-by-Cycle Breakdown:**
-*   **Cycle 3:** `ADDI` is in **Execute** calculating its result. `SUB` is in **Decode**.
-*   **Cycle 4 (Forwarding!):** `ADDI` moves to **Memory** (result is now in the `EX/MEM` register). `SUB` moves to **Execute**. The Forwarding Unit detects the hazard and tells the ALU to grab the result from the `EX/MEM` register instead of the Register File.
-
+</div>
+<br>
 **Implementation (`src/forwarding_unit.sv`):**
-The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
-
 ```verilog
 if (ex_mem_reg_write && (ex_mem_rd != 0) && (ex_mem_rd == id_ex_rs1))
     forward_a = 2'b10; // Select data from EX/MEM register
 ```
+The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
+
 
 ### Case 2: MEM-to-EX Forwarding
 This occurs when the dependency is two instructions apart. The data is currently sitting in the `MEM/WB` pipeline register.
@@ -94,7 +95,20 @@ or   x4, x5, x6   # Unrelated
 sub  x2, x1, x3   # Needs x1
 ```
 
-**Implementation:** The unit selects `2'b01` to bypass from the Writeback stage.
+**Implementation (`src/forwarding_unit.sv`):**
+```verilog
+logic mem_match, ex_match;
+
+mem_match = mem_reg_write && (mem_rd != 5'b0) && (mem_rd == rs);
+ex_match = reg_write && (mem_rd != 5'b0) && (mem_rd == rs);;
+
+if (mem_match && !ex_match) begin : MEMHazard
+  return 1'b1;
+end else begin : NoMEMHazard
+  return 1'b0;
+end
+```
+The forwarding unit selects forward control `1'b01` to bypass data from the MEM/WB pipeline register directly to the execute stage.
 
 ### Case 3: MEM Store Forwarding (WB-to-MEM)
 A unique case where a `store` instruction needs data that is currently in the Writeback stage.
@@ -105,7 +119,14 @@ sw   x1, 0(x2)    # sw needs x1, which is in WB stage
 ```
 
 **Implementation (`src/mem_stage.sv`):**
-The Memory stage contains its own mini-forwarding logic to ensure the `dmem_wdata` is updated if the `rs2` register is being written to by the instruction currently in the Writeback stage.
+```verilog
+if (wb_reg_write && (wb_rd != 5'b0) && (wb_rd == mem_rs2)) begin
+  return wb_data;
+end else begin
+  return mem_data;
+end
+```
+The Memory stage contains its own mini-forwarding logic to ensure the <code>mem_data</code> is updated if the <code>rs2</code> register is being written to by the instruction currently in the Writeback stage.
 
 ---
 
@@ -117,29 +138,37 @@ When an instruction depends on a `load` instruction, forwarding alone is insuffi
 
 A Load-Use hazard is the only data hazard that **cannot** be solved by forwarding alone. The data is still in RAM while the next instruction is already trying to use it.
 
+```asm
+lw   x1, 0(x10)   # Load into x1
+add  x2, x1, x3   # Uses x1 immediately (Stall needed)
+or   x4, x5, x6   # Unrelated instruction
+sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
+```
+
+<div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p......" },
-  { "name": "IF (Fetch)",     "wave": "34556..", "data": ["LW", "ADD", "OR", "SUB"] },
-  { "name": "ID (Decode)",    "wave": ".34456.", "data": ["LW", "ADD", "OR", "SUB"] },
-  { "name": "EX (Execute)",   "wave": "..37456", "data": ["LW", "BUBBLE", "ADD", "OR", "SUB"] },
-  { "name": "MEM (Memory)",   "wave": "...3745", "data": ["LW", "NOP", "ADD", "OR"] },
-  { "name": "WB (Writeback)", "wave": "....374", "data": ["LW", "NOP", "ADD"] },
+  { "name": "CLK", "wave": "p....." },
+  { "name": "IF (Fetch)",     "wave": "34697x", "data": ["LW", "ADD", "OR", "OR", "SUB"] },
+  { "name": "ID (Decode)",    "wave": "x34967", "data": ["LW", "ADD", "ADD", "OR", "SUB"] },
+  { "name": "EX (Execute)",   "wave": "xx3546", "data": ["LW", "NOP", "AND", "OR" ] },
+  { "name": "MEM (Memory)",   "wave": "xxx354", "data": ["LW", "NOP", "AND"] },
+  { "name": "WB (Writeback)", "wave": "xxxx35", "data": ["LW", "NOP"] },
   {},
-  { "name": "PIPELINE STATE", "wave": "...34..", "data": ["STALL", "Resume"] }
+  { "name": "PIPELINE STATE", "wave": "xx345x", "data": ["DETECT", "STALL", "RESUME"] }
 ],
-  "head": { "text": "Load-Use Hazard (Detection at Cycle 3, Stall at Cycle 4)", "tick": 1 },
-  "config": { "hscale": 2.2 }
+  "node": "b....",
+  "edge": [ "a~>b Stall Active" ],
+  "head": { "text": "Load-Use Hazard (1-Cycle Stall)", "tick": 0 },
+  "config": { "hscale": 2.2 },
+  "style": {
+    "4": "fill:#0dd; stroke:#0dd; stroke-width:2;",
+    "7": "fill:#f90; stroke:#f90; stroke-width:2;"
+  }
 }
 </script>
-
-**Cycle-by-Cycle Breakdown:**
-*   **Cycle 3 (Detection):** `LW` is in **Execute** (calculating the RAM address). `ADD` is in **Decode**. The Hazard Unit realizes `ADD` depends on `LW` and triggers a stall.
-*   **Cycle 4 (The Stall):** 
-    *   **IF & ID are Frozen:** `ADD` stays in Decode, and `OR` stays in Fetch.
-    *   **EX is Flushed:** A `BUBBLE` (NOP) is sent to Execute so that no "bad" math happens with the old register value.
-    *   `LW` is in **Memory** actually reading the data from RAM.
-*   **Cycle 5 (Resume):** `LW` is in **Writeback**. `ADD` finally moves to **Execute**, receiving its data via forwarding from the WB stage.
+</div>
+<br>
 
 ---
 
@@ -151,33 +180,45 @@ Control hazards occur when the CPU fetches instructions from the wrong path (e.g
 
 Our CPU assumes a branch is **Not Taken** by default. If the branch *is* taken, we must "kill" the instructions already behind it in the pipeline.
 
+```asm
+beq  x1, x2, target  # Taken
+addi x3, x0, 1       # Wrong1 (Flushed)
+addi x4, x0, 2       # Wrong2 (Flushed)
+...
+target:
+sub  x5, x5, x6      # Target
+```
+
+<div style="text-align: center;">
 <script type="WaveDrom">
 { "signal": [
-  { "name": "CLK", "wave": "p......" },
-  { "name": "IF (Fetch)",     "wave": "34567..", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Target+4"] },
-  { "name": "ID (Decode)",    "wave": ".34867.", "data": ["BEQ", "Wrong1", "Bubble", "Target", "Target+4"] },
-  { "name": "EX (Execute)",   "wave": "..3996.", "data": ["BEQ", "Flush1", "Flush2", "Target"] },
+  { "name": "CLK", "wave": "p....." },
+  { "name": "IF (Fetch)",     "wave": "34867x", "data": ["BEQ", "Wrong1", "Wrong2", "Target", "Next"] },
+  { "name": "ID (Decode)",    "wave": "x34567", "data": ["BEQ", "Wrong1", "NOP", "Target", "Next"] },
+  { "name": "EX (Execute)",   "wave": "xx3556", "data": ["BEQ", "NOP", "NOP", "Target"] },
+  { "name": "MEM (Memory)",   "wave": "xxx355", "data": ["BEQ", "NOP", "NOP"] },
   {},
-  { "name": "Branch Taken",   "wave": "..010.." },
-  { "name": "PIPELINE ACTION","wave": "...2.3.", "data": ["FLUSHING", "Resume"] }
+  { "name": "Branch Taken",   "wave": "xx10xx" },
+  { "name": "Pipeline Action","wave": "xx35xx", "data": ["RESOLVE", "FLUSH", "Resume"] }
 ],
-  "head": { "text": "Branch Taken (Resolves at Cycle 3, Flushes at Cycle 4)", "tick": 1 },
-  "config": { "hscale": 2.2 }
+  "node": "b..",
+  "edge": [ "a~>b Flush Active" ],
+  "head": { "text": "Branch Taken (2-Cycle Flush)", "tick": 0 },
+  "config": { "hscale": 2.2 },
+  "style": {
+    "4": "fill:#0dd; stroke:#0dd; stroke-width:2;",
+    "5": "fill:#0dd; stroke:#0dd; stroke-width:2;",
+    "8": "fill:#f90; stroke:#f90; stroke-width:2;"
+  }
 }
 </script>
-
-**Cycle-by-Cycle Breakdown:**
-*   **Cycle 3 (Resolution):** `BEQ` is in **Execute**. The ALU determines the branch is **TAKEN**. The PC is updated to the `Target` address, and the flush signal is asserted.
-*   **Cycle 4 (The Flush):** 
-    *   `Wrong1` (in Decode) is flushed -> becomes a Bubble in EX next cycle? No, it's replaced by a Bubble in the ID stage immediately? Effectively, the pipeline registers are cleared.
-    *   The `Target` instruction is fetched from memory.
-*   **Cycle 5:** The pipeline contains bubbles where the wrong instructions were. The `Target` instruction moves to **Decode**.
-*   **Cycle 6:** `Target` reaches **Execute**.
-
-
+</div>
+<br>
 
 ### Case 6: ALU-to-Branch Stall (Specific Implementation)
-In our architecture, if a branch in the Decode stage depends on an ALU result currently in the Execute stage, the `HazardUnit` triggers an additional stall. This is a design choice to simplify the branch comparison timing.
+<div class="callout warn"><span class="title">Design Choice</span>
+In our architecture, if a branch in the Decode stage depends on an ALU result currently in the Execute stage, the <code>HazardUnit</code> triggers an additional stall. This simplifies branch comparison timing at the cost of one extra cycle penalty.
+</div>
 
 **Example Code:**
 ```asm
@@ -222,4 +263,11 @@ end
 ```
 
 ---
-*riscv-cpu: a 5-Stage Pipelined RISC-V Processor (RV32I) by Charlie Shields, 2026*
+
+<div class="callout note"><span class="title">A Note on Cycle Timing</span>
+The following diagrams use a <strong>0-indexed</strong> cycle count, which is standard in hardware design. <strong>Cycle 0</strong> is the first clock cycle where the first instruction is fetched. An instruction fetched in Cycle <code>N</code> will be in the Decode stage in Cycle <code>N+1</code> and the Execute stage in Cycle <code>N+2</code>.
+</div>
+
+---
+
+*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*

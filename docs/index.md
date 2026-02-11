@@ -11,11 +11,11 @@
 
 # Documentation
 
-Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation was created to give you background on this project from both a high and low level.
+Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation provides a comprehensive background on the project's design, verification, and implementation.
 
 ## Project Development
 
-My introduction to RISC-V happened while I was studying ARM assembly during a semester abroad at the University of Glasgow. Discovering that RISC-V was open source and free to use felt like unlocking a lifelong dream, the chance to design and build my own CPU from scratch. I began reading into the RISC-V ISA, starting with a single-cycle CPU to get a feel for the basics. Once that was working, I didn't want to stop, so began implementing a full 5-stage pipeline, learning a ton about hazards and microarchitecture along the way. The final milestone was getting the design running on an FPGA and watching it pass the Fibonacci test in hardware, a moment that truly made the project feel complete.
+The `riscv-5` core is an educational yet rigorously verified implementation of the RISC-V RV32I Base Integer Instruction Set. It was designed with a focus on clean, synthesizable SystemVerilog code and strict adherence to the official ISA specifications.
 
 ## Articles
 
@@ -29,18 +29,19 @@ A deep dive into the microarchitecture of the core.
 Objective evidence of correctness and a narrative account of debugging resilience.
 - **[Compliance Matrix](./verification/report.html):** Formal RISCOF results for RV32I.
 - **[Hazard Handling](./verification/report.html#load-use-hazard-stall):** Timing diagrams (WaveDrom) of temporal interactions.
-- **[War Stories](./verification/report.html#war-stories):** Retrospectives on solving "The Frozen Pipeline" and "The Bouncing Branch".
 
 ### 3. The Setup Guide (How-To)
 Practical instructions for instantiating the core and running simulations.
 - **[Technical Onboarding](./developer/guide.html):** Toolchain setup and simulation workflow.
-- **[FPGA Integration](./developer/guide.html#fpga-deployment):** Deployment on the Xilinx PYNQ-Z2.
+- **[FPGA Integration](./verification/fpga.html):** Deployment on the Xilinx PYNQ-Z2.
 
 ---
 
-## 🏛️ Theoretical Anchor
+## Key References
 
-Every design decision in this core is anchored in the official **RISC-V Instruction Set Manual (Volume I)** and the seminal textbook **Computer Organization and Design: The Hardware/Software Interface** by Patterson and Hennessy. This documentation explicitly maps code to these authoritative texts to prove engineering competence.
+<div class="callout note"><span class="title">Standard Compliance</span>
+Every design decision in this core is anchored in the official <strong>RISC-V Instruction Set Manual (Volume I)</strong> and the seminal textbook <strong>Computer Organization and Design: The Hardware/Software Interface</strong> by Patterson and Hennessy.
+</div>
 
 ---
 *Verified RTL. Rigorous Documentation. Silicon-Ready Design.*

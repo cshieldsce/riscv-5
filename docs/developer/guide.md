@@ -11,7 +11,7 @@
 
 # Setup Guide
 
-This guide provides the technical instructions for building, simulating, and extending the `riscv-5` core.
+This guide provides the technical instructions for building and simulating the `riscv-5` core.
 
 ## 1. Toolchain Dependencies
 
@@ -39,9 +39,14 @@ cd riscv-5
 # Fetch external dependencies (RISC-V Architecture Test Suite)
 ./setup_project.sh
 ```
-The `setup_project.sh` script will:
-- Clone the [RISC-V Architecture Test Suite](https://github.com/riscv-non-isa/riscv-arch-test) into `test/verification/riscv-arch-test/`
-- Verify that `riscv64-unknown-elf-gcc` is available in your PATH
+
+<div class="callout tip"><span class="title">Setup Script</span>
+The <code>setup_project.sh</code> script automates the following:
+<ul>
+  <li>Clones the <a href="https://github.com/riscv-non-isa/riscv-arch-test">RISC-V Architecture Test Suite</a> into <code>test/verification/riscv-arch-test/</code></li>
+  <li>Verifies that <code>riscv64-unknown-elf-gcc</code> is available in your PATH</li>
+</ul>
+</div>
 
 ### 1.4 Verify Installation
 ```bash
@@ -117,6 +122,8 @@ Use the provided TCL script to generate the Vivado project:
 cd fpga
 vivado -mode batch -source create_project.tcl
 ```
+
+For detailed implementation results, synthesis reports, and hardware verification demos, see the **[FPGA Implementation](../verification/fpga.html)** report.
 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*

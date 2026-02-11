@@ -16,16 +16,20 @@ This section maps the theoretical pipeline stages from *Patterson & Hennessy* to
 ## Complete Datapath
 Before diving into individual stages, here's the full pipeline with all major signals labeled:
 
-![Complete Pipelined Datapath](../images/pipeline_complete.svg)
-*Figure 3: Complete datapath showing pipeline registers, forwarding paths, and hazard detection units. Based on Patterson & Hennessy Figure 4.51.*
+<div class="img-wrapper diagram">
+  <img src="../images/pipeline_complete.svg" alt="Complete Pipelined Datapath">
+  <span class="caption">Figure 2: Complete datapath showing pipeline registers, forwarding paths, and hazard detection units. Based on Patterson & Hennessy Figure 4.51.</span>
+</div>
 
 This diagram maps directly to our SystemVerilog implementation in [`src/pipelined_cpu.sv`](../../src/pipelined_cpu.sv).
 
 
 ## 2.1 Instruction Fetch (IF)
 
-![IF Stage Detail](../images/stage_if.svg)
-*Figure 4: IF stage showing PC selection multiplexer and instruction memory interface.*
+<div class="img-wrapper diagram">
+  <img src="../images/stage_if.svg" alt="IF Stage Detail">
+  <span class="caption">Figure 3: IF stage showing PC selection multiplexer and instruction memory interface.</span>
+</div>
 
 **Implementation:** `if_stage.sv`  
 **Objective:** Fetch the next instruction from memory and calculate `PC+4`.
@@ -87,15 +91,17 @@ The PC selection multiplexer determines the next instruction address based on co
 By detecting `JAL` early in the ID stage (since the target is just `PC + Immediate`), we reduce the control hazard penalty from 2 cycles to 1 cycle. However, `JALR` and conditional branches still incur a 2-cycle penalty because they require ALU computation. (described in <a href="./hazards.html#case-5-control-hazards-branch-misprediction-">Hazard Resolution, Case 5</a>).
 
 <div class="callout note"><span class="title">Design Decision</span>
-JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect—the target depends on register content—so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.
+JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect, the target depends on register content, so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.
 </div>
 
 ---
 
 ## 2.2 Instruction Decode (ID)
 
-![ID Stage Detail](../images/stage_id.svg)
-*Figure 5: ID stage with control unit, register file, and immediate generator.*
+<div class="img-wrapper diagram">
+  <img src="../images/stage_id.svg" alt="ID Stage Detail">
+  <span class="caption">Figure 4: ID stage with control unit, register file, and immediate generator.</span>
+</div>
 
 **Implementation:** `id_stage.sv`  
 **Objective:** Decode the instruction, generate control signals, read registers, and produce the immediate value.
@@ -125,8 +131,10 @@ See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I 
 
 ## 2.3 Execute (EX)
 
-![EX Stage Detail](../images/stage_ex.svg)
-*Figure 6: EX stage showing forwarding multiplexers and branch resolution logic.*
+<div class="img-wrapper diagram">
+  <img src="../images/stage_ex.svg" alt="EX Stage Detail">
+  <span class="caption">Figure 5: EX stage showing forwarding multiplexers and branch resolution logic.</span>
+</div>
 
 **Implementation:** `ex_stage.sv`  
 
@@ -139,9 +147,9 @@ The forwarding unit provides two 2-bit control signals (`forward_a`, `forward_b`
 ```verilog
 always_comb begin : ForwardA_MUX
     case (forward_a)
-        2'b00:   ex_alu_in_a_fwd = rs1_data;            // No hazard (Register)
-        2'b01:   ex_alu_in_a_fwd = wb_write_data;       // Forward from WB
-        2'b10:   ex_alu_in_a_fwd = ex_mem_alu_result;   // Forward from MEM
+        2'b00:   ex_alu_in_a_fwd = rs1_data;           // No hazard (Register)
+        2'b01:   ex_alu_in_a_fwd = wb_write_data;      // Forward from WB
+        2'b10:   ex_alu_in_a_fwd = ex_mem_alu_result;  // Forward from MEM
         default: ex_alu_in_a_fwd = rs1_data;
     endcase
 end
@@ -154,9 +162,9 @@ The `op_a_sel` signal handles special cases like `LUI` (Load Upper Immediate) an
 ```verilog
 always_comb begin : ALUInputA_MUX
     case (op_a_sel)
-        2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;          // Regular register op
-        2'b01:   ex_alu_in_a = pc;                       // AUIPC: PC
-        2'b10:   ex_alu_in_a = {XLEN{1'b0}};             // LUI: Zero
+        2'b00:   ex_alu_in_a = ex_alu_in_a_fwd;  // Regular register op
+        2'b01:   ex_alu_in_a = pc;               // AUIPC: PC
+        2'b10:   ex_alu_in_a = {XLEN{1'b0}};     // LUI: Zero
         default: ex_alu_in_a = ex_alu_in_a_fwd;
     endcase
 end
@@ -174,12 +182,12 @@ LUI (Load Upper Immediate) loads a 20-bit immediate into bits [31:12]. The RISC-
 always_comb begin
     if (branch_en) begin
         case (funct3)
-            F3_BEQ:  branch_taken = alu_zero;          // A == B
-            F3_BNE:  branch_taken = ~alu_zero;         // A != B
-            F3_BLT:  branch_taken = alu_result[0];     // A < B (signed)
-            F3_BGE:  branch_taken = ~alu_result[0];    // A >= B (signed)
-            F3_BLTU: branch_taken = alu_result[0];     // A < B (unsigned)
-            F3_BGEU: branch_taken = ~alu_result[0];    // A >= B (unsigned)
+            F3_BEQ:  branch_taken = alu_zero;        // A == B
+            F3_BNE:  branch_taken = ~alu_zero;       // A != B
+            F3_BLT:  branch_taken = alu_result[0];   // A < B (signed)
+            F3_BGE:  branch_taken = ~alu_result[0];  // A >= B (signed)
+            F3_BLTU: branch_taken = alu_result[0];   // A < B (unsigned)
+            F3_BGEU: branch_taken = ~alu_result[0];  // A >= B (unsigned)
             default: branch_taken = 1'b0;
         endcase
     end else begin
@@ -197,9 +205,6 @@ The ALU computes both signed and unsigned comparison results. <code>BLT</code>/<
 ---
 
 ## 2.4 Memory Access (MEM)
-
-![MEM Stage Detail](../images/stage_mem.svg)
-*Figure 7: MEM stage showing Data Memory interface and byte enable logic.*
 
 **Implementation:** `mem_stage.sv`  
 
@@ -237,9 +242,6 @@ assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 
 ## 2.5 Writeback (WB)
 
-![WB Stage Detail](../images/stage_wb.svg)
-*Figure 8: WB stage showing the final result selection multiplexer.*
-
 **Implementation:** `wb_stage.sv`  
 
 The `WB` stage resolves the final value for the destination register using the `wb_mux_sel` control signal:
@@ -247,10 +249,10 @@ The `WB` stage resolves the final value for the destination register using the `
 ```verilog
 always_comb begin : WriteBackMUX
     case (mem_wb_wb_mux_sel)
-        2'b00: wb_write_data = mem_wb_alu_result;     // ALU instructions
-        2'b01: wb_write_data = dmem_read_data;        // Load instructions
-        2'b10: wb_write_data = mem_wb_pc_plus_4;      // JAL/JALR (Return address)
-        default: wb_write_data = {XLEN{1'b0}};        // Safety default
+        2'b00: wb_write_data = mem_wb_alu_result;  // ALU instructions
+        2'b01: wb_write_data = dmem_read_data;     // Load instructions
+        2'b10: wb_write_data = mem_wb_pc_plus_4;   // JAL/JALR (Return address)
+        default: wb_write_data = {XLEN{1'b0}};     // Safety default
     endcase
 end
 ```
@@ -282,3 +284,5 @@ We include <code>rs2</code> in the <code>EX/MEM</code> register to enable store 
 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+<script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
