@@ -14,9 +14,11 @@
   <div class="nav-label">Implementation</div>
   <a href="#1-synthesis-overview">Synthesis</a>
   <a href="#2-timing-report">Timing</a>
-  <a href="#3-block-diagram">Block Diagram</a>
-  <a href="#4-hardware-demo">Hardware Demo</a>
-  <a href="#6-additional-notes">Notes</a>
+  <a href="#3-implementation-layout">Layout</a>
+  <a href="#4-hardware-debugging--ila-analysis">Debugging</a>
+  <a href="#5-lessons-learned">Lessons</a>
+  <a href="#6-hardware-demo">Demo</a>
+  <a href="#7-additional-notes">Notes</a>
 </div>
 
 <div class="content-body" markdown="1">

@@ -9,6 +9,19 @@
   <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
+<!-- Vertical Side Nav -->
+<div class="side-nav">
+  <div class="nav-label">Theory</div>
+  <a href="#1-introduction">Introduction</a>
+  <a href="#the-single-cycle-problem">Single-Cycle</a>
+  <a href="#11-the-pipelining-solution">Solution</a>
+  <a href="#12-mapping-the-textbook-to-the-rtl">RTL Mapping</a>
+  <a href="#13-building-the-core">Motivation</a>
+  <a href="#14-references">References</a>
+</div>
+
+<div class="content-body" markdown="1">
+
 ## 1. Introduction
 
 The architecture of the `riscv-5` core is anchored to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
@@ -88,5 +101,7 @@ The following references, particularly the highlighted chapters and sections, di
 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+</div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

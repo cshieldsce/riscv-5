@@ -35,8 +35,8 @@ div[id^="WaveDrom_Display_"] {
   <a href="#case-1-ex-to-ex-forwarding">EX Forward</a>
   <a href="#case-2-mem-to-ex-forwarding">MEM Forward</a>
   <a href="#case-3-mem-store-forwarding-wb-to-mem">Store Forward</a>
-  <a href="#33-the-load-use-hazard">Load-Use</a>
-  <a href="#34-control-hazards">Control</a>
+  <a href="#case-4-load-use-stall-the-hardware-pause">Load-Use</a>
+  <a href="#case-5-branch-misprediction-2-cycle-flush">Branch Flush</a>
   <a href="#case-6-alu-to-branch-stall-specific-implementation">Br-Stall</a>
 </div>
 

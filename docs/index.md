@@ -9,6 +9,8 @@
   <a href="./developer/guide.html">Setup Guide</a>
 </div>
 
+<div class="content-body" markdown="1">
+
 # Documentation
 
 Welcome to the technical deep-dive and user manual for the `riscv-5` processor. This documentation provides a comprehensive background on the project's design, verification, and implementation.
@@ -45,5 +47,7 @@ Every design decision in this core is anchored in the official <strong>RISC-V In
 
 ---
 *Verified RTL. Rigorous Documentation. Silicon-Ready Design.*
+
+</div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

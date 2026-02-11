@@ -9,6 +9,17 @@
   <a href="./guide.html" class="active">Setup Guide</a>
 </div>
 
+<!-- Vertical Side Nav -->
+<div class="side-nav">
+  <div class="nav-label">Setup</div>
+  <a href="#1-toolchain-dependencies">Dependencies</a>
+  <a href="#2-functional-simulation-workflow">Simulation</a>
+  <a href="#3-compliance-verification-workflow">Compliance</a>
+  <a href="#4-fpga-deployment-pynq-z2">FPGA</a>
+</div>
+
+<div class="content-body" markdown="1">
+
 # Setup Guide
 
 This guide provides the technical instructions for building and simulating the `riscv-5` core.
@@ -127,5 +138,7 @@ For detailed implementation results, synthesis reports, and hardware verificatio
 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+</div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

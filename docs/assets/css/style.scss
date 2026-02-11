@@ -8,24 +8,26 @@
 /* --- Layout Improvements --- */
 
 section {
-  max-width: 1100px !important;
+  max-width: 1200px !important;
   margin: 0 auto !important;
   float: none !important; 
   padding: 2rem 4rem !important;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap; /* Allow top-nav to take full width and others to wrap below */
   align-items: flex-start;
-  gap: 40px;
+  gap: 0; /* Controlled by child margins */
 }
 
 /* Container for the actual markdown content */
 .content-body {
   flex: 1;
-  min-width: 0; /* Prevents flex items from overflowing */
+  min-width: 0;
+  padding-left: 40px;
 }
 
 .wrapper {
-  max-width: 1100px !important;
+  max-width: 1200px !important;
   margin: 0 auto !important;
 }
 
@@ -59,31 +61,32 @@ hr {
 /* --- Header Anchor Styling --- */
 h1, h2, h3, h4, h5, h6 {
   position: relative;
-  scroll-margin-top: 2rem !important; 
+  scroll-margin-top: 5rem !important; 
 }
 
 /* --- Unified Navigation Styling --- */
 
 /* Main Site Nav (Top) */
 .site-nav {
+  flex: 0 0 100%; /* Force top nav to take full width */
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 10px;
+  gap: 8px;
+  padding: 12px;
   background: rgba(30, 30, 30, 0.9);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem !important;
 }
 
 .site-nav a {
   color: #aaa;
   font-size: 0.8rem;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 8px;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -102,43 +105,44 @@ h1, h2, h3, h4, h5, h6 {
 /* Side Navigation (Stages, Hazards, FPGA) */
 .side-nav {
   position: sticky;
-  top: 2rem;
-  width: 180px;
-  min-width: 180px;
+  top: 5rem;
+  width: 200px;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 20px 15px;
-  background: rgba(35, 35, 35, 0.4);
-  border-left: 2px solid rgba(224, 172, 119, 0.3);
-  margin-top: 1rem;
+  padding: 10px 20px 10px 0;
+  background: transparent;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: none;
+  margin-top: 0;
 }
 
 .side-nav .nav-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   color: #e0ac77;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   font-weight: 800;
-  padding-left: 10px;
+  padding-left: 0;
+  opacity: 0.8;
 }
 
 .side-nav a {
   color: #888;
   font-size: 0.85rem;
-  font-weight: 600;
-  padding: 8px 12px;
-  border-radius: 0 6px 6px 0;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
   transition: all 0.2s ease;
-  border-left: 2px solid transparent;
-  margin-left: -2px;
+  border-left: none;
+  margin-left: 0;
 }
 
 .side-nav a:hover {
-  background: rgba(224, 172, 119, 0.05);
+  background: rgba(255, 255, 255, 0.05);
   color: #e0ac77;
-  border-left-color: #e0ac77;
 }
 
 /* Hide side-nav on small screens */
@@ -149,6 +153,9 @@ h1, h2, h3, h4, h5, h6 {
   }
   .side-nav {
     display: none;
+  }
+  .content-body {
+    padding-left: 0;
   }
 }
 

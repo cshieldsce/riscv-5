@@ -9,6 +9,17 @@
   <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
+<!-- Vertical Side Nav -->
+<div class="side-nav">
+  <div class="nav-label">Verification</div>
+  <a href="#rationale">Rationale</a>
+  <a href="#1-riscof-the-gold-standard-of-compliance">RISCOF</a>
+  <a href="#11-compliance-matrix">Matrix</a>
+  <a href="#12-automated-verification--badges">Automation</a>
+</div>
+
+<div class="content-body" markdown="1">
+
 
 # Verification Report
 
@@ -48,5 +59,7 @@ We utilize Continuous Integration (CI) to maintain high code quality.
 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+</div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
