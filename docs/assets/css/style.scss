@@ -7,15 +7,14 @@
 
 /* --- Layout Improvements --- */
 
-/* Fix: Increase width while maintaining theme centering */
 section {
   max-width: 1100px !important;
   margin: 0 auto !important;
-  float: none !important; /* Prevent theme float from shifting content */
-  padding: 2rem 4rem !important;
+  float: none !important; 
+  padding: 2rem 2rem 2rem 220px !important; /* Made room for side nav on the left */
+  position: relative;
 }
 
-/* Ensure the header (theme sidebar/top) matches the new width or stays centered */
 .wrapper {
   max-width: 1100px !important;
   margin: 0 auto !important;
@@ -51,33 +50,13 @@ hr {
 /* --- Header Anchor Styling --- */
 h1, h2, h3, h4, h5, h6 {
   position: relative;
-  /* Fix: Robust scroll margin to ensure sticky nav doesn't cover titles */
-  scroll-margin-top: 120px !important; 
+  scroll-margin-top: 2rem !important; 
 }
 
-.anchor {
-  position: absolute;
-  left: -1.25em;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-  text-decoration: none;
-}
+/* --- Unified Navigation Styling --- */
 
-.anchor::before {
-  content: '#';
-  color: #e0ac77;
-}
-
-h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, 
-h4:hover .anchor, h5:hover .anchor, h6:hover .anchor {
-  opacity: 1;
-}
-
-/* --- Unified Navigation Styling (Site & Pipeline) --- */
-
-.site-nav, .pipeline-nav {
+/* Main Site Nav (Top) */
+.site-nav {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
@@ -88,51 +67,78 @@ h4:hover .anchor, h5:hover .anchor, h6:hover .anchor {
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
-.site-nav a, .pipeline-nav a {
+.site-nav a {
   color: #aaa;
-  font-size: 0.8rem; /* Fit all links on one line */
+  font-size: 0.8rem;
   font-weight: 600;
   padding: 6px 12px;
   border-radius: 8px;
   transition: all 0.2s ease;
-  border: 1px solid transparent;
   white-space: nowrap;
 }
 
-.site-nav a:hover, .pipeline-nav a:hover {
+.site-nav a:hover {
   background: rgba(224, 172, 119, 0.15);
   color: #e0ac77;
-  text-decoration: none;
 }
 
-/* Active State */
-.site-nav a.active, .pipeline-nav a.active {
+.site-nav a.active {
   background: #e0ac77;
   color: #1c1c1c;
-  box-shadow: 0 4px 12px rgba(224, 172, 119, 0.3);
 }
 
-/* Special logic for the Sticky Pipeline Nav */
-.pipeline-nav {
-  position: sticky;
-  top: 20px;
-  z-index: 1000;
-  border-color: rgba(224, 172, 119, 0.5);
-  max-width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+/* Side Navigation (Stages & Hazards) */
+.side-nav {
+  position: fixed;
+  top: 150px;
+  left: calc(50% - 530px); /* Positioned relative to centered content */
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 15px;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(224, 172, 119, 0.3);
+  border-radius: 12px;
+  z-index: 100;
+}
+
+.side-nav .nav-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #e0ac77;
+  margin-bottom: 10px;
+  font-weight: 800;
+  text-align: center;
+  border-bottom: 1px solid rgba(224, 172, 119, 0.2);
+  padding-bottom: 5px;
+}
+
+.side-nav a {
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.side-nav a:hover {
+  background: rgba(224, 172, 119, 0.1);
+  color: #e0ac77;
 }
 
 /* --- Visual Data Flow Separator --- */
 .pipeline-arrow {
   text-align: center;
-  margin: 5rem 0;
+  margin: 2rem 0;
   position: relative;
-  height: 80px;
+  height: 40px;
 }
 
 .pipeline-arrow::before {
@@ -153,39 +159,20 @@ h4:hover .anchor, h5:hover .anchor, h6:hover .anchor {
   left: 50%;
   transform: translate(-50%, -50%);
   color: #e0ac77;
-  font-size: 1.2rem;
+  font-size: 1rem;
   background: #1c1c1c;
-  padding: 10px 0;
-  text-shadow: 0 0 15px rgba(224, 172, 119, 0.6);
+  padding: 5px 0;
 }
 
 /* Callouts */
-:root {
-  --callout-tip: #1f7a1f;
-  --callout-note: #1f4e7a;
-  --callout-warn: #7a3b1f;
-  --callout-bg: rgba(255,255,255,0.04);
-}
-
 .callout {
   padding: 1.2rem 1.5rem;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
   border-radius: 12px;
-  background: var(--callout-bg);
+  background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   border-left-width: 6px;
 }
-.callout .title { 
-  font-weight: 700;
-  display: block;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.8px;
-}
-.callout.tip  { border-left-color: var(--callout-tip); }
-.callout.note { border-left-color: var(--callout-note); }
-.callout.warn { border-left-color: var(--callout-warn); }
 
 /* Code Blocks */
 .highlight pre {
@@ -193,45 +180,51 @@ h4:hover .anchor, h5:hover .anchor, h6:hover .anchor {
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,0.08);
   background-color: #141414 !important;
-  margin: 2rem 0;
-}
-
-/* Table styling */
-table {
-  margin: 2rem 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-table th, table td {
-  padding: 1rem 1.2rem;
+  margin: 1.5rem 0;
 }
 
 /* Image Styling */
 .img-wrapper {
-  margin: 4rem 0;
+  margin: 2.5rem 0;
+  text-align: center;
+  display: block;
+  clear: both;
 }
+
+.img-wrapper img {
+  display: block;
+  margin: 0 auto;
+  cursor: zoom-in;
+  transition: all 0.4s ease;
+  max-width: 100%;
+}
+
 .img-wrapper .caption {
-  margin-top: 1.5rem;
-  color: #999;
+  display: block;
+  margin-top: 1rem;
+  color: #888;
+  font-style: italic;
+  font-size: 0.85rem;
 }
 
 .img-wrapper.thumbnail img {
-  max-width: 65%;
+  max-width: 75%;
 }
 
 .img-wrapper img:hover {
-  transform: scale(1.02) translateY(-5px);
+  transform: scale(1.01) translateY(-3px);
 }
 
 /* Hazard Table Styling */
 .hazard-table {
   border: 1px solid rgba(224, 172, 119, 0.3);
-  border-radius: 14px;
-  margin: 3rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 2rem 0;
+}
+
+.hazard-table table {
+  margin: 0;
 }
 
 /* Lightbox adjustment for wide layout */

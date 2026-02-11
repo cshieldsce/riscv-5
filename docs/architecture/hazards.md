@@ -30,6 +30,18 @@ div[id^="WaveDrom_Display_"] {
 
 # 3.0 Hazard Resolution
 
+<!-- Vertical Side Nav -->
+<div class="side-nav">
+  <div class="nav-label">Hazards</div>
+  <a href="#31-hazard-summary-table">Summary</a>
+  <a href="#case-1-ex-to-ex-forwarding">EX Forward</a>
+  <a href="#case-2-mem-to-ex-forwarding">MEM Forward</a>
+  <a href="#case-3-mem-store-forwarding-wb-to-mem">Store Forward</a>
+  <a href="#33-the-load-use-hazard">Load-Use</a>
+  <a href="#34-control-hazards">Control</a>
+  <a href="#case-6-alu-to-branch-stall-specific-implementation">Br-Stall</a>
+</div>
+
 In a pipelined processor, multiple instructions overlap in execution. Hazards occur when the hardware cannot support the next instruction in the next clock cycle without producing incorrect results. Our CPU handles three types of hazards through a combination of **Forwarding**, **Stalling**, and **Flushing**.
 
 ## 3.1 Hazard Summary Table

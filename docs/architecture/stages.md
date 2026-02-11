@@ -11,14 +11,16 @@
 
 # 2. Pipeline Stages & Microarchitectural Logic
 
-<!-- Sticky Pipeline Map -->
-<div class="pipeline-nav">
-  <a href="#20-complete-datapath">Full View</a>
-  <a href="#21-instruction-fetch-if">IF</a>
-  <a href="#22-instruction-decode-id">ID</a>
-  <a href="#23-execute-ex">EX</a>
-  <a href="#24-memory-access-mem">MEM</a>
-  <a href="#25-writeback-wb">WB</a>
+<!-- Vertical Side Nav -->
+<div class="side-nav">
+  <div class="nav-label">Pipeline</div>
+  <a href="#20-complete-datapath">Overview</a>
+  <a href="#21-instruction-fetch-if">Fetch (IF)</a>
+  <a href="#22-instruction-decode-id">Decode (ID)</a>
+  <a href="#23-execute-ex">Execute (EX)</a>
+  <a href="#24-memory-access-mem">Memory (MEM)</a>
+  <a href="#25-writeback-wb">Writeback (WB)</a>
+  <a href="#26-pipeline-register-summary">Summary</a>
 </div>
 
 This section maps the theoretical pipeline stages from *Patterson & Hennessy* to our SystemVerilog implementation, proving that each stage faithfully implements the RISC-V ISA specification.
