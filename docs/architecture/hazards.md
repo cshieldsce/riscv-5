@@ -34,6 +34,8 @@ In a pipelined processor, multiple instructions overlap in execution. Hazards oc
 
 ## 3.1 Hazard Summary Table
 
+<div class="hazard-table">
+
 | Hazard Type | Scenario | Hardware Action | Penalty (Cycles) |
 |-------------|----------|-----------------|------------------|
 | **Data Hazard** | Register dependency (ALU to ALU) | Forwarding | 0 |
@@ -43,6 +45,8 @@ In a pipelined processor, multiple instructions overlap in execution. Hazards oc
 | **Control Hazard** | JAL (Unconditional Jump) | Flush IF | 1 |
 | **Control Hazard** | JALR (Indirect Jump) | Flush IF & ID | 2 |
 | **Special Case** | ALU-to-Branch Dependency | Stall + Flush IF/ID | 3 (Total) |
+
+</div>
 
 ---
 
