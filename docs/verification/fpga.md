@@ -160,6 +160,8 @@ Sequence Displayed on LEDs:
 
 ---
 
-*For questions or contributions, see the [GitHub repository](https://github.com/cshieldsce/riscv-5).*
+*riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+<script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

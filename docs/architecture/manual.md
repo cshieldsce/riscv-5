@@ -49,7 +49,18 @@ It is a common misconception that pipelining reduces the execution time of a sin
 
 ---
 
-## 1.2 Building the Core
+## 1.2 Mapping the Textbook to the RTL
+
+The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
+
+<div class="img-wrapper diagram">
+  <img src="../images/pipeline_basic.svg" alt="Simplified pipelined datapath">
+  <span class="caption">Figure 2: The classic 5-stage RISC-V datapath components (Simplified View).</span>
+</div>
+
+**Figure 2** illustrates the theoretical 5-stage RISC-V datapath components. In an ideal pipeline, one instruction completes every cycle.
+
+## 1.3 Building the Core
 
 ### Motivations
 
@@ -61,7 +72,7 @@ I found the Hennessy & Patterson book to be what many referred to as the "gold s
 
 ---
 
-## 1.3 References
+## 1.4 References
 The following references, particularly the highlighted chapters and sections, directly informed the design and implementation of this core’s pipelined architecture and instruction set support. They served as both theoretical foundation and practical guide throughout development.
 
 1. **Patterson, D. A., & Hennessy, J. L.** (2017). *Computer Organization and Design: The Hardware/Software Interface (RISC-V Edition).* Morgan Kaufmann.

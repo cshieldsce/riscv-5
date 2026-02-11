@@ -45,3 +45,5 @@ Every design decision in this core is anchored in the official <strong>RISC-V In
 
 ---
 *Verified RTL. Rigorous Documentation. Silicon-Ready Design.*
+
+<script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

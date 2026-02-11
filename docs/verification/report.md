@@ -48,3 +48,5 @@ We utilize Continuous Integration (CI) to maintain high code quality.
 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+<script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

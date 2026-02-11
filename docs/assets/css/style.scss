@@ -34,8 +34,9 @@ a:hover, .site-nav a:hover {
 hr {
   height: 1px;
   border: 0;
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
-  margin: 2rem 0;
+  background-color: #444; /* Fallback solid color */
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  margin: 3rem 0;
 }
 
 /* --- Header Anchor Styling --- */
@@ -229,6 +230,12 @@ table tbody tr:hover {
   /* Apply a slight brightness/invert if needed for dark theme visibility */
   filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); 
 }
+
+/* 2. Smaller Stage Diagrams */
+.img-wrapper.thumbnail img {
+  max-width: 60%;
+}
+
 .img-wrapper.diagram img:hover {
   transform: translateY(-5px);
 }
