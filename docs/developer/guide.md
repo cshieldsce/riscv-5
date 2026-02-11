@@ -6,7 +6,7 @@
   <a href="../architecture/hazards.html">Hazard Resolution</a>
   <a href="../verification/report.html">Design Verification</a>
   <a href="../verification/fpga.html">FPGA Implementation</a>
-  <a href="./guide.html">Setup Guide</a>
+  <a href="./guide.html" class="active">Setup Guide</a>
 </div>
 
 # Setup Guide

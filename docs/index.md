@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
 <div class="site-nav">
-  <a href="./index.html">Home</a>
+  <a href="./index.html" class="active">Home</a>
   <a href="./architecture/manual.html">Architecture Overview</a>
   <a href="./architecture/stages.html">Pipeline Stages</a>
   <a href="./architecture/hazards.html">Hazard Resolution</a>
