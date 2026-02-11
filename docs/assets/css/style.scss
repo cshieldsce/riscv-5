@@ -233,7 +233,33 @@ table tbody tr:hover {
 
 /* 2. Smaller Stage Diagrams */
 .img-wrapper.thumbnail img {
-  max-width: 60%;
+  max-width: 40%;
+}
+
+/* --- Hazard Table Styling --- */
+.hazard-table {
+  border: 2px solid #e0ac77; /* Amber border */
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 2rem 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.hazard-table table {
+  margin: 0;
+  border: none;
+}
+
+.hazard-table th {
+  background-color: rgba(224, 172, 119, 0.15) !important;
+  color: #e0ac77;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85rem;
+}
+
+.hazard-table td {
+  border-color: rgba(255,255,255,0.05);
 }
 
 .img-wrapper.diagram img:hover {
