@@ -11,6 +11,16 @@
 
 # 2. Pipeline Stages & Microarchitectural Logic
 
+<!-- Sticky Pipeline Map -->
+<div class="pipeline-nav">
+  <a href="#20-complete-datapath">Full View</a>
+  <a href="#21-instruction-fetch-if">IF</a>
+  <a href="#22-instruction-decode-id">ID</a>
+  <a href="#23-execute-ex">EX</a>
+  <a href="#24-memory-access-mem">MEM</a>
+  <a href="#25-writeback-wb">WB</a>
+</div>
+
 This section maps the theoretical pipeline stages from *Patterson & Hennessy* to our SystemVerilog implementation, proving that each stage faithfully implements the RISC-V ISA specification.
 
 ## 2.0 Complete Datapath
@@ -23,6 +33,7 @@ The full pipeline includes the control logic, forwarding paths, and hazard detec
 
 This diagram maps directly to our SystemVerilog implementation in [`src/pipelined_cpu.sv`](../../src/pipelined_cpu.sv).
 
+<div class="pipeline-arrow"></div>
 
 ## 2.1 Instruction Fetch (IF)
 
@@ -94,7 +105,7 @@ By detecting `JAL` early in the ID stage (since the target is just `PC + Immedia
 JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect, the target depends on register content, so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.
 </div>
 
----
+<div class="pipeline-arrow"></div>
 
 ## 2.2 Instruction Decode (ID)
 
@@ -127,7 +138,7 @@ This stage implements the decoding logic for all RV32I base instructions (Sectio
 See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I Base Integer ISA". All instruction formats and encoding are defined there.
 </div>
 
----
+<div class="pipeline-arrow"></div>
 
 ## 2.3 Execute (EX)
 
@@ -202,7 +213,7 @@ assign branch_target = pc + imm;
 The ALU computes both signed and unsigned comparison results. <code>BLT</code>/<code>BGE</code> use the signed result (bit 0 of SLT operation), while <code>BLTU</code>/<code>BGEU</code> use the unsigned equivalent. The branch resolution logic simply selects the appropriate comparison output.
 </div>
 
----
+<div class="pipeline-arrow"></div>
 
 ## 2.4 Memory Access (MEM)
 
@@ -243,7 +254,7 @@ endfunction
 assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 ```
 
----
+<div class="pipeline-arrow"></div>
 
 ## 2.5 Writeback (WB)
 
@@ -277,7 +288,9 @@ end
 See <em>RISC-V Unprivileged ISA Specification</em>, Section 2.5: "Control Transfer Instructions". JAL and JALR store the address of the next instruction into the destination register to enable function returns. The callee can execute <code>JALR x0, 0(ra)</code> to jump back using the saved return address.
 </div>
 
-## 2.7 Pipeline Register Summary
+<div class="pipeline-arrow"></div>
+
+## 2.6 Pipeline Register Summary
 
 Each pipeline register preserves the architectural state needed by downstream stages. Below is a summary of the data and control signals carried by each register:
 

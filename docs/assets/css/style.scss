@@ -95,6 +95,75 @@ h6:hover .anchor {
   right: -1.2rem;
 }
 
+/* --- Sticky Pipeline Navigation --- */
+.pipeline-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(28, 28, 28, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e0ac77;
+  padding: 10px 0;
+  margin-bottom: 2rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.pipeline-nav a {
+  color: #aaa;
+  text-decoration: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.pipeline-nav a:hover {
+  background: rgba(224, 172, 119, 0.1);
+  color: #e0ac77;
+}
+
+.pipeline-nav a.active {
+  background: #e0ac77;
+  color: #1c1c1c;
+  border-color: #e0ac77;
+}
+
+/* --- Visual Data Flow Separator --- */
+.pipeline-arrow {
+  text-align: center;
+  margin: 3rem 0;
+  position: relative;
+  height: 40px;
+}
+
+.pipeline-arrow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, #444, #e0ac77);
+}
+
+.pipeline-arrow::after {
+  content: "▼";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #e0ac77;
+  font-size: 1.2rem;
+  background: #1c1c1c;
+  padding: 0 5px;
+}
+
 /* Callouts with color-coded left borders */
 :root {
   --callout-tip: #1f7a1f;   /* green */
