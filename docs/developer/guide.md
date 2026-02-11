@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<div class="flex-content-wrapper">
+
 <div class="site-nav">
   <a href="../index.html">Home</a>
   <a href="../architecture/manual.html">Architecture Overview</a>
@@ -12,10 +14,10 @@
 <!-- Vertical Side Nav -->
 <div class="side-nav">
   <div class="nav-label">Setup</div>
-  <a href="#1-toolchain-dependencies">Dependencies</a>
-  <a href="#2-functional-simulation-workflow">Simulation</a>
-  <a href="#3-compliance-verification-workflow">Compliance</a>
-  <a href="#4-fpga-deployment-pynq-z2">FPGA</a>
+  <a href="#dependencies">Dependencies</a>
+  <a href="#simulation">Simulation</a>
+  <a href="#compliance">Compliance</a>
+  <a href="#fpga">FPGA</a>
 </div>
 
 <div class="content-body" markdown="1">
@@ -24,7 +26,7 @@
 
 This guide provides the technical instructions for building and simulating the `riscv-5` core.
 
-## 1. Toolchain Dependencies
+## 1. Toolchain Dependencies {#dependencies}
 
 The project relies on standard open-source EDA tools and the RISC-V GNU toolchain.
 
@@ -72,7 +74,7 @@ ls test/verification/riscv-arch-test/
 
 ---
 
-## 2. Functional Simulation Workflow
+## 2. Functional Simulation Workflow {#simulation}
 
 We use **Icarus Verilog** for simulation, you can also use **GTKWave** for waveform analysis.
 
@@ -110,7 +112,7 @@ vvp sim.out +TEST=test/mem/fib_test.mem
 
 ---
 
-## 3. Compliance Verification Workflow
+## 3. Compliance Verification Workflow {#compliance}
 
 To run the full **RISC-V Architectural Test Suite** and generate a formal compliance report:
 ```bash
@@ -123,7 +125,7 @@ To run the full **RISC-V Architectural Test Suite** and generate a formal compli
 
 ---
 
-## 4. FPGA Deployment (PYNQ-Z2)
+## 4. FPGA Deployment (PYNQ-Z2) {#fpga}
 
 The core is optimized for Xilinx Zynq-7000 series FPGAs.
 
@@ -139,6 +141,7 @@ For detailed implementation results, synthesis reports, and hardware verificatio
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
 
+</div>
 </div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Create lightbox elements
+  // --- Lightbox Functionality ---
   const overlay = document.createElement('div');
   overlay.className = 'lightbox-overlay';
   overlay.innerHTML = `
@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const lightboxCaption = overlay.querySelector('.lightbox-caption');
   const closeBtn = overlay.querySelector('.lightbox-close');
 
-  // Add click listeners to all images in wrappers
   document.querySelectorAll('.img-wrapper img').forEach(img => {
     img.addEventListener('click', () => {
       lightboxImg.src = img.src;
@@ -23,15 +22,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Close logic
   const closeLightbox = () => overlay.classList.remove('active');
   closeBtn.addEventListener('click', closeLightbox);
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeLightbox();
   });
 
-  // ESC key to close
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeLightbox();
   });
+
+  // --- Scroll-Spy for Side Nav ---
+  const sideNavLinks = document.querySelectorAll('.side-nav a');
+  const sections = Array.from(sideNavLinks).map(link => {
+    const id = link.getAttribute('href').substring(1);
+    return document.getElementById(id);
+  }).filter(section => section !== null);
+
+  if (sections.length > 0) {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-10% 0px -80% 0px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          sideNavLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${entry.target.id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+  }
 });
+

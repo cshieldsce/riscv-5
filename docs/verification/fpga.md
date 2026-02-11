@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<div class="flex-content-wrapper">
+
 <div class="site-nav">
   <a href="../index.html">Home</a>
   <a href="../architecture/manual.html">Architecture Overview</a>
@@ -12,13 +14,13 @@
 <!-- Vertical Side Nav -->
 <div class="side-nav">
   <div class="nav-label">Implementation</div>
-  <a href="#1-synthesis-overview">Synthesis</a>
-  <a href="#2-timing-report">Timing</a>
-  <a href="#3-implementation-layout">Layout</a>
-  <a href="#4-hardware-debugging--ila-analysis">Debugging</a>
-  <a href="#5-lessons-learned">Lessons</a>
-  <a href="#6-hardware-demo">Demo</a>
-  <a href="#7-additional-notes">Notes</a>
+  <a href="#synthesis">Synthesis</a>
+  <a href="#timing">Timing</a>
+  <a href="#layout">Layout</a>
+  <a href="#debugging">Debugging</a>
+  <a href="#lessons">Lessons</a>
+  <a href="#demo">Demo</a>
+  <a href="#notes">Notes</a>
 </div>
 
 <div class="content-body" markdown="1">
@@ -29,7 +31,7 @@ This page documents the process and results of deploying the `riscv-5` core on r
 
 ---
 
-## 1. Synthesis Overview
+## 1. Synthesis Overview {#synthesis}
 
 - **Target Board:** Xilinx PYNQ-Z2 (Zynq-7000)
 - **Toolchain:** Vivado 2025.2
@@ -51,7 +53,7 @@ The core was synthesized for the Zynq-7000 SoC on the PYNQ-Z2 board. Resource ut
 
 ---
 
-## 2. Timing Report
+## 2. Timing Report {#timing}
 
 The design was constrained to a 10 MHz clock (100 ns period). The following timing summary from Vivado confirms that the design meets all setup and hold requirements with positive slack.
 
@@ -62,7 +64,7 @@ The design was constrained to a 10 MHz clock (100 ns period). The following timi
 
 ---
 
-## 3. Implementation Layout
+## 3. Implementation Layout {#layout}
 
 The image below shows the physical implementation of the `riscv-5` core on the Zynq-7000 fabric.
 
@@ -73,7 +75,7 @@ The image below shows the physical implementation of the `riscv-5` core on the Z
 
 ---
 
-## 4. Hardware Debugging & ILA Analysis
+## 4. Hardware Debugging & ILA Analysis {#debugging}
 
 During initial hardware testing, we encountered a critical timing misalignment that caused branch instructions to fail. To diagnose this, we integrated the **Integrated Logic Analyzer (ILA)** IP core to monitor the program counter (PC), instruction word, and control signals in real-time.
 
@@ -136,14 +138,14 @@ The LEDs subsequently displayed `0010` (2), confirming the processor successfull
 
 ---
 
-## 5. Lessons Learned
+## 5. Lessons Learned {#lessons}
 
 1. **Clocking Integrity:** Using a logic-based clock divider led to instability with the JTAG debug hub. Switching to the **Xilinx Clocking Wizard** IP ensured a stable clock tree and reliable ILA communication.
 2. **Memory Timing:** In a single-cycle fetch pipeline, the timing relationship between the PC and the Instruction Memory is critical. Synchronous BRAM requires careful stall logic or a dedicated fetch stage; for this implementation, asynchronous Distributed RAM was the appropriate choice for simplicity and performance at 10 MHz.
 
 ---
 
-## 6. Hardware Demo
+## 6. Hardware Demo {#demo}
 
 ### Fibonacci & Branch Test Results
 In `src/pynq_z2_top.sv`, the board's LEDs are connected to the lower 4 bits of the memory-mapped LED register (`led = dmem_leds`). Since the PYNQ-Z2 only has 4 LEDs, we can only display values from 0 to 15 (0000 to 1111 in binary). Any number larger than 15 "overflows" the display, effectively showing the value modulo 16.
@@ -166,7 +168,7 @@ Sequence Displayed on LEDs:
 
 ---
 
-## 7. Additional Notes
+## 7. Additional Notes {#notes}
 
 - **Bitstream:** [Download link or instructions]
 - **Test Program:** [`fib_test.mem`](../../test/mem/fib_test.mem)
@@ -176,6 +178,7 @@ Sequence Displayed on LEDs:
 
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
 
+</div>
 </div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

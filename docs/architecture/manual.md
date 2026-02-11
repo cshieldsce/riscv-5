@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<div class="flex-content-wrapper">
+
 <div class="site-nav">
   <a href="../index.html">Home</a>
   <a href="./manual.html" class="active">Architecture Overview</a>
@@ -12,21 +14,21 @@
 <!-- Vertical Side Nav -->
 <div class="side-nav">
   <div class="nav-label">Theory</div>
-  <a href="#1-introduction">Introduction</a>
-  <a href="#the-single-cycle-problem">Single-Cycle</a>
-  <a href="#11-the-pipelining-solution">Solution</a>
-  <a href="#12-mapping-the-textbook-to-the-rtl">RTL Mapping</a>
-  <a href="#13-building-the-core">Motivation</a>
-  <a href="#14-references">References</a>
+  <a href="#introduction">Introduction</a>
+  <a href="#single-cycle">Single-Cycle</a>
+  <a href="#solution">Solution</a>
+  <a href="#rtl-mapping">RTL Mapping</a>
+  <a href="#motivation">Motivation</a>
+  <a href="#references">References</a>
 </div>
 
 <div class="content-body" markdown="1">
 
-## 1. Introduction
+## 1. Introduction {#introduction}
 
 The architecture of the `riscv-5` core is anchored to the official RISC-V ISA Specification and the seminal microarchitecture text *Patterson & Hennessy (RISC-V Edition)*.
 
-### The Single-Cycle Problem
+### The Single-Cycle Problem {#single-cycle}
 
 To understand why we build pipelined processors, we first have to look at the limitations of a **Single Cycle CPU**. In a single-cycle implementation, the entire execution of an instruction—fetching from memory, decoding, calculating in the ALU, accessing data memory, and finally writing back to registers must happen in exactly one clock tick.
 
@@ -36,7 +38,7 @@ You can think of a Single Cycle CPU as one giant combinational circuit, and the 
 If you have used Xilinx Vivado to synthesize a core, you likely encountered <strong>Total Negative Slack (TNS)</strong>. In a Single Cycle CPU, the "Critical Path" (the longest path between two registers) is effectively the entire length of the CPU. Vivado will report timing violations because the signal physically cannot travel to the logic gates fast enough.
 </div>
 
-## 1.1 The Pipelining Solution
+## 1.1 The Pipelining Solution {#solution}
 
 <div class="img-wrapper diagram">
   <img src="../images/pipeline_stages_clean.svg" alt="Simplified pipelined datapath">
@@ -62,7 +64,7 @@ It is a common misconception that pipelining reduces the execution time of a sin
 
 ---
 
-## 1.2 Mapping the Textbook to the RTL
+## 1.2 Mapping the Textbook to the RTL {#rtl-mapping}
 
 The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
 
@@ -73,7 +75,7 @@ The 5-stage pipeline is a faithful instantiation of the classic microarchitectur
 
 **Figure 2** illustrates the theoretical 5-stage RISC-V datapath components. In an ideal pipeline, one instruction completes every cycle.
 
-## 1.3 Building the Core
+## 1.3 Building the Core {#motivation}
 
 ### Motivations
 
@@ -85,7 +87,7 @@ I found the Hennessy & Patterson book to be what many referred to as the "gold s
 
 ---
 
-## 1.4 References
+## 1.4 References {#references}
 The following references, particularly the highlighted chapters and sections, directly informed the design and implementation of this core’s pipelined architecture and instruction set support. They served as both theoretical foundation and practical guide throughout development.
 
 1. **Patterson, D. A., & Hennessy, J. L.** (2017). *Computer Organization and Design: The Hardware/Software Interface (RISC-V Edition).* Morgan Kaufmann.
@@ -102,6 +104,7 @@ The following references, particularly the highlighted chapters and sections, di
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
 
+</div>
 </div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

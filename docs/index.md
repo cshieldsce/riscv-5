@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<div class="flex-content-wrapper">
+
 <div class="site-nav">
   <a href="./index.html" class="active">Home</a>
   <a href="./architecture/manual.html">Architecture Overview</a>
@@ -48,6 +50,7 @@ Every design decision in this core is anchored in the official <strong>RISC-V In
 ---
 *Verified RTL. Rigorous Documentation. Silicon-Ready Design.*
 
+</div>
 </div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

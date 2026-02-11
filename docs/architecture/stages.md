@@ -1,4 +1,6 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+<div class="flex-content-wrapper">
+
 <div class="site-nav">
   <a href="../index.html">Home</a>
   <a href="./manual.html">Architecture Overview</a>
@@ -12,13 +14,13 @@
 <!-- Vertical Side Nav -->
 <div class="side-nav">
   <div class="nav-label">Pipeline</div>
-  <a href="#20-complete-datapath">Overview</a>
-  <a href="#21-instruction-fetch-if">Fetch (IF)</a>
-  <a href="#22-instruction-decode-id">Decode (ID)</a>
-  <a href="#23-execute-ex">Execute (EX)</a>
-  <a href="#24-memory-access-mem">Memory (MEM)</a>
-  <a href="#25-writeback-wb">Writeback (WB)</a>
-  <a href="#26-pipeline-register-summary">Summary</a>
+  <a href="#overview">Overview</a>
+  <a href="#fetch">Fetch (IF)</a>
+  <a href="#decode">Decode (ID)</a>
+  <a href="#execute">Execute (EX)</a>
+  <a href="#memory">Memory (MEM)</a>
+  <a href="#writeback">Writeback (WB)</a>
+  <a href="#summary">Summary</a>
 </div>
 
 <div class="content-body" markdown="1">
@@ -27,7 +29,7 @@
 
 This section maps the theoretical pipeline stages from *Patterson & Hennessy* to our SystemVerilog implementation, proving that each stage faithfully implements the RISC-V ISA specification.
 
-## 2.0 Complete Datapath
+## 2.0 Complete Datapath {#overview}
 The full pipeline includes the control logic, forwarding paths, and hazard detection units necessary for performance and correctness:
 
 <div class="img-wrapper diagram">
@@ -39,17 +41,21 @@ This diagram maps directly to our SystemVerilog implementation in [`src/pipeline
 
 <div class="pipeline-arrow"></div>
 
-## 2.1 Instruction Fetch (IF)
+## 2.1 Instruction Fetch (IF) {#fetch}
 
-<div class="img-wrapper diagram thumbnail">
-  <img src="../images/stage_if.svg" alt="IF Stage Detail">
-  <span class="caption">Figure 3: IF stage showing PC selection multiplexer and instruction memory interface.</span>
-</div>
-
+<div class="side-by-side">
+<div class="text-content" markdown="1">
 **Implementation:** `if_stage.sv`  
 **Objective:** Fetch the next instruction from memory and calculate `PC+4`.
 
 The IF stage is responsible for maintaining program flow. It receives a `next_pc` value (either sequential or redirected due to branches/jumps) and outputs the current PC, the fetched instruction, and the default next address (`PC+4`).
+</div>
+
+<div class="img-wrapper diagram">
+  <img src="../images/stage_if.svg" alt="IF Stage Detail">
+  <span class="caption">Figure 3: IF stage showing PC selection multiplexer.</span>
+</div>
+</div>
 
 ### RTL Implementation
 
@@ -111,17 +117,21 @@ JAL is a direct jump, so the target address is known immediately from the instru
 
 <div class="pipeline-arrow"></div>
 
-## 2.2 Instruction Decode (ID)
+## 2.2 Instruction Decode (ID) {#decode}
 
-<div class="img-wrapper diagram thumbnail">
-  <img src="../images/stage_id.svg" alt="ID Stage Detail">
-  <span class="caption">Figure 4: ID stage with control unit, register file, and immediate generator.</span>
-</div>
-
+<div class="side-by-side">
+<div class="text-content" markdown="1">
 **Implementation:** `id_stage.sv`  
 **Objective:** Decode the instruction, generate control signals, read registers, and produce the immediate value.
 
 The ID stage is the "brain" of the pipeline, translating binary opcodes into control signals and preparing operands for execution.
+</div>
+
+<div class="img-wrapper diagram">
+  <img src="../images/stage_id.svg" alt="ID Stage Detail">
+  <span class="caption">Figure 4: ID stage with control unit and register file.</span>
+</div>
+</div>
 
 ### Instruction Field Extraction
 
@@ -144,16 +154,20 @@ See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I 
 
 <div class="pipeline-arrow"></div>
 
-## 2.3 Execute (EX)
+## 2.3 Execute (EX) {#execute}
 
-<div class="img-wrapper diagram thumbnail">
-  <img src="../images/stage_ex.svg" alt="EX Stage Detail">
-  <span class="caption">Figure 5: EX stage showing forwarding multiplexers and branch resolution logic.</span>
-</div>
-
+<div class="side-by-side">
+<div class="text-content" markdown="1">
 **Implementation:** `ex_stage.sv`  
 
 The `EX` stage is where the actual computation happens. It receives operands (potentially forwarded from later stages), performs the requested operation, and determines if branches should be taken.
+</div>
+
+<div class="img-wrapper diagram">
+  <img src="../images/stage_ex.svg" alt="EX Stage Detail">
+  <span class="caption">Figure 5: EX stage showing forwarding multiplexers.</span>
+</div>
+</div>
 
 ### 1. Forwarding Multiplexers
 
@@ -219,16 +233,20 @@ The ALU computes both signed and unsigned comparison results. <code>BLT</code>/<
 
 <div class="pipeline-arrow"></div>
 
-## 2.4 Memory Access (MEM)
+## 2.4 Memory Access (MEM) {#memory}
 
-<div class="img-wrapper diagram thumbnail">
-  <img src="../images/stage_mem.svg" alt="MEM Stage Detail">
-  <span class="caption">Figure 6: MEM stage showing Data Memory interface and byte enable logic.</span>
-</div>
-
+<div class="side-by-side">
+<div class="text-content" markdown="1">
 **Implementation:** `mem_stage.sv`  
 
-The `MEM` stage translates RISC-V load/store operations into physical memory accesses. It includes logic for store data forwarding (handling the "EX-to-MEM" hazard for stores) and byte enable generation.
+The `MEM` stage translates RISC-V load/store operations into physical memory accesses. It includes logic for store data forwarding and byte enable generation.
+</div>
+
+<div class="img-wrapper diagram">
+  <img src="../images/stage_mem.svg" alt="MEM Stage Detail">
+  <span class="caption">Figure 6: MEM stage showing Data Memory interface.</span>
+</div>
+</div>
 
 ### Byte Enable Generation
 
@@ -260,27 +278,20 @@ assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 
 <div class="pipeline-arrow"></div>
 
-## 2.5 Writeback (WB)
+## 2.5 Writeback (WB) {#writeback}
 
-<div class="img-wrapper diagram thumbnail">
-  <img src="../images/stage_wb.svg" alt="WB Stage Detail">
-  <span class="caption">Figure 7: WB stage showing the final result selection multiplexer.</span>
-</div>
-
+<div class="side-by-side">
+<div class="text-content" markdown="1">
 **Implementation:** `wb_stage.sv`  
 
-The `WB` stage resolves the final value for the destination register using the `wb_mux_sel` control signal:
+The `WB` stage resolves the final value for the destination register using the `wb_mux_sel` control signal.
+</div>
 
-```verilog
-always_comb begin : WriteBackMUX
-    case (mem_wb_wb_mux_sel)
-        2'b00: wb_write_data = mem_wb_alu_result;  // ALU instructions
-        2'b01: wb_write_data = dmem_read_data;     // Load instructions
-        2'b10: wb_write_data = mem_wb_pc_plus_4;   // JAL/JALR (Return address)
-        default: wb_write_data = {XLEN{1'b0}};     // Safety default
-    endcase
-end
-```
+<div class="img-wrapper diagram">
+  <img src="../images/stage_wb.svg" alt="WB Stage Detail">
+  <span class="caption">Figure 7: WB stage showing result selection multiplexer.</span>
+</div>
+</div>
 
 ### ISA Compliance
 
@@ -294,7 +305,7 @@ See <em>RISC-V Unprivileged ISA Specification</em>, Section 2.5: "Control Transf
 
 <div class="pipeline-arrow"></div>
 
-## 2.6 Pipeline Register Summary
+## 2.6 Pipeline Register Summary {#summary}
 
 Each pipeline register preserves the architectural state needed by downstream stages. Below is a summary of the data and control signals carried by each register:
 
@@ -312,6 +323,7 @@ We include <code>rs2</code> in the <code>EX/MEM</code> register to enable store 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
 
+</div>
 </div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

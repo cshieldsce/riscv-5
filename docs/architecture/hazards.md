@@ -1,3 +1,5 @@
+<div class="flex-content-wrapper">
+
 <div class="site-nav">
   <a href="../index.html">Home</a>
   <a href="./manual.html">Architecture Overview</a>
@@ -31,13 +33,13 @@ div[id^="WaveDrom_Display_"] {
 <!-- Vertical Side Nav -->
 <div class="side-nav">
   <div class="nav-label">Hazards</div>
-  <a href="#31-hazard-summary-table">Summary</a>
-  <a href="#case-1-ex-to-ex-forwarding">EX Forward</a>
-  <a href="#case-2-mem-to-ex-forwarding">MEM Forward</a>
-  <a href="#case-3-mem-store-forwarding-wb-to-mem">Store Forward</a>
-  <a href="#case-4-load-use-stall-the-hardware-pause">Load-Use</a>
-  <a href="#case-5-branch-misprediction-2-cycle-flush">Branch Flush</a>
-  <a href="#case-6-alu-to-branch-stall-specific-implementation">Br-Stall</a>
+  <a href="#summary">Summary</a>
+  <a href="#case1">EX Forward</a>
+  <a href="#case2">MEM Forward</a>
+  <a href="#case3">Store Forward</a>
+  <a href="#case4">Load-Use</a>
+  <a href="#case5">Branch Flush</a>
+  <a href="#case6">Br-Stall</a>
 </div>
 
 <div class="content-body" markdown="1">
@@ -46,7 +48,7 @@ div[id^="WaveDrom_Display_"] {
 
 In a pipelined processor, multiple instructions overlap in execution. Hazards occur when the hardware cannot support the next instruction in the next clock cycle without producing incorrect results. Our CPU handles three types of hazards through a combination of **Forwarding**, **Stalling**, and **Flushing**.
 
-## 3.1 Hazard Summary Table
+## 3.1 Hazard Summary Table {#summary}
 
 <div class="hazard-table" markdown="1">
 
@@ -68,7 +70,7 @@ In a pipelined processor, multiple instructions overlap in execution. Hazards oc
 
 Data hazards occur when an instruction depends on the result of a a previous instruction that hasn't yet been written back to the Register File.
 
-### Case 1: EX-to-EX Forwarding
+### Case 1: EX-to-EX Forwarding {#case1}
 This occurs when an instruction needs a result computed by the *immediately* preceding instruction.
 
 ```asm
@@ -104,7 +106,7 @@ if (ex_mem_reg_write && (ex_mem_rd != 0) && (ex_mem_rd == id_ex_rs1))
 The Forwarding Unit detects that the source register in the Execute stage (`id_ex_rs1`) matches the destination register of the instruction in the Memory stage (`ex_mem_rd`).
 
 
-### Case 2: MEM-to-EX Forwarding
+### Case 2: MEM-to-EX Forwarding {#case2}
 This occurs when the dependency is two instructions apart. The data is currently sitting in the `MEM/WB` pipeline register.
 
 ```asm
@@ -118,7 +120,7 @@ sub  x2, x1, x3   # Needs x1
 logic mem_match, ex_match;
 
 mem_match = mem_reg_write && (mem_rd != 5'b0) && (mem_rd == rs);
-ex_match = reg_write && (mem_rd != 5'b0) && (mem_rd == rs);;
+ex_match = reg_write && (mem_rd != 5'b0) && (mem_rd == rs);
 
 if (mem_match && !ex_match) begin : MEMHazard
   return 1'b1;
@@ -128,7 +130,7 @@ end
 ```
 The forwarding unit selects forward control `1'b01` to bypass data from the MEM/WB pipeline register directly to the execute stage.
 
-### Case 3: MEM Store Forwarding (WB-to-MEM)
+### Case 3: MEM Store Forwarding (WB-to-MEM) {#case3}
 A unique case where a `store` instruction needs data that is currently in the Writeback stage.
 
 ```asm
@@ -152,7 +154,7 @@ The Memory stage contains its own mini-forwarding logic to ensure the <code>mem_
 
 When an instruction depends on a `load` instruction, forwarding alone is insufficient because the data isn't available until the end of the Memory stage.
 
-### Case 4: Load-Use Stall (The "Hardware Pause")
+### Case 4: Load-Use Stall (The "Hardware Pause") {#case4}
 
 A Load-Use hazard is the only data hazard that **cannot** be solved by forwarding alone. The data is still in RAM while the next instruction is already trying to use it.
 
@@ -194,7 +196,7 @@ sub  x7, x1, x8   # Uses x1 (No stall, forwarding)
 
 Control hazards occur when the CPU fetches instructions from the wrong path (e.g., after a branch).
 
-### Case 5: Branch Misprediction (2-Cycle Flush)
+### Case 5: Branch Misprediction (2-Cycle Flush) {#case5}
 
 Our CPU assumes a branch is **Not Taken** by default. If the branch *is* taken, we must "kill" the instructions already behind it in the pipeline.
 
@@ -233,7 +235,7 @@ sub  x5, x5, x6      # Target
 </div>
 <br>
 
-### Case 6: ALU-to-Branch Stall (Specific Implementation)
+### Case 6: ALU-to-Branch Stall (Specific Implementation) {#case6}
 <div class="callout warn"><span class="title">Design Choice</span>
 In our architecture, if a branch in the Decode stage depends on an ALU result currently in the Execute stage, the <code>HazardUnit</code> triggers an additional stall. This simplifies branch comparison timing at the cost of one extra cycle penalty.
 </div>
@@ -290,6 +292,7 @@ The following diagrams use a <strong>0-indexed</strong> cycle count, which is st
 
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
 
+</div>
 </div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
