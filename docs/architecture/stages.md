@@ -198,6 +198,9 @@ The ALU computes both signed and unsigned comparison results. <code>BLT</code>/<
 
 ## 2.4 Memory Access (MEM)
 
+![MEM Stage Detail](../images/stage_mem.svg)
+*Figure 7: MEM stage showing Data Memory interface and byte enable logic.*
+
 **Implementation:** `mem_stage.sv`  
 
 The `MEM` stage translates RISC-V load/store operations into physical memory accesses. It includes logic for store data forwarding (handling the "EX-to-MEM" hazard for stores) and byte enable generation.
@@ -233,6 +236,9 @@ assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 ---
 
 ## 2.5 Writeback (WB)
+
+![WB Stage Detail](../images/stage_wb.svg)
+*Figure 8: WB stage showing the final result selection multiplexer.*
 
 **Implementation:** `wb_stage.sv`  
 
