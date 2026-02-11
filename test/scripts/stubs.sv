@@ -22,6 +22,9 @@ module ila_0 (
     input logic [31:0]  probe8,
     input logic [31:0]  probe9,
     input logic [31:0]  probe10,
-    input logic [31:0]  probe11
+    input logic [31:0]  probe11,
+    input logic [31:0]  probe12,
+    input logic [31:0]  probe13,
+    input logic [31:0]  probe14
 );
 endmodule
