@@ -9,6 +9,18 @@
   <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
+<!-- Vertical Side Nav -->
+<div class="side-nav">
+  <div class="nav-label">Implementation</div>
+  <a href="#1-synthesis-overview">Synthesis</a>
+  <a href="#2-timing-report">Timing</a>
+  <a href="#3-block-diagram">Block Diagram</a>
+  <a href="#4-hardware-demo">Hardware Demo</a>
+  <a href="#6-additional-notes">Notes</a>
+</div>
+
+<div class="content-body" markdown="1">
+
 # FPGA Implementation & Hardware Validation
 
 This page documents the process and results of deploying the `riscv-5` core on real FPGA hardware. Here, we showcase synthesis results, resource utilization, timing closure, and a live demonstration of the core running the Fibonacci test.
@@ -161,6 +173,8 @@ Sequence Displayed on LEDs:
 ---
 
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+</div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
 

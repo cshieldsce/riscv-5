@@ -11,8 +11,17 @@ section {
   max-width: 1100px !important;
   margin: 0 auto !important;
   float: none !important; 
-  padding: 2rem 2rem 2rem 220px !important; /* Made room for side nav on the left */
-  position: relative;
+  padding: 2rem 4rem !important;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+/* Container for the actual markdown content */
+.content-body {
+  flex: 1;
+  min-width: 0; /* Prevents flex items from overflowing */
 }
 
 .wrapper {
@@ -90,33 +99,29 @@ h1, h2, h3, h4, h5, h6 {
   color: #1c1c1c;
 }
 
-/* Side Navigation (Stages & Hazards) */
+/* Side Navigation (Stages, Hazards, FPGA) */
 .side-nav {
-  position: fixed;
-  top: 150px;
-  left: calc(50% - 530px); /* Positioned relative to centered content */
-  width: 160px;
+  position: sticky;
+  top: 2rem;
+  width: 180px;
+  min-width: 180px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 15px;
-  background: rgba(30, 30, 30, 0.6);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(224, 172, 119, 0.3);
-  border-radius: 12px;
-  z-index: 100;
+  padding: 20px 15px;
+  background: rgba(35, 35, 35, 0.4);
+  border-left: 2px solid rgba(224, 172, 119, 0.3);
+  margin-top: 1rem;
 }
 
 .side-nav .nav-label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   color: #e0ac77;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   font-weight: 800;
-  text-align: center;
-  border-bottom: 1px solid rgba(224, 172, 119, 0.2);
-  padding-bottom: 5px;
+  padding-left: 10px;
 }
 
 .side-nav a {
@@ -124,13 +129,27 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.85rem;
   font-weight: 600;
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: 0 6px 6px 0;
   transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+  margin-left: -2px;
 }
 
 .side-nav a:hover {
-  background: rgba(224, 172, 119, 0.1);
+  background: rgba(224, 172, 119, 0.05);
   color: #e0ac77;
+  border-left-color: #e0ac77;
+}
+
+/* Hide side-nav on small screens */
+@media (max-width: 900px) {
+  section {
+    flex-direction: column;
+    padding: 2rem !important;
+  }
+  .side-nav {
+    display: none;
+  }
 }
 
 /* --- Visual Data Flow Separator --- */

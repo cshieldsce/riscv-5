@@ -28,8 +28,6 @@ div[id^="WaveDrom_Display_"] {
 }
 </style>
 
-# 3.0 Hazard Resolution
-
 <!-- Vertical Side Nav -->
 <div class="side-nav">
   <div class="nav-label">Hazards</div>
@@ -41,6 +39,10 @@ div[id^="WaveDrom_Display_"] {
   <a href="#34-control-hazards">Control</a>
   <a href="#case-6-alu-to-branch-stall-specific-implementation">Br-Stall</a>
 </div>
+
+<div class="content-body" markdown="1">
+
+# 3.0 Hazard Resolution
 
 In a pipelined processor, multiple instructions overlap in execution. Hazards occur when the hardware cannot support the next instruction in the next clock cycle without producing incorrect results. Our CPU handles three types of hazards through a combination of **Forwarding**, **Stalling**, and **Flushing**.
 
@@ -287,5 +289,7 @@ The following diagrams use a <strong>0-indexed</strong> cycle count, which is st
 ---
 
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+</div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>

@@ -9,8 +9,6 @@
   <a href="../developer/guide.html">Setup Guide</a>
 </div>
 
-# 2. Pipeline Stages & Microarchitectural Logic
-
 <!-- Vertical Side Nav -->
 <div class="side-nav">
   <div class="nav-label">Pipeline</div>
@@ -22,6 +20,10 @@
   <a href="#25-writeback-wb">Writeback (WB)</a>
   <a href="#26-pipeline-register-summary">Summary</a>
 </div>
+
+<div class="content-body" markdown="1">
+
+# 2. Pipeline Stages & Microarchitectural Logic
 
 This section maps the theoretical pipeline stages from *Patterson & Hennessy* to our SystemVerilog implementation, proving that each stage faithfully implements the RISC-V ISA specification.
 
@@ -309,5 +311,7 @@ We include <code>rs2</code> in the <code>EX/MEM</code> register to enable store 
 
 ---
 *riscv-5: a 5-Stage Pipelined RISC-V Processor (RV32I) by [Charlie Shields](https://github.com/cshieldsce), 2026*
+
+</div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
