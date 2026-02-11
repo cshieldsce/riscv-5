@@ -8,18 +8,18 @@
 /* --- Layout Improvements --- */
 
 .wrapper {
-  max-width: 1250px !important;
+  max-width: 1400px !important; /* Increased width for a more spacious feel */
   margin: 0 auto !important;
   display: flex !important;
   flex-direction: row;
   align-items: flex-start;
-  gap: 30px;
-  padding: 0 20px;
+  gap: 40px; /* Increased gap between sidebar and content */
+  padding: 0 40px;
 }
 
 header {
-  width: 260px !important;
-  flex: 0 0 260px !important;
+  width: 280px !important;
+  flex: 0 0 280px !important;
   position: sticky !important;
   top: 2rem;
   float: none !important;
@@ -28,8 +28,9 @@ header {
 }
 
 section {
-  flex: 1 !important;
+  flex: 1 !important; /* Allow section to grow and fill the remainder of the 1400px */
   width: auto !important;
+  max-width: none !important;
   float: none !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -43,14 +44,14 @@ section {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0;
-  width: 100%;
+  width: 100%; /* Fill the entire section */
 }
 
 /* Container for the actual markdown content */
 .content-body {
   flex: 1;
   min-width: 0;
-  padding-left: 30px;
+  padding-left: 40px; /* More space between side-nav and content */
   padding-top: 1rem;
 }
 
