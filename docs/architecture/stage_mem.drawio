@@ -1,0 +1,55 @@
+<mxfile host="65bd71144e" scale="1" border="20">
+    <diagram id="MEM_Stage" name="Memory Access">
+        <mxGraphModel dx="1143" dy="559" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#1C1C1C" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="ex_mem_reg" value="EX/MEM" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;strokeWidth=3;fontColor=#FFCC00;fontStyle=1;fontFamily=Consolas;fillStyle=hatch;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="60" width="40" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="data_mem" value="Data Memory" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#353535;strokeColor=#F0E7D5;strokeWidth=2;fontColor=#F0E7D5;fontStyle=1;fontFamily=Consolas;" parent="1" vertex="1">
+                    <mxGeometry x="215" y="150" width="160" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="mem_wb_reg" value="MEM/WB" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;strokeWidth=3;fontColor=#FFCC00;fontStyle=1;fontFamily=Consolas;fillStyle=hatch;" parent="1" vertex="1">
+                    <mxGeometry x="473" y="60" width="40" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="w1" value="Address" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBorderColor=#FFCC00;labelBackgroundColor=#1C1C1C;" parent="1" source="ex_mem_reg" target="data_mem" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="80" y="200" as="sourcePoint"/>
+                        <mxPoint x="250" y="200" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="160" y="200"/>
+                            <mxPoint x="160" y="200"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="w2" value="Write Data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" parent="1" source="ex_mem_reg" target="data_mem" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="80" y="280" as="sourcePoint"/>
+                        <mxPoint x="250" y="280" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="160" y="280"/>
+                            <mxPoint x="160" y="280"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="w3" value="Read Data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" parent="1" source="data_mem" target="mem_wb_reg" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="410" y="230" as="sourcePoint"/>
+                        <mxPoint x="500" y="230" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="w4" value="ALU Result" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBorderColor=#FFCC00;labelBackgroundColor=#1C1C1C;" parent="1" source="ex_mem_reg" target="mem_wb_reg" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="80" y="100" as="sourcePoint"/>
+                        <mxPoint x="500" y="100" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="290" y="100"/>
+                            <mxPoint x="290" y="100"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
