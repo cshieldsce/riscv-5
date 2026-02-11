@@ -1,0 +1,113 @@
+<mxfile host="65bd71144e" scale="1" border="20">
+    <diagram id="ID_Stage" name="Instruction Decode">
+        <mxGraphModel dx="964" dy="460" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#1C1C1C" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="if_id_reg" value="IF/ID" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;strokeWidth=3;fontColor=#FFCC00;fontStyle=1;fontFamily=Consolas;fillStyle=hatch;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="40" width="40" height="420" as="geometry"/>
+                </mxCell>
+                <mxCell id="control_unit" value="Control&#xa;Unit" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="150" y="100" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="reg_file" value="Register File" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#F0E7D5;fillColor=#353535;fontColor=#F0E7D5;fontStyle=1;fontFamily=Consolas;" parent="1" vertex="1">
+                    <mxGeometry x="256" y="180" width="120" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="imm_gen" value="ImmGen" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="149" y="320" width="60" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="id_ex_reg" value="ID/EX" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;strokeWidth=3;fontColor=#FFCC00;fontStyle=1;fontFamily=Consolas;fillStyle=hatch;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="40" width="40" height="420" as="geometry"/>
+                </mxCell>
+                <mxCell id="wire_instr_imm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;jumpStyle=line;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="110" y="240" as="sourcePoint"/>
+                        <mxPoint x="149" y="351" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="110" y="350"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="wire_instr_reg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;jumpStyle=line;" parent="1" target="reg_file" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="110" y="240" as="sourcePoint"/>
+                        <mxPoint x="250" y="240" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="wire_ctrl" value="Control Signals" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#FFCC00;fontFamily=Consolas;fontColor=#EDEDED;fontSize=10;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" parent="1" source="control_unit" target="id_ex_reg" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="450" y="140"/>
+                            <mxPoint x="450" y="100"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="wire_rs1" value="rs1_data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBorderColor=#FFCC00;labelBackgroundColor=#1C1C1C;" parent="1" source="reg_file" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="370" y="210" as="sourcePoint"/>
+                        <mxPoint x="518" y="208" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="wire_rs2" value="rs2_data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" parent="1" source="reg_file" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="370" y="270" as="sourcePoint"/>
+                        <mxPoint x="518" y="270" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="wire_imm" value="imm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBorderColor=#FFCC00;labelBackgroundColor=#1C1C1C;" parent="1" source="imm_gen" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="450" y="350"/>
+                            <mxPoint x="450" y="350"/>
+                        </Array>
+                        <mxPoint x="518" y="350" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="wire_pc" value="PC" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" parent="1" source="if_id_reg" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="70" y="380" as="sourcePoint"/>
+                        <mxPoint x="518" y="420" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="110" y="420"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="wire_wb_data" value="WB Data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#FFCC00;fontFamily=Consolas;fontColor=#EDEDED;fontSize=10;curved=0;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;jumpStyle=line;entryX=-0.003;entryY=0.841;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" edge="1" target="reg_file" source="2">
+                    <mxGeometry x="-0.4095" relative="1" as="geometry">
+                        <mxPoint x="606" y="485" as="sourcePoint"/>
+                        <mxPoint x="250" y="280" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="230" y="485"/>
+                            <mxPoint x="230" y="281"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#FFCC00;fontFamily=Consolas;fontColor=#EDEDED;fontSize=10;curved=0;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" edge="1" parent="1" target="2">
+                    <mxGeometry x="-0.4095" relative="1" as="geometry">
+                        <mxPoint x="606" y="485" as="sourcePoint"/>
+                        <mxPoint x="250" y="280" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="606" y="485"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="2" value="" style="shape=ellipse;fillColor=#FFCC00;strokeColor=none;html=1;sketch=0;" vertex="1" parent="1">
+                    <mxGeometry x="596" y="480" width="10" height="10" as="geometry"/>
+                </mxCell>
+                <mxCell id="wire_instr" value="Instr" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" parent="1" source="if_id_reg" edge="1">
+                    <mxGeometry x="-0.6471" relative="1" as="geometry">
+                        <mxPoint x="70" y="240" as="sourcePoint"/>
+                        <mxPoint x="150" y="140" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="110" y="240"/>
+                            <mxPoint x="110" y="140"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
