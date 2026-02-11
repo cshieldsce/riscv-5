@@ -49,9 +49,27 @@ This diagram maps directly to our SystemVerilog implementation in [`src/pipeline
 **Objective:** Fetch the next instruction from memory and calculate `PC+4`.
 
 The IF stage is responsible for maintaining program flow. It receives a `next_pc` value (either sequential or redirected due to branches/jumps) and outputs the current PC, the fetched instruction, and the default next address (`PC+4`).
+
+#### PC Selection Logic
+
+The PC selection multiplexer determines the next instruction address based on control hazards. This logic prioritizes control flow changes in order of detection (stalls take highest priority, followed by resolved jumps/branches):
+
+1.  **Stall:** Keep current PC.
+2.  **JALR:** Indirect jump resolved in EX stage.
+3.  **Branch:** Conditional branch resolved in EX stage.
+4.  **JAL:** Direct jump resolved in ID stage (optimization).
+5.  **Sequential:** `PC + 4`.
+
+#### Design Rationale
+
+By detecting `JAL` early in the ID stage (since the target is just `PC + Immediate`), we reduce the control hazard penalty from 2 cycles to 1 cycle. However, `JALR` and conditional branches still incur a 2-cycle penalty because they require ALU computation. (described in <a href="./hazards.html#case-5-control-hazards-branch-misprediction-">Hazard Resolution, Case 5</a>).
+
+<div class="callout note"><span class="title">Design Decision</span>
+JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect, the target depends on register content, so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.
+</div>
 </div>
 
-<div class="img-wrapper diagram">
+<div class="img-wrapper">
   <img src="../images/stage_if.svg" alt="IF Stage Detail">
   <span class="caption">Figure 3: IF stage showing PC selection multiplexer.</span>
 </div>
@@ -97,24 +115,6 @@ assign pc_plus_4       = if_pc_plus_4_calc;
 assign instruction_out = instruction_in;
 ```
 
-### PC Selection Logic
-
-The PC selection multiplexer determines the next instruction address based on control hazards. This logic prioritizes control flow changes in order of detection (stalls take highest priority, followed by resolved jumps/branches):
-
-1.  **Stall:** Keep current PC.
-2.  **JALR:** Indirect jump resolved in EX stage.
-3.  **Branch:** Conditional branch resolved in EX stage.
-4.  **JAL:** Direct jump resolved in ID stage (optimization).
-5.  **Sequential:** `PC + 4`.
-
-### Design Rationale
-
-By detecting `JAL` early in the ID stage (since the target is just `PC + Immediate`), we reduce the control hazard penalty from 2 cycles to 1 cycle. However, `JALR` and conditional branches still incur a 2-cycle penalty because they require ALU computation. (described in <a href="./hazards.html#case-5-control-hazards-branch-misprediction-">Hazard Resolution, Case 5</a>).
-
-<div class="callout note"><span class="title">Design Decision</span>
-JAL is a direct jump, so the target address is known immediately from the instruction encoding. JALR is indirect, the target depends on register content, so it can't be resolved until the EX stage. This asymmetry is why we get different penalty costs.
-</div>
-
 <div class="pipeline-arrow"></div>
 
 ## 2.2 Instruction Decode (ID) {#decode}
@@ -125,9 +125,17 @@ JAL is a direct jump, so the target address is known immediately from the instru
 **Objective:** Decode the instruction, generate control signals, read registers, and produce the immediate value.
 
 The ID stage is the "brain" of the pipeline, translating binary opcodes into control signals and preparing operands for execution.
+
+#### ISA Compliance
+
+This stage implements the decoding logic for all RV32I base instructions (Sections 2.2-2.5 of the RISC-V Unprivileged ISA Specification). The `ImmGen` module correctly handles the sign-extension requirements for I-type, S-type, B-type, U-type, and J-type immediate formats.
+
+<div class="callout note"><span class="title">ISA Reference</span>
+See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I Base Integer ISA". All instruction formats and encoding are defined there.
+</div>
 </div>
 
-<div class="img-wrapper diagram">
+<div class="img-wrapper">
   <img src="../images/stage_id.svg" alt="ID Stage Detail">
   <span class="caption">Figure 4: ID stage with control unit and register file.</span>
 </div>
@@ -161,9 +169,17 @@ See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I 
 **Implementation:** `ex_stage.sv`  
 
 The `EX` stage is where the actual computation happens. It receives operands (potentially forwarded from later stages), performs the requested operation, and determines if branches should be taken.
+
+<div class="callout tip"><span class="title">LUI Trick</span>
+LUI (Load Upper Immediate) loads a 20-bit immediate into bits [31:12]. The RISC-V ISA defines this as: <code>rd = imm << 12</code>. By setting <code>A = 0</code> and <code>B = (imm << 12)</code>, we can reuse the ALU's addition operation: <code>0 + (imm << 12) = imm << 12</code>. This is an elegant hardware reuse pattern.
 </div>
 
-<div class="img-wrapper diagram">
+<div class="callout note"><span class="title">Implementation Detail</span>
+The ALU computes both signed and unsigned comparison results. <code>BLT</code>/<code>BGE</code> use the signed result (bit 0 of SLT operation), while <code>BLTU</code>/<code>BGEU</code> use the unsigned equivalent.
+</div>
+</div>
+
+<div class="img-wrapper">
   <img src="../images/stage_ex.svg" alt="EX Stage Detail">
   <span class="caption">Figure 5: EX stage showing forwarding multiplexers.</span>
 </div>
@@ -240,15 +256,8 @@ The ALU computes both signed and unsigned comparison results. <code>BLT</code>/<
 **Implementation:** `mem_stage.sv`  
 
 The `MEM` stage translates RISC-V load/store operations into physical memory accesses. It includes logic for store data forwarding and byte enable generation.
-</div>
 
-<div class="img-wrapper diagram">
-  <img src="../images/stage_mem.svg" alt="MEM Stage Detail">
-  <span class="caption">Figure 6: MEM stage showing Data Memory interface.</span>
-</div>
-</div>
-
-### Byte Enable Generation
+#### Byte Enable Generation
 
 RISC-V supports sub-word memory accesses (`LB`, `LH`, `SB`, `SH`). The `mem_stage.sv` module calculates the byte enable signal (`dmem_be`) using a helper function:
 
@@ -272,6 +281,14 @@ function automatic logic [3:0] get_byte_enable(logic [2:0] funct3, logic [1:0] a
         default: return 4'b1111;        // Word access
     endcase
 endfunction
+```
+</div>
+
+<div class="img-wrapper">
+  <img src="../images/stage_mem.svg" alt="MEM Stage Detail">
+  <span class="caption">Figure 6: MEM stage showing Data Memory interface.</span>
+</div>
+</div>
 
 assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 ```
@@ -285,15 +302,8 @@ assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 **Implementation:** `wb_stage.sv`  
 
 The `WB` stage resolves the final value for the destination register using the `wb_mux_sel` control signal.
-</div>
 
-<div class="img-wrapper diagram">
-  <img src="../images/stage_wb.svg" alt="WB Stage Detail">
-  <span class="caption">Figure 7: WB stage showing result selection multiplexer.</span>
-</div>
-</div>
-
-### ISA Compliance
+#### ISA Compliance
 
 - `mem_to_reg = 00`: Standard ALU operations (ADD, SUB, AND, etc.)
 - `mem_to_reg = 01`: Load instructions that read from memory
@@ -301,6 +311,13 @@ The `WB` stage resolves the final value for the destination register using the `
 
 <div class="callout tip"><span class="title">Why PC+4 for JAL/JALR?</span>
 See <em>RISC-V Unprivileged ISA Specification</em>, Section 2.5: "Control Transfer Instructions". JAL and JALR store the address of the next instruction into the destination register to enable function returns. The callee can execute <code>JALR x0, 0(ra)</code> to jump back using the saved return address.
+</div>
+</div>
+
+<div class="img-wrapper">
+  <img src="../images/stage_wb.svg" alt="WB Stage Detail">
+  <span class="caption">Figure 7: WB stage showing result selection multiplexer.</span>
+</div>
 </div>
 
 <div class="pipeline-arrow"></div>

@@ -25,6 +25,14 @@ header {
   float: none !important;
   padding-right: 0 !important;
   -webkit-font-smoothing: subpixel-antialiased;
+  word-wrap: break-word; /* Ensure long titles can wrap */
+  overflow-wrap: break-word;
+}
+
+header h1 {
+  font-size: 1.8rem !important;
+  line-height: 1.2 !important;
+  margin-top: 0 !important;
 }
 
 section {
@@ -233,29 +241,35 @@ h1, h2, h3, h4, h5, h6 {
 /* Side-by-Side Layout for Stages */
 .side-by-side {
   display: flex;
-  gap: 30px;
+  gap: 40px;
   align-items: flex-start;
-  margin: 2rem 0;
+  margin: 3rem 0;
 }
 
 .side-by-side .text-content {
   flex: 1;
 }
 
+.side-by-side .text-content pre {
+  margin-top: 1rem;
+}
+
 .side-by-side .img-wrapper {
-  flex: 0 0 320px;
+  flex: 0 0 380px; /* Slightly wider for better visibility */
   margin: 0;
   background: rgba(255, 255, 255, 0.03);
   padding: 15px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .side-by-side .img-wrapper img {
   max-width: 100%;
+  height: auto;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .side-by-side {
     flex-direction: column;
   }
@@ -263,6 +277,8 @@ h1, h2, h3, h4, h5, h6 {
     flex: 1 0 auto;
     width: 100%;
     box-sizing: border-box;
+    max-width: 500px;
+    margin: 0 auto;
   }
 }
 

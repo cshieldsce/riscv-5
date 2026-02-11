@@ -13,10 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const lightboxCaption = overlay.querySelector('.lightbox-caption');
   const closeBtn = overlay.querySelector('.lightbox-close');
 
-  document.querySelectorAll('.img-wrapper img').forEach(img => {
+  // Add click listeners to all images in wrappers and side-by-side blocks
+  document.querySelectorAll('.img-wrapper img, .side-by-side img').forEach(img => {
     img.addEventListener('click', () => {
       lightboxImg.src = img.src;
-      const caption = img.closest('.img-wrapper').querySelector('.caption');
+      const caption = img.closest('.img-wrapper')?.querySelector('.caption') || 
+                      img.closest('.side-by-side')?.querySelector('.caption');
       lightboxCaption.textContent = caption ? caption.textContent : '';
       overlay.classList.add('active');
     });
