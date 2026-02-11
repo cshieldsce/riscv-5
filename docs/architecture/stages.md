@@ -13,30 +13,22 @@
 
 This section maps the theoretical pipeline stages from *Patterson & Hennessy* to our SystemVerilog implementation, proving that each stage faithfully implements the RISC-V ISA specification.
 
-## 2.0 Overview: The Simplified Datapath
-Before adding the complexity of forwarding and hazard units, here is the basic 5-stage data flow:
-
-<div class="img-wrapper diagram">
-  <img src="../images/pipeline_basic.svg" alt="Simplified Pipelined Datapath">
-  <span class="caption">Figure 2: Simplified datapath showing only the main components and pipeline registers.</span>
-</div>
-
-## 2.1 Complete Datapath
+## 2.0 Complete Datapath
 The full pipeline includes the control logic, forwarding paths, and hazard detection units necessary for performance and correctness:
 
 <div class="img-wrapper diagram">
   <img src="../images/pipeline_complete.svg" alt="Complete Pipelined Datapath">
-  <span class="caption">Figure 3: Complete datapath with pipeline registers and hazard resolution logic. Based on Patterson & Hennessy Figure 4.51.</span>
+  <span class="caption">Figure 2: Complete datapath with pipeline registers and hazard resolution logic. Based on Patterson & Hennessy Figure 4.51.</span>
 </div>
 
 This diagram maps directly to our SystemVerilog implementation in [`src/pipelined_cpu.sv`](../../src/pipelined_cpu.sv).
 
 
-## 2.2 Instruction Fetch (IF)
+## 2.1 Instruction Fetch (IF)
 
 <div class="img-wrapper diagram thumbnail">
   <img src="../images/stage_if.svg" alt="IF Stage Detail">
-  <span class="caption">Figure 4: IF stage showing PC selection multiplexer and instruction memory interface.</span>
+  <span class="caption">Figure 3: IF stage showing PC selection multiplexer and instruction memory interface.</span>
 </div>
 
 **Implementation:** `if_stage.sv`  
@@ -104,11 +96,11 @@ JAL is a direct jump, so the target address is known immediately from the instru
 
 ---
 
-## 2.3 Instruction Decode (ID)
+## 2.2 Instruction Decode (ID)
 
 <div class="img-wrapper diagram thumbnail">
   <img src="../images/stage_id.svg" alt="ID Stage Detail">
-  <span class="caption">Figure 5: ID stage with control unit, register file, and immediate generator.</span>
+  <span class="caption">Figure 4: ID stage with control unit, register file, and immediate generator.</span>
 </div>
 
 **Implementation:** `id_stage.sv`  
@@ -137,11 +129,11 @@ See <em>RISC-V Unprivileged ISA Specification v20191213</em>, Section 2: "RV32I 
 
 ---
 
-## 2.4 Execute (EX)
+## 2.3 Execute (EX)
 
 <div class="img-wrapper diagram thumbnail">
   <img src="../images/stage_ex.svg" alt="EX Stage Detail">
-  <span class="caption">Figure 6: EX stage showing forwarding multiplexers and branch resolution logic.</span>
+  <span class="caption">Figure 5: EX stage showing forwarding multiplexers and branch resolution logic.</span>
 </div>
 
 **Implementation:** `ex_stage.sv`  
@@ -212,11 +204,11 @@ The ALU computes both signed and unsigned comparison results. <code>BLT</code>/<
 
 ---
 
-## 2.5 Memory Access (MEM)
+## 2.4 Memory Access (MEM)
 
 <div class="img-wrapper diagram thumbnail">
   <img src="../images/stage_mem.svg" alt="MEM Stage Detail">
-  <span class="caption">Figure 7: MEM stage showing Data Memory interface and byte enable logic.</span>
+  <span class="caption">Figure 6: MEM stage showing Data Memory interface and byte enable logic.</span>
 </div>
 
 **Implementation:** `mem_stage.sv`  
@@ -253,11 +245,11 @@ assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 
 ---
 
-## 2.6 Writeback (WB)
+## 2.5 Writeback (WB)
 
 <div class="img-wrapper diagram thumbnail">
   <img src="../images/stage_wb.svg" alt="WB Stage Detail">
-  <span class="caption">Figure 8: WB stage showing the final result selection multiplexer.</span>
+  <span class="caption">Figure 7: WB stage showing the final result selection multiplexer.</span>
 </div>
 
 **Implementation:** `wb_stage.sv`  
@@ -285,7 +277,7 @@ end
 See <em>RISC-V Unprivileged ISA Specification</em>, Section 2.5: "Control Transfer Instructions". JAL and JALR store the address of the next instruction into the destination register to enable function returns. The callee can execute <code>JALR x0, 0(ra)</code> to jump back using the saved return address.
 </div>
 
-## 2.7 Pipeline Register Summary
+## 2.6 Pipeline Register Summary
 
 Each pipeline register preserves the architectural state needed by downstream stages. Below is a summary of the data and control signals carried by each register:
 
