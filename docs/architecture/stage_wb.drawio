@@ -1,0 +1,74 @@
+<mxfile host="65bd71144e" scale="1" border="20">
+    <diagram id="WB_Stage" name="Writeback">
+        <mxGraphModel dx="1240" dy="191" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#1C1C1C" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="mem_wb_reg" value="MEM/WB" style="verticalLabelPosition=top;outlineConnect=0;align=center;dashed=0;html=1;verticalAlign=bottom;shape=mxgraph.pid2misc.column;columnType=common;fillColor=#434343;strokeColor=#FFCC00;labelPosition=center;strokeWidth=3;fontColor=#FFCC00;fontStyle=1;fontFamily=Consolas;fillStyle=hatch;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="60" width="40" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="wb_mux" value="Mux" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontColor=#F0E7D5;strokeColor=#F0E7D5;fillColor=#353535;fontFamily=Consolas;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="225" y="210" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="w1" value="ALU Result" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBorderColor=#FFCC00;labelBackgroundColor=#1C1C1C;" parent="1" source="mem_wb_reg" target="wb_mux" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="80" y="150" as="sourcePoint"/>
+                        <mxPoint x="250" y="230" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="160" y="150"/>
+                            <mxPoint x="160" y="230"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="w2" value="Read Data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" parent="1" source="mem_wb_reg" target="wb_mux" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="80" y="250" as="sourcePoint"/>
+                        <mxPoint x="250" y="250" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="112" y="249"/>
+                            <mxPoint x="112" y="249"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="w3" value="PC+4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#E8E8E8;fontFamily=Consolas;fontColor=#E8E8E8;fontSize=10;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;" parent="1" source="mem_wb_reg" target="wb_mux" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="80" y="350" as="sourcePoint"/>
+                        <mxPoint x="250" y="270" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="160" y="350"/>
+                            <mxPoint x="160" y="270"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="w4" value="Write Data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#FFCC00;fontFamily=Consolas;fontColor=#EDEDED;fontSize=10;curved=0;labelBorderColor=#FFCC00;labelBackgroundColor=#1C1C1C;endArrow=none;endFill=0;" parent="1" source="wb_mux" edge="1">
+                    <mxGeometry x="0.06" relative="1" as="geometry">
+                        <mxPoint x="330" y="250" as="sourcePoint"/>
+                        <mxPoint x="-25" y="484" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="373" y="250"/>
+                            <mxPoint x="373" y="484"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="w5" value="rd" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#FFCC00;fontFamily=Consolas;fontColor=#EDEDED;fontSize=10;curved=0;labelBackgroundColor=#1C1C1C;labelBorderColor=#FFCC00;strokeWidth=1;endArrow=none;endFill=0;jumpStyle=line;" parent="1" source="mem_wb_reg" edge="1">
+                    <mxGeometry x="0.201" relative="1" as="geometry">
+                        <mxPoint x="80" y="440" as="sourcePoint"/>
+                        <mxPoint x="-24" y="521" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="192" y="440"/>
+                            <mxPoint x="192" y="521"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="2" value="" style="shape=ellipse;fillColor=#FFCC00;strokeColor=none;html=1;sketch=0;" vertex="1" parent="1">
+                    <mxGeometry x="-30" y="478" width="10" height="10" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="shape=ellipse;fillColor=#FFCC00;strokeColor=none;html=1;sketch=0;" vertex="1" parent="1">
+                    <mxGeometry x="-30" y="516" width="10" height="10" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
