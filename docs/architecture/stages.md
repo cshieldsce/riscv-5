@@ -277,7 +277,7 @@ end
 See <em>RISC-V Unprivileged ISA Specification</em>, Section 2.5: "Control Transfer Instructions". JAL and JALR store the address of the next instruction into the destination register to enable function returns. The callee can execute <code>JALR x0, 0(ra)</code> to jump back using the saved return address.
 </div>
 
-## 2.6 Pipeline Register Summary
+## 2.7 Pipeline Register Summary
 
 Each pipeline register preserves the architectural state needed by downstream stages. Below is a summary of the data and control signals carried by each register:
 

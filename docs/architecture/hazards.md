@@ -34,7 +34,7 @@ In a pipelined processor, multiple instructions overlap in execution. Hazards oc
 
 ## 3.1 Hazard Summary Table
 
-<div class="hazard-table">
+<div class="hazard-table" markdown="1">
 
 | Hazard Type | Scenario | Hardware Action | Penalty (Cycles) |
 |-------------|----------|-----------------|------------------|
