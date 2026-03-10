@@ -469,3 +469,48 @@ body > .wrapper > header p {
   text-overflow: clip !important;
   line-height: 1.4 !important;
 }
+
+/* --- Final fix: prevent Midnight theme header clipping --- */
+html, body {
+  overflow-x: hidden;
+}
+
+body > .wrapper {
+  overflow: visible !important;
+  align-items: flex-start !important;
+}
+
+/* Force header to fully expand and not clip title/description */
+body > .wrapper > header,
+body > header {
+  position: sticky !important;
+  top: 1.5rem !important;
+  align-self: flex-start !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  clip-path: none !important;
+}
+
+/* Ensure text can wrap instead of being visually cut */
+body > .wrapper > header h1,
+body > .wrapper > header p,
+body > header h1,
+body > header p {
+  display: block !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+/* Mobile: disable sticky header entirely */
+@media (max-width: 1000px) {
+  body > .wrapper > header,
+  body > header {
+    position: static !important;
+    top: auto !important;
+  }
+}
