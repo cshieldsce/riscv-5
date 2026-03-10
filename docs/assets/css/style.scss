@@ -30,9 +30,10 @@ header {
 }
 
 header h1 {
-  font-size: 1.8rem !important;
-  line-height: 1.2 !important;
+  font-size: 1.3rem !important;
+  line-height: 1.3 !important;
   margin-top: 0 !important;
+  word-break: break-word;
 }
 
 section {
@@ -255,7 +256,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .side-by-side .img-wrapper {
-  flex: 0 0 380px; /* Slightly wider for better visibility */
+  flex: 0 0 300px; /* Slightly wider for better visibility */
   margin: 0;
   background: rgba(255, 255, 255, 0.03);
   padding: 15px;
@@ -346,7 +347,43 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Lightbox adjustment for wide layout */
-.lightbox-overlay img {
-  max-width: 85vw;
-  max-height: 85vh;
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  cursor: zoom-out;
+}
+
+.lightbox-overlay.active {
+  display: flex;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  color: #fff;
+  font-size: 2.5rem;
+  cursor: pointer;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.lightbox-close:hover {
+  opacity: 1;
+}
+
+.lightbox-caption {
+  color: #aaa;
+  font-style: italic;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
+  max-width: 80vw;
 }

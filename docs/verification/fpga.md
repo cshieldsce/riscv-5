@@ -182,5 +182,3 @@ Sequence Displayed on LEDs:
 </div>
 
 <script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
-
-<script src="{{ '/assets/js/lightbox.js' | relative_url }}"></script>
