@@ -290,6 +290,7 @@ endfunction
 </div>
 </div>
 
+```verilog
 assign dmem_be = get_byte_enable(ex_mem_funct3, ex_mem_alu_result[1:0]);
 ```
 
