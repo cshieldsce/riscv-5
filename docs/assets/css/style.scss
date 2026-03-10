@@ -5,6 +5,43 @@
 
 @import "{{ site.theme }}";
 
+/* --- HEADER --- */
+header {
+  width: 280px !important;
+  flex: 0 0 280px !important;
+  position: sticky !important;
+  top: 2rem;
+  float: none !important;
+  padding-right: 0 !important;
+  overflow: visible !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+header h1 {
+  font-size: 1.15rem !important;
+  line-height: 1.4 !important;
+  margin-top: 0 !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  height: auto !important;
+}
+
+header p {
+  font-size: 0.85rem !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.4 !important;
+  height: auto !important;
+}
+
 /* --- Layout Improvements --- */
 
 .wrapper {
@@ -37,7 +74,8 @@ header h1 {
   word-break: break-word !important;
   white-space: normal !important;
   overflow: visible !important;
-  text-overflow: unset !important;
+  text-overflow: clip !important;
+  height: auto !important;
 }
 
 header p {
@@ -45,8 +83,9 @@ header p {
   word-break: break-word !important;
   white-space: normal !important;
   overflow: visible !important;
-  text-overflow: unset !important;
+  text-overflow: clip !important;
   line-height: 1.4 !important;
+  height: auto !important;
 }
 
 section {
@@ -418,7 +457,7 @@ body > .wrapper > header h1 {
   word-break: break-word !important;
   white-space: normal !important;
   overflow: visible !important;
-  text-overflow: unset !important;
+  text-overflow: clip !important;
 }
 
 body > header p,
@@ -427,6 +466,6 @@ body > .wrapper > header p {
   word-break: break-word !important;
   white-space: normal !important;
   overflow: visible !important;
-  text-overflow: unset !important;
+  text-overflow: clip !important;
   line-height: 1.4 !important;
 }
