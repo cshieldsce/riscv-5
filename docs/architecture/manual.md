@@ -69,7 +69,7 @@ It is a common misconception that pipelining reduces the execution time of a sin
 The 5-stage pipeline is a faithful instantiation of the classic microarchitecture defined in **Section 4.6** of *Patterson & Hennessy*.
 
 <div class="img-wrapper diagram">
-  <img src="../images/pipeline_basic.svg" alt="Simplified pipelined datapath">
+  <img src="../images/pipeline_basic.png" alt="Simplified pipelined datapath">
   <span class="caption">Figure 2: The classic 5-stage RISC-V datapath components (Simplified View).</span>
 </div>
 
