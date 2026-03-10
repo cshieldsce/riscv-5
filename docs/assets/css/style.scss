@@ -506,11 +506,69 @@ body > header p {
   word-break: break-word !important;
 }
 
-/* Mobile: disable sticky header entirely */
+/* --- Final sidebar header fix --- */
+body .wrapper {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 40px !important;
+  overflow: visible !important;
+}
+
+body .wrapper > header {
+  position: sticky !important;
+  top: 2rem !important;
+  align-self: flex-start !important;
+  flex: 0 0 280px !important;
+  width: 280px !important;
+  height: fit-content !important;
+  min-height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  float: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body .wrapper > header h1,
+body .wrapper > header p,
+body .wrapper > header .view,
+body .wrapper > header ul {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+body .wrapper > section {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  float: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 @media (max-width: 1000px) {
-  body > .wrapper > header,
-  body > header {
+  body .wrapper {
+    flex-direction: column !important;
+    gap: 24px !important;
+    padding: 0 20px !important;
+  }
+
+  body .wrapper > header {
     position: static !important;
-    top: auto !important;
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    text-align: center !important;
+  }
+
+  body .wrapper > section {
+    width: 100% !important;
   }
 }
