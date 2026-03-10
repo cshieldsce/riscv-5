@@ -37,6 +37,7 @@ header h1 {
   word-break: break-word !important;
   white-space: normal !important;
   overflow: visible !important;
+  text-overflow: unset !important;
 }
 
 header p {
@@ -44,6 +45,7 @@ header p {
   word-break: break-word !important;
   white-space: normal !important;
   overflow: visible !important;
+  text-overflow: unset !important;
   line-height: 1.4 !important;
 }
 
@@ -397,4 +399,34 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 1rem;
   text-align: center;
   max-width: 80vw;
+}
+
+body > header,
+body > .wrapper > header {
+  overflow: visible !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding-bottom: 20px !important;
+}
+
+body > header h1,
+body > .wrapper > header h1 {
+  font-size: 1.15rem !important;
+  line-height: 1.4 !important;
+  margin-top: 0 !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+}
+
+body > header p,
+body > .wrapper > header p {
+  font-size: 0.85rem !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  line-height: 1.4 !important;
 }
