@@ -19,14 +19,14 @@ I scoped this to RV32I and stopped. No M extension (no hardware multiply or divi
 
 ## Documentation
 
-**[Full documentation site →](https://cshieldsce.github.io/riscv-5/)**
+**[Full documentation site](https://cshieldsce.github.io/riscv-5/)**
 
-- [Architecture overview](https://cshieldsce.github.io/riscv-5/architecture/) — datapath, pipeline diagram, design tradeoffs
-- [Pipeline stages](https://cshieldsce.github.io/riscv-5/architecture/stages/) — per-stage RTL with explanations
-- [Hazards & forwarding](https://cshieldsce.github.io/riscv-5/architecture/hazards/) — timing diagrams for every hazard case
-- [Verification](https://cshieldsce.github.io/riscv-5/verification/) — RISCOF results and a bring-up postmortem
-- [FPGA](https://cshieldsce.github.io/riscv-5/fpga/) — synthesis numbers, timing closure, hardware demo
-- [Setup](https://cshieldsce.github.io/riscv-5/setup/) — toolchain install and build instructions
+- [Architecture overview](https://cshieldsce.github.io/riscv-5/architecture/): datapath, pipeline diagram, design tradeoffs
+- [Pipeline stages](https://cshieldsce.github.io/riscv-5/architecture/stages/): per-stage RTL with explanations
+- [Hazards & forwarding](https://cshieldsce.github.io/riscv-5/architecture/hazards/): timing diagrams for every hazard case
+- [Verification](https://cshieldsce.github.io/riscv-5/verification/): RISCOF results and a bring-up postmortem
+- [FPGA](https://cshieldsce.github.io/riscv-5/fpga/): synthesis numbers, timing closure, hardware demo
+- [Setup](https://cshieldsce.github.io/riscv-5/setup/): toolchain install and build instructions
 
 ## Quick start
 
@@ -78,4 +78,4 @@ riscv-5/
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT: see [LICENSE](LICENSE).

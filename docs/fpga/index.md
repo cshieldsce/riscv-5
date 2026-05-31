@@ -40,7 +40,7 @@ The clock was constrained to {{ site.results.clock_target_period_ns }} ns ({{ si
   <span class="caption">Setup, hold, and pulse-width all met at {{ site.results.clock_target_mhz }} MHz.</span>
 </div>
 
-Fmax is open. The {{ site.results.clock_target_mhz }} MHz constraint was deliberately conservative for bring-up; rerunning synthesis with the constraint loosened (or removed) and reading the resulting WNS would let me quote a real maximum. That's a TODO; until I do, the [results strip]({{ '/' | relative_url }}#what-works-today) keeps `fmax_mhz` hidden.
+Fmax is open. The {{ site.results.clock_target_mhz }} MHz constraint was deliberately conservative for bring-up; rerunning synthesis with the constraint loosened (or removed) and reading the resulting WNS would let me quote a real maximum. That's a TODO; until I do, the fmax card in the results strip at the top of this page stays hidden.
 
 ## Implementation layout {#layout}
 
@@ -60,7 +60,7 @@ Two pieces of advice I would give myself if I were starting again:
 
 ## Hardware demo {#demo}
 
-`src/pynq_z2_top.sv` wires the lower four bits of the MMIO LED register at `0x8000_0000` to the board's four user LEDs. Any RISC-V program that writes to that address shows up on the LEDs the next cycle. The demo program is a Fibonacci generator that writes successive terms; because the LEDs are four bits, values larger than 15 wrap modulo 16, so the visible sequence rolls over after `13 → 21 → 34`.
+`src/pynq_z2_top.sv` wires the lower four bits of the MMIO LED register at `0x8000_0000` to the board's four user LEDs. Any RISC-V program that writes to that address shows up on the LEDs the next cycle. The demo program is a Fibonacci generator that writes successive terms; because the LEDs are four bits, values larger than 15 wrap modulo 16, so the visible sequence rolls over after `13, 21, 34`.
 
 ```bash
 Sequence Displayed on LEDs:

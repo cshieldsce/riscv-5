@@ -26,20 +26,23 @@ image: /images/pipeline_complete.svg
   </div>
 </section>
 
-{% include results-strip.html %}
+## How the pipeline works
 
-## What I built
+A single-cycle CPU has to be slow on purpose: every clock has to be long enough for a signal to traverse the entire datapath from instruction fetch to register writeback, so the critical path is the whole machine. A pipelined CPU breaks that critical path into shorter stages separated by registers. Each clock only has to cover one stage. In steady state, one instruction completes every cycle even though any individual instruction still takes five cycles end to end.
 
-I built riscv-5 to learn pipelined CPU design end to end. It's an RV32I core in SystemVerilog, simulated with Icarus, verified with RISCOF against Spike, and deployed on a PYNQ-Z2.
+`riscv-5` has the five canonical stages. **IF** holds the program counter and fetches the next instruction from a small ROM. **ID** decodes the instruction word, reads up to two registers from the register file, and produces an immediate value sign-extended to 32 bits. **EX** runs the ALU, computes branch targets, and resolves whether a branch is taken. **MEM** does loads and stores against the data memory and handles byte-enable masking for sub-word access. **WB** writes a result back into the register file. Pipeline registers between every pair of stages carry the in-flight architectural state forward each clock.
 
-The microarchitecture is the classic Patterson & Hennessy 5-stage pipeline (IF, ID, EX, MEM, WB) with full forwarding, load-use stalling, and early branch resolution for JAL. Every design choice in the source, from the PC-mux priority to the forwarding multiplexer to the LUI/AUIPC ALU shortcut, has a paragraph on the architecture page explaining why it is there.
+The interesting part of any pipeline is not the stages themselves, but what happens when they collide. Two instructions in flight can want the same data at the same time, with the producer one or two slots ahead of the consumer. A taken branch can change the PC after later instructions have already been fetched. The pipeline has to either bypass the right value into the right place at the right cycle (forwarding), pause a stage until the value is ready (stalling), or throw away wrongly-fetched instructions (flushing). Those three mechanisms, and the code that arbitrates between them, are most of the actual complexity in the design. The [Hazards & Forwarding]({{ '/architecture/hazards/' | relative_url }}) page walks through every case with timing diagrams.
 
-## What works today
+The full datapath, including the forwarding multiplexers in EX and the hazard-detection wires that drive the stalls and flushes, is in the hero figure at the top of this page. The [Pipeline Stages]({{ '/architecture/stages/' | relative_url }}) page zooms in on each stage with the SystemVerilog that implements it.
 
-- {{ site.results.riscof_rv32i_pass }} of {{ site.results.riscof_rv32i_total }} RISCOF RV32I tests pass against {{ site.results.riscof_golden_model }}.
-- {{ site.results.riscof_regression_pass }} of {{ site.results.riscof_regression_total }} regression tests pass on every commit via GitHub Actions.
-- The core synthesizes on a {{ site.results.fpga_target }} at {{ site.results.clock_target_mhz }} MHz with positive slack ({{ site.results.toolchain }}).
-- A Fibonacci test program produces the recognizable 1, 2, 3, 5, 8, 13, 21, 34 sequence on four LEDs on the board ([video on the FPGA page]({{ '/fpga/#demo' | relative_url }})).
+## Three design choices worth a look
+
+**Resolving JAL in ID, not EX.** The textbook flow puts every branch and jump resolution in EX. JAL is unconditional and its target is `PC + Imm`, both of which are available immediately in ID. Resolving JAL one stage earlier saves one cycle of fetch penalty per JAL: the only instruction that gets flushed is the one already in IF, not the one in IF *and* the one in ID. JALR can't get the same treatment because its target depends on a register that might not be ready. See [PC selection priority]({{ '/architecture/stages/' | relative_url }}#fetch).
+
+**LUI through the ALU, no dedicated unit.** LUI loads a 20-bit immediate into the upper bits of a destination register: `rd = imm << 12`. A naive implementation adds a separate datapath for it. Instead, I have the immediate generator emit the already-shifted value as the U-type immediate, drive the ALU with `A = 0` and `B = imm_shifted`, and use the existing ADD path. LUI becomes a regular instruction as far as the ALU is concerned. No new logic, no new control signal. AUIPC works the same way with PC instead of zero on the A input. See the [EX stage]({{ '/architecture/stages/' | relative_url }}#execute).
+
+**Async LUTRAM for instruction fetch, not synchronous BRAM.** The first FPGA bring-up used a synchronous block-RAM for the instruction memory: the addressed word lands on the bus the cycle *after* the address is presented. That extra cycle of latency is fine in a single-cycle CPU but wrong in a 5-stage pipeline where IF/ID expects the fetched word to be available the same cycle the PC updates. The result was a real, debuggable bug that branches refused to fire on hardware while RISCOF still passed in simulation. The fix was to switch the instruction memory to a combinational read, which synthesizes to LUTRAM on the Zynq-7000. The [bouncing-branch postmortem]({{ '/verification/' | relative_url }}#bouncing-branch) on the verification page walks through the diagnosis and the Vivado ILA captures that confirmed the fix.
 
 ## What's not there
 
